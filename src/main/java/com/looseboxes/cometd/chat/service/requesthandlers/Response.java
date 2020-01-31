@@ -18,11 +18,11 @@ package com.looseboxes.cometd.chat.service.requesthandlers;
 /**
  * @author USER
  */
-public interface Response {
+public interface Response<T> {
 
     int getCode();
 
-    Object getData();
+    T getData();
 
     String getMessage();
 
