@@ -13,29 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chat.service.requesthandler.exceptions;
+package com.looseboxes.cometd.chat.service.requesthandlers.exceptions;
 
 /**
  * @author USER
  */
-public class ProcessingRequestException extends RuntimeException{
+public class InvalidRequestParameterException extends ProcessingRequestException{
 
-    public ProcessingRequestException() {
+    public InvalidRequestParameterException() {
     }
 
-    public ProcessingRequestException(String message) {
+    public InvalidRequestParameterException(String message) {
         super(message);
     }
 
-    public ProcessingRequestException(String message, Throwable cause) {
+    public InvalidRequestParameterException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public ProcessingRequestException(Throwable cause) {
+    public InvalidRequestParameterException(Throwable cause) {
         super(cause);
     }
 
-    public ProcessingRequestException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public InvalidRequestParameterException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
+    
 }

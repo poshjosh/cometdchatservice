@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chat.service.requesthandler;
+package com.looseboxes.cometd.chat.service.requesthandlers;
 
-import com.looseboxes.cometd.chat.service.requesthandler.exceptions.InvalidRequestParameterException;
+import com.looseboxes.cometd.chat.service.requesthandlers.exceptions.InvalidRequestParameterException;
 import com.looseboxes.cometd.chat.service.AttributeNames;
 import com.looseboxes.cometd.chat.service.CometDProperties;
 import javax.servlet.ServletRequest;

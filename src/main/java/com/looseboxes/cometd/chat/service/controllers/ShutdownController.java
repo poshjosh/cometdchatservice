@@ -15,7 +15,7 @@
  */
 package com.looseboxes.cometd.chat.service.controllers;
 
-import com.looseboxes.cometd.chat.service.requesthandler.Response;
+import com.looseboxes.cometd.chat.service.requesthandlers.Response;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;

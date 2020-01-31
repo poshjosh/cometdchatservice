@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chat.service.requesthandler;
+package com.looseboxes.cometd.chat.service.requesthandlers;
+
+import com.looseboxes.cometd.chat.service.requesthandlers.exceptions.ProcessingRequestException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 
 /**
  * @author USER
  */
-public interface ErrorResponseProvider {
-    
-    Response from(Exception e);
-    
-    Response from(String msg, Exception e);
+public interface ResponseHandler<T> {
+    void onSuccess(ServletRequest req, ServletResponse res, T responseData) throws ProcessingRequestException;
+    void onFailure(ServletRequest req, ServletResponse res, T responseData) throws ProcessingRequestException;
+    void onAlways(ServletRequest req, ServletResponse res, T responseData) throws ProcessingRequestException;
 }

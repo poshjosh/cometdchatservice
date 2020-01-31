@@ -13,18 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chat.service.requesthandler;
+package com.looseboxes.cometd.chat.service.requesthandlers;
 
-import com.looseboxes.cometd.chat.service.requesthandler.exceptions.ProcessingRequestException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author USER
  */
-public interface RequestHandler<T>{
-    
-    T process(ServletRequest req, ServletResponse res) throws ProcessingRequestException;
+public interface Await {
 
-    void process(ServletRequest req, ServletResponse res, ResponseHandler<T> callback) throws ProcessingRequestException;
+    void tillTrue(AtomicBoolean flag, Object lock, long timeout);
 }

@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chat.service.requesthandler;
-
-import java.util.concurrent.atomic.AtomicBoolean;
+package com.looseboxes.cometd.chat.service.requesthandlers;
 
 /**
  * @author USER
  */
-public interface Await {
-
-    void tillTrue(AtomicBoolean flag, Object lock, long timeout);
+public interface ErrorResponseProvider {
+    
+    Response from(Exception e);
+    
+    Response from(String msg, Exception e);
 }

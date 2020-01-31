@@ -15,10 +15,10 @@
  */
 package com.looseboxes.cometd.chat.service;
 
-import com.looseboxes.cometd.chat.service.requesthandler.Await;
-import com.looseboxes.cometd.chat.service.requesthandler.Response;
-import com.looseboxes.cometd.chat.service.requesthandler.ResponseImpl;
-import com.looseboxes.cometd.chat.service.requesthandler.exceptions.ProcessingRequestTimeoutException;
+import com.looseboxes.cometd.chat.service.requesthandlers.Await;
+import com.looseboxes.cometd.chat.service.requesthandlers.Response;
+import com.looseboxes.cometd.chat.service.requesthandlers.ResponseImpl;
+import com.looseboxes.cometd.chat.service.requesthandlers.exceptions.ProcessingRequestTimeoutException;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;

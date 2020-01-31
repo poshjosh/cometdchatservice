@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chat.service.requesthandler;
+package com.looseboxes.cometd.chat.service.requesthandlers;
 
-import com.looseboxes.cometd.chat.service.requesthandler.exceptions.ProcessingRequestException;
-import com.looseboxes.cometd.chat.service.requesthandler.exceptions.RequestHandlerNotFoundException;
+import com.looseboxes.cometd.chat.service.requesthandlers.exceptions.ProcessingRequestException;
+import com.looseboxes.cometd.chat.service.requesthandlers.exceptions.RequestHandlerNotFoundException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
@@ -26,9 +26,9 @@ import javax.servlet.ServletResponse;
 public interface RequestHandlerFactory {
 
     /**
-     * @param req The ServletRequest instance for which to return a {@link com.looseboxes.cometd.chat.service.requesthandler.RequestHandler RequestHandler}
-     * @param res The ServletResponse instance for which to return a {@link com.looseboxes.cometd.chat.service.requesthandler.RequestHandler RequestHandler}
-     * @return A {@link com.looseboxes.cometd.chat.service.requesthandler.RequestHandler RequestHandler}
+     * @param req The ServletRequest instance for which to return a {@link com.looseboxes.cometd.chat.service.requesthandlers.RequestHandler RequestHandler}
+     * @param res The ServletResponse instance for which to return a {@link com.looseboxes.cometd.chat.service.requesthandlers.RequestHandler RequestHandler}
+     * @return A {@link com.looseboxes.cometd.chat.service.requesthandlers.RequestHandler RequestHandler}
      * @throws RequestHandlerNotFoundException If a matching request handler is not found
      * @throws ProcessingRequestException if there are errors initialising the request handler
      */

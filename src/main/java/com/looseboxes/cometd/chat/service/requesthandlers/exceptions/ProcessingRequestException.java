@@ -13,34 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chat.service.requesthandler.exceptions;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+package com.looseboxes.cometd.chat.service.requesthandlers.exceptions;
 
 /**
  * @author USER
  */
-@ResponseStatus(HttpStatus.NOT_FOUND)
-public class RequestHandlerNotFoundException extends ProcessingRequestException {
+public class ProcessingRequestException extends RuntimeException{
 
-    public RequestHandlerNotFoundException() {
+    public ProcessingRequestException() {
     }
 
-    public RequestHandlerNotFoundException(String message) {
+    public ProcessingRequestException(String message) {
         super(message);
     }
 
-    public RequestHandlerNotFoundException(String message, Throwable cause) {
+    public ProcessingRequestException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public RequestHandlerNotFoundException(Throwable cause) {
+    public ProcessingRequestException(Throwable cause) {
         super(cause);
     }
 
-    public RequestHandlerNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public ProcessingRequestException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
-
 }
