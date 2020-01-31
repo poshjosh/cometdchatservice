@@ -137,10 +137,14 @@ public final class CometDServlet extends HttpServlet {
 
         LOG.debug("{}", reqHandler);
         
-        Response data;
+        final JsonResponseHandler resHandler = this.getBean(req, JsonResponseHandler.class);
+        
+        Response data = null;
         try{
             
             data = reqHandler.process(req, res);
+            
+            resHandler.onSuccess(req, res, data);
             
         }catch(RuntimeException e0) {
             
@@ -151,11 +155,15 @@ public final class CometDServlet extends HttpServlet {
             final ErrorResponseProvider erp = this.getBean(req, ErrorResponseProvider.class);
             
             data = erp.from(msg, e0);
-        }
+            
+            resHandler.onFailure(req, res, data);
+            
+        }finally{
         
-        LOG.debug("{}", data);
+            LOG.debug("{}", data);
 
-        this.getBean(req, JsonResponseHandler.class).process(req, res, data);
+            resHandler.onAlways(req, res, data);
+        }
     }
 
     private <T extends Object> T getBean(ServletRequest req, Class<T> type) throws BeansException {
