@@ -45,7 +45,7 @@ public final class JsonResponseHandler implements ResponseHandler<Response>{
     @Override
     public void onAlways(ServletRequest req, ServletResponse res, Response responseData) { }
 
-    public void process(ServletRequest req, ServletResponse res, Response responseData) {
+    private void process(ServletRequest req, ServletResponse res, Response responseData) {
         
         try{
 
