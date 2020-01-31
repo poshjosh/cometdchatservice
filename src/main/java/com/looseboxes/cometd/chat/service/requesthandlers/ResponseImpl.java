@@ -21,7 +21,7 @@ import java.util.Objects;
 /**
  * @author USER
  */
-public final class ResponseImpl implements Serializable, Response{
+public final class ResponseImpl<T> implements Serializable, Response<T>{
 
     private boolean success;
     
@@ -29,7 +29,7 @@ public final class ResponseImpl implements Serializable, Response{
     
     private String message = "";
     
-    private Object data;
+    private T data;
 
     public ResponseImpl() { }
 
@@ -78,11 +78,11 @@ public final class ResponseImpl implements Serializable, Response{
     }
 
     @Override
-    public Object getData() {
+    public T getData() {
         return data;
     }
 
-    public void setData(Object data) {
+    public void setData(T data) {
         this.data = data;
     }
 
