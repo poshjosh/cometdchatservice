@@ -15,13 +15,14 @@
  */
 package com.looseboxes.cometd.chat.service.controllers;
 
+import com.looseboxes.cometd.chat.service.ParamNames;
 import com.looseboxes.cometd.chat.service.handlers.response.Response;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseBuilder;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
-import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,12 +32,16 @@ import org.springframework.web.bind.annotation.RestController;
  * @author USER
  */
 @RestController
-public class ShutdownController implements ApplicationContextAware {
+public class ShutdownController{
      
-    private ApplicationContext context;
+    private final ApplicationContext context;
+
+    public ShutdownController(@Autowired ApplicationContext context) {
+        this.context = Objects.requireNonNull(context);
+    }
      
     @RequestMapping(Endpoints.SHUTDOWN)
-    public Response shutdown(@RequestParam(value="delay", required=false) Long delay) {
+    public Response shutdown(@RequestParam(value=ParamNames.DELAY, required=false) Long delay) {
 
         final ResponseBuilder resBuilder = context.getBean(ResponseBuilder.class);
 
@@ -52,7 +57,7 @@ public class ShutdownController implements ApplicationContextAware {
         }
     }
     
-    public void shutdownAfter(@RequestParam(value="delay", required=false) Long delay) {
+    private void shutdownAfter(@RequestParam(value="delay", required=false) Long delay) {
 
         if(delay == null || delay < 1) {
         
@@ -73,10 +78,5 @@ public class ShutdownController implements ApplicationContextAware {
 
     private void shutdown() {
         ((ConfigurableApplicationContext) context).close();
-    }
- 
-    @Override
-    public void setApplicationContext(ApplicationContext ctx) throws BeansException {
-        this.context = ctx;
     }
 }
