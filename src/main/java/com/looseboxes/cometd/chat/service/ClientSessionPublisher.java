@@ -15,7 +15,7 @@
  */
 package com.looseboxes.cometd.chat.service;
 
-import com.looseboxes.cometd.chat.service.requesthandlers.Response;
+import com.looseboxes.cometd.chat.service.handlers.response.Response;
 import java.util.Map;
 import org.cometd.bayeux.client.ClientSessionChannel;
 
