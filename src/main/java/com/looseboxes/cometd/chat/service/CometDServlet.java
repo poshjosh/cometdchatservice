@@ -15,11 +15,11 @@
  */
 package com.looseboxes.cometd.chat.service;
 
-import com.looseboxes.cometd.chat.service.requesthandlers.ErrorResponseProvider;
 import com.looseboxes.cometd.chat.service.requesthandlers.JsonResponseHandler;
 import com.looseboxes.cometd.chat.service.requesthandlers.RequestHandlerFactory;
 import com.looseboxes.cometd.chat.service.requesthandlers.RequestHandler;
 import com.looseboxes.cometd.chat.service.requesthandlers.Response;
+import com.looseboxes.cometd.chat.service.requesthandlers.ResponseBuilder;
 import java.io.IOException;
 import javax.servlet.ServletContext;
 
@@ -152,9 +152,9 @@ public final class CometDServlet extends HttpServlet {
             
             LOG.warn(msg, e0);
             
-            final ErrorResponseProvider erp = this.getBean(req, ErrorResponseProvider.class);
+            final ResponseBuilder erp = this.getBean(req, ResponseBuilder.class);
             
-            data = erp.from(msg, e0);
+            data = erp.buildErrorResponse(msg, e0);
             
             resHandler.onFailure(req, res, data);
             

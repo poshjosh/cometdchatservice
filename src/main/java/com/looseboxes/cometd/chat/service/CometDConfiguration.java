@@ -18,14 +18,16 @@ package com.looseboxes.cometd.chat.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.looseboxes.cometd.chat.service.requesthandlers.ChatHandler;
 import com.looseboxes.cometd.chat.service.requesthandlers.ServletUtil;
-import com.looseboxes.cometd.chat.service.requesthandlers.ErrorResponseProvider;
 import com.looseboxes.cometd.chat.service.requesthandlers.JoinHandler;
 import com.looseboxes.cometd.chat.service.requesthandlers.JsonResponseHandler;
 import com.looseboxes.cometd.chat.service.requesthandlers.RequestHandlerFactory;
 import com.looseboxes.cometd.chat.service.requesthandlers.RequestHandlerFactoryImpl;
 import com.looseboxes.cometd.chat.service.requesthandlers.Await;
 import com.looseboxes.cometd.chat.service.requesthandlers.AwaitImpl;
-import com.looseboxes.cometd.chat.service.requesthandlers.ErrorResponseProviderImpl;
+import com.looseboxes.cometd.chat.service.requesthandlers.ResponseBuilder;
+import com.looseboxes.cometd.chat.service.requesthandlers.ResponseBuilderImpl;
+import com.looseboxes.cometd.chat.service.requesthandlers.ResponseCodeFromSpringAnnotationProvider;
+import com.looseboxes.cometd.chat.service.requesthandlers.ResponseCodeProvider;
 import com.looseboxes.cometd.chat.service.requesthandlers.ResponseImpl;
 import java.util.function.Supplier;
 import org.springframework.context.annotation.Bean;
@@ -37,6 +39,10 @@ import org.springframework.context.annotation.Scope;
  */
 @Configuration
 public class CometDConfiguration {
+    
+    @Bean public ResponseCodeProvider responseCodeProvider() {
+        return new ResponseCodeFromSpringAnnotationProvider();
+    }
     
     @Bean @Scope("prototype") public ClientSessionPublisher clientSessionPublisher(Await await) {
         final Supplier<ResponseImpl> supplier = () -> this.response();
@@ -57,9 +63,9 @@ public class CometDConfiguration {
         return new ObjectMapper();
     }
     
-    @Bean public ErrorResponseProvider errorResponseProvider() {
+    @Bean public ResponseBuilder responseBuilder(ResponseCodeProvider responseCodeProvider) {
         final Supplier<ResponseImpl> supplier = () -> this.response();
-        return new ErrorResponseProviderImpl(supplier);
+        return new ResponseBuilderImpl(supplier, responseCodeProvider);
     }
     
     @Bean @Scope("prototype") public ResponseImpl response() {
