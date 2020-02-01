@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chat.service;
+package com.looseboxes.cometd.chat.service.test;
 
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseImpl;
 import org.junit.jupiter.api.Test;
@@ -31,11 +31,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author USER
  */
-@Import(MyTestConfiguration.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@Import(TestConfig.class)
 public class HttpRequestIT {
     
-    @Autowired private TestUrl testUrl;
+    @Autowired private TestUrls testUrls;
 
     @LocalServerPort private int port;
 
@@ -44,24 +44,46 @@ public class HttpRequestIT {
     @Test
 //    @Ignore // Junit4 construct
     @Disabled("disabled until issue #1 is fixed")
-    public void whenRequestJoin_shouldReturnSuccessfully() throws Exception {
-        System.out.println("whenRequestJoin_shouldReturnSuccessfully");
+    public void join_ShouldReturnSuccessfully() throws Exception {
+        System.out.println("join_ShouldReturnSuccessfully");
         
-        this.shouldReturnResponse("join", 200, true);
+        this.givenRequestHandlerName_ShouldReturn("join", 200, true);
     }
 
     @Test
 //    @Ignore // Junit4 construct
     @Disabled("disabled until issue #1 is fixed")
-    public void whenRequestChat_shouldReturnSuccessfully() throws Exception {
-        System.out.println("whenRequestChat_shouldReturnSuccessfully");
+    public void chat_ShouldReturnSuccessfully() throws Exception {
+        System.out.println("chat_ShouldReturnSuccessfully");
         
-        this.shouldReturnResponse("chat", 200, true);
+        this.givenRequestHandlerName_ShouldReturn("chat", 200, true);
+    }
+    
+    @Test
+    @Disabled("@TODO find out why this is failing")
+    public void shutdown_ShouldReturnSuccessfully() throws Exception {
+        System.out.println("shutdown_ShouldReturnSuccessfully");
+    
+        final String url = testUrls.getShutdownUrl(port);
+        
+        this.givenUrl_ShouldReturn(url, 200, true);
     }
 
-    public void shouldReturnResponse(String reqHandlerName, int code, boolean success) throws Exception {
+    private void givenRequestHandlerName_ShouldReturn(String reqHandlerName, int code, boolean success) throws Exception {
         
-        final String url = testUrl.getUrl(port, reqHandlerName);
+        final String url = testUrls.getReqUrl(port, reqHandlerName);
+        
+        this.givenUrl_ShouldReturn(url, code, success);
+    }
+    
+    private void givenEndpoint_ShouldReturn(String endpoint, int code, boolean success) throws Exception {
+        
+        final String url = testUrls.getContextUrl(port) + endpoint;
+        
+        this.givenUrl_ShouldReturn(url, code, success);
+    }
+
+    private void givenUrl_ShouldReturn(String url, int code, boolean success) throws Exception {
         
         assertThat(this.restTemplate.getForObject(url, ResponseImpl.class))
             .matches((r) -> r.isSuccess() == success && r.getCode() == code,
