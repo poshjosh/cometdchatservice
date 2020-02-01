@@ -43,7 +43,7 @@ public class HttpRequestTest {
 
     @Test
 //    @Ignore // Junit4 construct
-    @Disabled("disabled until bug#1 is fixed")
+    @Disabled("disabled until issue #1 is fixed")
     public void whenRequestJoin_shouldReturnSuccessfully() throws Exception {
         System.out.println("whenRequestJoin_shouldReturnSuccessfully");
         
@@ -52,7 +52,7 @@ public class HttpRequestTest {
 
     @Test
 //    @Ignore // Junit4 construct
-    @Disabled("disabled until bug#1 is fixed")
+    @Disabled("disabled until issue #1 is fixed")
     public void whenRequestChat_shouldReturnSuccessfully() throws Exception {
         System.out.println("whenRequestChat_shouldReturnSuccessfully");
         
