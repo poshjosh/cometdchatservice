@@ -20,4 +20,5 @@ package com.looseboxes.cometd.chat.service;
  */
 public interface ParamNames {
     String REQUEST = "req";
+    String DELAY = "delay";
 }
