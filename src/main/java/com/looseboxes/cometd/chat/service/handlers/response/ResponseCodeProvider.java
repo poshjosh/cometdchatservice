@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chat.service.requesthandlers;
+package com.looseboxes.cometd.chat.service.handlers.response;
 
 /**
  * @author USER
