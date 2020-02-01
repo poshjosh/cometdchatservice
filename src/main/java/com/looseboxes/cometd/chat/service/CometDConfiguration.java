@@ -19,17 +19,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.looseboxes.cometd.chat.service.handlers.request.ChatHandler;
 import com.looseboxes.cometd.chat.service.handlers.ServletUtil;
 import com.looseboxes.cometd.chat.service.handlers.request.JoinHandler;
-import com.looseboxes.cometd.chat.service.handlers.response.JsonResponseHandler;
 import com.looseboxes.cometd.chat.service.handlers.request.RequestHandlerFactory;
 import com.looseboxes.cometd.chat.service.handlers.request.RequestHandlerFactoryImpl;
 import com.looseboxes.cometd.chat.service.handlers.Await;
 import com.looseboxes.cometd.chat.service.handlers.AwaitImpl;
-import com.looseboxes.cometd.chat.service.handlers.response.ResponseBuilder;
-import com.looseboxes.cometd.chat.service.handlers.response.ResponseBuilderImpl;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseCodeFromSpringAnnotationProvider;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseCodeProvider;
-import com.looseboxes.cometd.chat.service.handlers.response.ResponseImpl;
-import java.util.function.Supplier;
+import com.looseboxes.cometd.chat.service.handlers.response.ResponseConfiguration.ResponseSupplier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -44,15 +40,14 @@ public class CometDConfiguration {
         return new ResponseCodeFromSpringAnnotationProvider();
     }
     
-    @Bean @Scope("prototype") public ClientSessionPublisher clientSessionPublisher(Await await) {
-        final Supplier<ResponseImpl> supplier = () -> this.response();
-        return new ClientSessionPublisherImpl(supplier, await);
+    @Bean @Scope("prototype") public ClientSessionPublisher clientSessionPublisher(
+            ResponseSupplier resSupplier, Await await) {
+        return new ClientSessionPublisherImpl(resSupplier, await);
     }
     
     @Bean @Scope("prototype") public ClientSessionChannelSubscription 
-        clientSessionChannelSubscriptionListener(Await await) {
-        final Supplier<ResponseImpl> supplier = () -> this.response();
-        return new ClientSessionChannelSubscriptionImpl(supplier, await);
+        clientSessionChannelSubscriptionListener(ResponseSupplier resSupplier, Await await) {
+        return new ClientSessionChannelSubscriptionImpl(resSupplier, await);
     }
     
     @Bean @Scope("prototype") public Await await() {
@@ -63,23 +58,10 @@ public class CometDConfiguration {
         return new ObjectMapper();
     }
     
-    @Bean public ResponseBuilder responseBuilder(ResponseCodeProvider responseCodeProvider) {
-        final Supplier<ResponseImpl> supplier = () -> this.response();
-        return new ResponseBuilderImpl(supplier, responseCodeProvider);
-    }
-    
-    @Bean @Scope("prototype") public ResponseImpl response() {
-        return new ResponseImpl();
-    }
-    
     @Bean public ServletUtil servletUtil() {
         return new ServletUtil();
     }
     
-    @Bean public JsonResponseHandler jsonResponseHandler() {
-        return new JsonResponseHandler();
-    }
-
     @Bean @Scope("prototype") public ChatHandler chatHandler() {
         return new ChatHandler();
     }
