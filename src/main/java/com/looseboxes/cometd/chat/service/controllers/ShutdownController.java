@@ -16,6 +16,7 @@
 package com.looseboxes.cometd.chat.service.controllers;
 
 import com.looseboxes.cometd.chat.service.requesthandlers.Response;
+import com.looseboxes.cometd.chat.service.requesthandlers.ResponseBuilder;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -33,8 +34,19 @@ public class ShutdownController implements ApplicationContextAware {
      
     @RequestMapping(Endpoints.SHUTDOWN)
     public Response shutdown() {
-        ((ConfigurableApplicationContext) context).close();
-        return null;
+        
+        final ResponseBuilder resBuilder = context.getBean(ResponseBuilder.class);
+        
+        try{
+            
+            ((ConfigurableApplicationContext) context).close();
+            
+            return resBuilder.buildSuccessResponse();
+            
+        }catch(Exception e) {
+        
+            return resBuilder.buildErrorResponse(e);
+        }
     }
  
     @Override
