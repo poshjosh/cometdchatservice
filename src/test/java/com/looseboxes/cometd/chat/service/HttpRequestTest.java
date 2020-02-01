@@ -15,8 +15,7 @@
  */
 package com.looseboxes.cometd.chat.service;
 
-import java.util.Map;
-import javax.servlet.http.HttpServletResponse;
+import com.looseboxes.cometd.chat.service.requesthandlers.ResponseImpl;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,28 +24,47 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 
+import org.springframework.context.annotation.Import;
 import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Disabled;
 
 /**
  * @author USER
  */
+@Import(MyTestConfiguration.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class HttpRequestTest {
     
-    private final TestData testData = new TestData();
+    @Autowired private TestUrl testUrl;
 
-    @LocalServerPort
-    private int port;
+    @LocalServerPort private int port;
 
-    @Autowired
-    private TestRestTemplate restTemplate;
+    @Autowired private TestRestTemplate restTemplate;
 
     @Test
-    public void shouldReturnSuccessfully() throws Exception {
-        System.out.println("shouldReturnSuccessfully");
-        final String url = testData.getUrl(port, "join");
-//        assertThat(this.restTemplate.getForObject(url, Map.class)).containsEntry("success", true);
-        assertThat(this.restTemplate.getForObject(url, Map.class)).containsEntry(
-                "code", HttpServletResponse.SC_GATEWAY_TIMEOUT);
+//    @Ignore // Junit4 construct
+    @Disabled("disabled until bug#1 is fixed")
+    public void whenRequestJoin_shouldReturnSuccessfully() throws Exception {
+        System.out.println("whenRequestJoin_shouldReturnSuccessfully");
+        
+        this.shouldReturnResponse("join", 200, true);
+    }
+
+    @Test
+//    @Ignore // Junit4 construct
+    @Disabled("disabled until bug#1 is fixed")
+    public void whenRequestChat_shouldReturnSuccessfully() throws Exception {
+        System.out.println("whenRequestChat_shouldReturnSuccessfully");
+        
+        this.shouldReturnResponse("chat", 200, true);
+    }
+
+    public void shouldReturnResponse(String reqHandlerName, int code, boolean success) throws Exception {
+        
+        final String url = testUrl.getUrl(port, reqHandlerName);
+        
+        assertThat(this.restTemplate.getForObject(url, ResponseImpl.class))
+            .matches((r) -> r.isSuccess() == success && r.getCode() == code,
+                    "{success="+success+", code="+code+"}");
     }
 }
