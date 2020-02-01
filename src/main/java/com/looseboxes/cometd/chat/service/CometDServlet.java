@@ -15,11 +15,11 @@
  */
 package com.looseboxes.cometd.chat.service;
 
-import com.looseboxes.cometd.chat.service.requesthandlers.JsonResponseHandler;
-import com.looseboxes.cometd.chat.service.requesthandlers.RequestHandlerFactory;
-import com.looseboxes.cometd.chat.service.requesthandlers.RequestHandler;
-import com.looseboxes.cometd.chat.service.requesthandlers.Response;
-import com.looseboxes.cometd.chat.service.requesthandlers.ResponseBuilder;
+import com.looseboxes.cometd.chat.service.handlers.response.JsonResponseHandler;
+import com.looseboxes.cometd.chat.service.handlers.request.RequestHandlerFactory;
+import com.looseboxes.cometd.chat.service.handlers.request.RequestHandler;
+import com.looseboxes.cometd.chat.service.handlers.response.Response;
+import com.looseboxes.cometd.chat.service.handlers.response.ResponseBuilder;
 import java.io.IOException;
 import javax.servlet.ServletContext;
 
