@@ -20,18 +20,15 @@ import com.looseboxes.cometd.chat.service.ClientProvider;
 import com.looseboxes.cometd.chat.service.ClientSessionChannelSubscription;
 import com.looseboxes.cometd.chat.service.CometDProperties;
 import com.looseboxes.cometd.chat.service.handlers.response.Response;
-import com.looseboxes.cometd.chat.service.handlers.response.ResponseImpl;
 import com.looseboxes.cometd.chat.service.handlers.ServletUtil;
 import com.looseboxes.cometd.chat.service.handlers.exceptions.ProcessingRequestTimeoutException;
+import com.looseboxes.cometd.chat.service.handlers.response.ResponseBuilder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.cometd.bayeux.Message;
 import org.cometd.bayeux.client.ClientSession;
-import org.cometd.bayeux.client.ClientSessionChannel;
 import org.cometd.client.BayeuxClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,8 +55,6 @@ public class JoinHandler extends AbstractRequestHandler{
     @Override
     public Response doProcess(HttpServletRequest req, HttpServletResponse res) {
         
-        final ResponseImpl resObj = new ResponseImpl();
-
         final WebApplicationContext webAppCtx = WebApplicationContextUtils
                 .getRequiredWebApplicationContext(req.getServletContext());
         
@@ -67,11 +62,9 @@ public class JoinHandler extends AbstractRequestHandler{
         
         if(alreadyJoined) {
         
-            resObj.setCode(HttpServletResponse.SC_OK);
-            resObj.setMessage("Already joined chat");
-            resObj.setSuccess(true);
+            final ResponseBuilder resBuilder = webAppCtx.getBean(ResponseBuilder.class);
             
-            return resObj;
+            return resBuilder.buildResponse("Already joined chat", null, false);
         }
 
 // This may have an asterix e.g /cometd/*  therefore we use the literal /cometd
