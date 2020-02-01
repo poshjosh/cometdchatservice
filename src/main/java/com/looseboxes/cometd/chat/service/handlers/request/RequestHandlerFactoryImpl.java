@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chat.service.requesthandlers;
+package com.looseboxes.cometd.chat.service.handlers.request;
 
-import com.looseboxes.cometd.chat.service.requesthandlers.exceptions.ProcessingRequestException;
-import com.looseboxes.cometd.chat.service.requesthandlers.exceptions.RequestHandlerNotFoundException;
+import com.looseboxes.cometd.chat.service.handlers.exceptions.ProcessingRequestException;
+import com.looseboxes.cometd.chat.service.handlers.exceptions.RequestHandlerNotFoundException;
 import com.looseboxes.cometd.chat.service.ParamNames;
 import com.looseboxes.cometd.chat.service.PropertyNames;
+import com.looseboxes.cometd.chat.service.handlers.ServletUtil;
 import java.lang.reflect.InvocationTargetException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
