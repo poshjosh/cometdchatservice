@@ -20,7 +20,6 @@ import java.util.Objects;
 import org.cometd.bayeux.client.ClientSession;
 import org.cometd.client.BayeuxClient;
 import org.cometd.client.transport.ClientTransport;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author USER
@@ -29,7 +28,7 @@ public class ClientProviderImpl implements ClientProvider{
     
     private final ClientTransportProvider transportProvider;
 
-    public ClientProviderImpl(@Autowired ClientTransportProvider transportProvider) {
+    public ClientProviderImpl(ClientTransportProvider transportProvider) {
         this.transportProvider = Objects.requireNonNull(transportProvider);
     }
     
