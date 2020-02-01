@@ -15,7 +15,7 @@
  */
 package com.looseboxes.cometd.chat.service;
 
-import com.looseboxes.cometd.chat.service.requesthandlers.ServletUtil;
+import com.looseboxes.cometd.chat.service.handlers.ServletUtil;
 import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpSessionEvent;
 import org.cometd.bayeux.client.ClientSession;
