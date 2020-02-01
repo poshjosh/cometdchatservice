@@ -15,13 +15,16 @@
  */
 package com.looseboxes.cometd.chat.service.controllers;
 
-import com.looseboxes.cometd.chat.service.requesthandlers.Response;
-import com.looseboxes.cometd.chat.service.requesthandlers.ResponseBuilder;
+import com.looseboxes.cometd.chat.service.handlers.response.Response;
+import com.looseboxes.cometd.chat.service.handlers.response.ResponseBuilder;
+import java.util.Timer;
+import java.util.TimerTask;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -33,13 +36,13 @@ public class ShutdownController implements ApplicationContextAware {
     private ApplicationContext context;
      
     @RequestMapping(Endpoints.SHUTDOWN)
-    public Response shutdown() {
-        
+    public Response shutdown(@RequestParam(value="delay", required=false) Long delay) {
+
         final ResponseBuilder resBuilder = context.getBean(ResponseBuilder.class);
-        
+
         try{
             
-            ((ConfigurableApplicationContext) context).close();
+            this.shutdownAfter(delay);
             
             return resBuilder.buildSuccessResponse();
             
@@ -47,6 +50,29 @@ public class ShutdownController implements ApplicationContextAware {
         
             return resBuilder.buildErrorResponse(e);
         }
+    }
+    
+    public void shutdownAfter(@RequestParam(value="delay", required=false) Long delay) {
+
+        if(delay == null || delay < 1) {
+        
+            ((ConfigurableApplicationContext) context).close();
+            
+        }else{
+        
+            final TimerTask task = new TimerTask() {
+                @Override
+                public void run() {
+                    ShutdownController.this.shutdown();
+                }
+            };
+            final Timer timer = new Timer(this.getClass().getName()+"_Timer");
+            timer.schedule(task, delay);            
+        }
+    }
+
+    private void shutdown() {
+        ((ConfigurableApplicationContext) context).close();
     }
  
     @Override
