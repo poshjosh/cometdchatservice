@@ -15,16 +15,21 @@
  */
 package com.looseboxes.cometd.chat.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+
 /**
  * @author USER
  */
-public class TestData {
-
-    public String getUrl(String req) {
-        return this.getUrl(8080, req);
-    }
+public class TestUrl {
+    
+    @Value("${server.servlet.context-path}") 
+    private String contextPath;
+    
+    @Autowired
+    private CometDProperties cometdProps;
     
     public String getUrl(int port, String req) {
-        return "http://localhost:" + port + "/chatservice/service?req="+req; 
+        return "http://localhost:" + port + contextPath + cometdProps.getDefaultServletPath() + "?req="+req; 
     }
 }
