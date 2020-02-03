@@ -30,6 +30,10 @@ public final class AwaitImpl implements Await{
     public void tillTrue(AtomicBoolean flag, Object lock, long timeout) {
         
         synchronized(lock){
+            
+            if(timeout < 1) {
+                timeout = Long.MAX_VALUE;
+            }
         
             final long n = timeout / 10;
             final long threshold = 500;
