@@ -18,7 +18,6 @@ package com.looseboxes.cometd.chat.service;
 import com.looseboxes.cometd.chat.service.handlers.response.Response;
 import com.looseboxes.cometd.chat.service.test.Mocker;
 import com.looseboxes.cometd.chat.service.test.TestConfig;
-import javax.servlet.http.HttpServletResponse;
 import org.cometd.bayeux.client.ClientSession;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,12 +25,6 @@ import org.mockito.Mock;
 import static org.mockito.Mockito.times;
 import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.assertj.core.api.Assertions.fail;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
@@ -52,9 +45,20 @@ public class ClientSessionChannelSubscriptionMockTest {
         final String methodName = "subscribe_GivenValidArguments_ShouldCreateAndReturnValidResponse";
         
         final Response result = subscribe_GivenArguments_ShouldCreateAndReturnValidResponse(
-                methodName, this.getValidClientSession(), this.getValidChannelName(), this.getValidTimeout());
+                methodName, this.getValidClientSession(), 
+                this.getValidChannelName(), this.getValidTimeout());
     }
     
+    @Test
+    public void subscribe_GivenNegativeTimeout_ShouldCreateAndReturnValidResponse() {
+        
+        final String methodName = "subscribe_GivenNegativeTimeout_ShouldCreateAndReturnValidResponse";
+        
+        final Response result = subscribe_GivenArguments_ShouldCreateAndReturnValidResponse(
+                methodName, this.getValidClientSession(), 
+                this.getValidChannelName(), Integer.MIN_VALUE);
+    }
+
     protected Response subscribe_GivenArguments_ShouldCreateAndReturnValidResponse(
             String methodName, ClientSession clientSession, String channel, long timeout) {
         final String description = this.getDescription(methodName);
@@ -77,9 +81,7 @@ public class ClientSessionChannelSubscriptionMockTest {
     }
 
     protected void validateResult(Response result) { 
-        final int expectedCode = HttpServletResponse.SC_OK;
-        assertThat("code != " + expectedCode, result.getCode(), equalTo(expectedCode));
-        assertThat("success != true", result.isSuccess(), equalTo(true));
+        this.getTestConfig().testData().validateSuccessResponse(result);
     }
 
     @Test

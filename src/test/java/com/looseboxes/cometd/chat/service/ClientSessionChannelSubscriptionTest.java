@@ -48,6 +48,20 @@ public class ClientSessionChannelSubscriptionTest extends ClientSessionChannelSu
     protected void verifyCandidate(ClientSessionChannelSubscription candidate,
             ClientSession clientSession, String channel, long timeout) { }
 
+    /**
+     * WE CAN'T TEST THIS as we don't have a valid instance of
+     * {@link org.cometd.bayeux.client.ClientSession ClientSession}
+     */
+    @Override
+    public void subscribe_GivenValidArguments_ShouldCreateAndReturnValidResponse() { }
+
+    /**
+     * WE CAN'T TEST THIS as we don't have a valid instance of
+     * {@link org.cometd.bayeux.client.ClientSession ClientSession}
+     */
+    @Override
+    public void subscribe_GivenNegativeTimeout_ShouldCreateAndReturnValidResponse() { }
+
     @Test
     @Override
     public void subscribe_GivenNullClientSession_ShouldThrowException() {
@@ -65,13 +79,6 @@ public class ClientSessionChannelSubscriptionTest extends ClientSessionChannelSu
     public void subscribe_GivenEmptyChannelText_ShouldThrowException() {
         super.subscribe_GivenEmptyChannelText_ShouldThrowException(); 
     }
-
-    /**
-     * WE CAN'T TEST THIS as we don't have a valid instance of
-     * {@link org.cometd.bayeux.client.ClientSession ClientSession}
-     */
-    @Override
-    public void subscribe_GivenValidArguments_ShouldCreateAndReturnValidResponse() { }
     
     @Override
     protected ClientSessionChannelSubscription getCandidate() {
