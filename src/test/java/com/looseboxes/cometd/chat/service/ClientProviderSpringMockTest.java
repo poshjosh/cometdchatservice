@@ -32,7 +32,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 // @RunWith(MockitoJUnitRunner.class)   JUnit4 construct
 @ExtendWith(value = {SpringExtension.class})
 @Import(TestConfig.class)
-public class ClientProviderSpringMockTest extends ClientProviderMockitoMockTest{
+public class ClientProviderSpringMockTest extends ClientProviderMockTest{
     
     @Autowired private Mocker mocker;
     
