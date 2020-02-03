@@ -37,11 +37,23 @@ public class ClientSessionPublisherTest extends ClientSessionPublisherMockTest{
             ClientSessionPublisher candidate, ClientSessionChannel channel, 
             Map<String, Object> message, long timeout) { }
 
-    @Test
+    /**
+     * WE SHOULDN'T TEST THIS HERE as it will call the actual server
+     */
     @Override
-    public void publish_GivenNullChannel_ShouldThrowException() {
-        super.publish_GivenNullChannel_ShouldThrowException();
-    }
+    public void publish_GivenValidArguments_ShouldReturnSuccessResponse() { }
+
+    /**
+     * WE SHOULDN'T TEST THIS HERE as it will call the actual server
+     */
+    @Override
+    public void publish_GivenNegativeTimeout_ShouldReturnSuccessResponse() { }
+
+    /**
+     * WE SHOULDN'T TEST THIS HERE as it will call the actual server
+     */
+    @Override
+    public void publish_GivenEmptyMessage_ShouldReturnSuccessResponse() { }
 
     @Test
     @Override
@@ -51,26 +63,8 @@ public class ClientSessionPublisherTest extends ClientSessionPublisherMockTest{
 
     @Test
     @Override
-    public void publish_GivenInvalidUrl_ShouldThrowException() {
-        super.publish_GivenInvalidUrl_ShouldThrowException(); 
-    }
-
-    @Test
-    @Override
-    public void publish_GivenNegativeTimeout_ShouldReturnSuccessResponse() {
-        super.publish_GivenNegativeTimeout_ShouldReturnSuccessResponse(); 
-    }
-
-    @Test
-    @Override
-    public void publish_GivenEmptyMessage_ShouldReturnSuccessResponse() {
-        super.publish_GivenEmptyMessage_ShouldReturnSuccessResponse(); 
-    }
-
-    @Test
-    @Override
-    public void publish_GivenValidArguments_ShouldReturnSuccessResponse() {
-        super.publish_GivenValidArguments_ShouldReturnSuccessResponse(); 
+    public void publish_GivenNullChannel_ShouldThrowException() {
+        super.publish_GivenNullChannel_ShouldThrowException();
     }
 
     @Override

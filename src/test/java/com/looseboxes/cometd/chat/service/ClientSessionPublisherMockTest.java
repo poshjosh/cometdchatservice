@@ -99,18 +99,6 @@ public class ClientSessionPublisherMockTest {
     }
 
     @Test
-    public void publish_GivenInvalidUrl_ShouldThrowException() {
-
-        final ClientSessionChannel channel = this.getValidClientSessionChannel();
-        final Map<String, Object> message = null;
-        final long timeout = this.getValidTimeout();
-        
-        this.publish_GivenArgs_ShouldThrowException(
-                "publish_GivenInvalidUrl_ShouldThrowException", 
-                channel, message, timeout);
-    }
-    
-    @Test
     public void publish_GivenNullMessage_ShouldThrowException() {
 
         final ClientSessionChannel channel = this.getValidClientSessionChannel();
