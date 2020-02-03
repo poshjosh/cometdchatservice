@@ -16,6 +16,8 @@
 package com.looseboxes.cometd.chat.service.test;
 
 import com.looseboxes.cometd.chat.service.ClientProvider;
+import com.looseboxes.cometd.chat.service.ClientSessionChannelSubscription;
+import com.looseboxes.cometd.chat.service.handlers.response.Response;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseBuilder;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseImpl;
 import java.net.URL;
@@ -25,8 +27,6 @@ import java.util.function.Function;
 import org.cometd.bayeux.client.ClientSession;
 import org.cometd.bayeux.client.ClientSessionChannel;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -51,8 +51,43 @@ public class Mocker {
         }
     }
     
-    public static Mocker lenient() {
+    /**
+     * @return A Mocker which does not carry out strict stub checking
+     * @see Mocker#lenientInstance() 
+     */
+    public Mocker lenient() {
+        return Mocker.lenientInstance();
+    }
+    
+    /**
+     * {@link org.mockito.Mockito Mockito} throws an UnsupportedStubbingException, 
+     * when an initialised mock is not called by one of the test methods during 
+     * execution. The instance returned by this method avoids this strict stub 
+     * checking by using the {@link org.mockito.Mockito#lenient() Mockito#lenient()} 
+     * method.
+     * @return A Mocker which does not carry out strict stub checking
+     */
+    public static Mocker lenientInstance() {
         return new LinientMocker();
+    }
+    
+    public ClientSessionChannelSubscription mock(ClientSessionChannelSubscription instance) {
+        when(instance.subscribe(any(ClientSession.class), any(String.class), any(long.class)))
+                .thenAnswer((InvocationOnMock invoc) -> {
+                    final Object arg0 = invoc.getArgument(0);
+                    Objects.requireNonNull(arg0);
+                    final String channel = invoc.getArgument(1, String.class);
+                    Objects.requireNonNull(channel);
+                    if(channel.isEmpty()) {
+                        throw new IllegalArgumentException();
+                    }
+                    final ResponseImpl res = new ResponseImpl();
+                    res.setCode(200);
+                    res.setSuccess(true);
+                    res.setMessage("subcsribed");
+                    return res;
+        });
+        return instance;
     }
 
     public ResponseBuilder mock(ResponseBuilder instance) {
