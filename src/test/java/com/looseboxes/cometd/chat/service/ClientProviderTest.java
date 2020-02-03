@@ -25,8 +25,6 @@ import org.junit.jupiter.api.Test;
 /**
  * @author USER
  */
-//@ExtendWith(value = {SpringExtension.class})
-//@Import(MyTestConfiguration.class)
 public class ClientProviderTest extends ClientProviderSpringMockTest{
     
     public ClientProviderTest() { }
