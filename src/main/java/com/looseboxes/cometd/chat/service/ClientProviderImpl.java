@@ -15,6 +15,8 @@
  */
 package com.looseboxes.cometd.chat.service;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Map;
 import java.util.Objects;
 import org.cometd.bayeux.client.ClientSession;
@@ -37,6 +39,12 @@ public class ClientProviderImpl implements ClientProvider{
             throws ClientProvider.ClientInitializationException{
         
         try{
+            
+            if(url.isEmpty()) {
+                throw new MalformedURLException();
+            }
+            
+            new URL(url); // Will throw MalformedURLException if URL is invalid
             
             final ClientTransport transport = this.transportProvider.createClientTransport(transportOptions);
 
