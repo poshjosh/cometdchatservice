@@ -111,13 +111,12 @@ public class JoinHandler extends AbstractRequestHandler{
         final boolean handshaken = ((BayeuxClient)client).waitFor(cometdProps.getHandshakeTimeout(), BayeuxClient.State.HANDSHAKEN);
         
         if( ! handshaken && (System.currentTimeMillis() - handshakeStart) >= cometdProps.getHandshakeTimeout()) {
-        
-            throw new ProcessingRequestTimeoutException("Time out: " + cometdProps.getHandshakeTimeout());
+            throw new ProcessingRequestTimeoutException("Time out: " + cometdProps.getHandshakeTimeout() + " millis");
         }
         
         final String chatchannel = cometdProps.getDefaultChannel();
 
-        return webAppCtx.getBean(ClientSessionChannelSubscription.class).subscribeSilently(
+        return webAppCtx.getBean(ClientSessionChannelSubscription.class).subscribe(
                 client, chatchannel, cometdProps.getSubscriptionTimeout());
     }
 }
