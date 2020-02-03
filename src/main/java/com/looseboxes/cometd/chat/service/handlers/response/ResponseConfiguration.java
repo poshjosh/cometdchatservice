@@ -40,13 +40,16 @@ public class ResponseConfiguration {
         }
     }
 
+    @Bean public ResponseBuilder responseBuilder() {
+        return new ResponseBuilderImpl(this.responseSupplier(), this.responseCodeProvider());
+    }
+    
     @Bean public ResponseSupplier responseSupplier() {
         return new ResponseSupplierImpl(this);
     }
     
-    @Bean public ResponseBuilder responseBuilder(
-            ResponseSupplier supplier, ResponseCodeProvider responseCodeProvider) {
-        return new ResponseBuilderImpl(supplier, responseCodeProvider);
+    @Bean public ResponseCodeProvider responseCodeProvider() {
+        return new ResponseCodeFromSpringAnnotationProvider();
     }
     
     @Bean public JsonResponseHandler jsonResponseHandler() {
