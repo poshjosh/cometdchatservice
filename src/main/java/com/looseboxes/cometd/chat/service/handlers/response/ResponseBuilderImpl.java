@@ -38,7 +38,9 @@ public class ResponseBuilderImpl implements ResponseBuilder {
     @Override
     public <T> Response<T> buildResponse(Object msg, T value, boolean error) {
         final ResponseImpl data = this.responseSupplier.get();
-        responseCodeProvider.from(value, error ? HttpServletResponse.SC_INTERNAL_SERVER_ERROR : HttpServletResponse.SC_OK);
+        final int _c = error ? HttpServletResponse.SC_INTERNAL_SERVER_ERROR : HttpServletResponse.SC_OK;
+        final int code = value == null ? _c : responseCodeProvider.from(value, _c);
+        data.setCode(code);
         if(msg != null) {
             data.setMessage(msg.toString());
         }
