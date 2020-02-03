@@ -18,7 +18,6 @@ package com.looseboxes.cometd.chat.service;
 import com.looseboxes.cometd.chat.service.handlers.Await;
 import com.looseboxes.cometd.chat.service.handlers.response.Response;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseImpl;
-import com.looseboxes.cometd.chat.service.handlers.exceptions.ProcessingRequestTimeoutException;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -55,18 +54,6 @@ public final class ClientSessionChannelSubscriptionImpl implements
     @Override
     public Response subscribe(ClientSession client, String channel, long timeout) {
         
-        this.subscribeSilently(client, channel, timeout);
-        
-        if( ! done.get()) {
-            throw new ProcessingRequestTimeoutException("Timeout: " + timeout + " millis");
-        }
-    
-        return response;
-    }
-
-    @Override
-    public Response subscribeSilently(ClientSession client, String channel, long timeout) {
-        
         this.requireNotDone();
         
         this.response = this.responseSupplier.get();
@@ -83,7 +70,7 @@ public final class ClientSessionChannelSubscriptionImpl implements
             response.setSuccess(false);
             response.setData(null);
         }
-        
+
         return response;
     }
 

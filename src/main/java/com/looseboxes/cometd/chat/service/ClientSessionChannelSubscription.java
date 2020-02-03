@@ -24,7 +24,5 @@ import org.cometd.bayeux.client.ClientSession;
 public interface ClientSessionChannelSubscription{
     
     Response subscribe(ClientSession client, String channel, long timeout);
-
-    Response subscribeSilently(ClientSession client, String channel, long timeout);
 }
 
