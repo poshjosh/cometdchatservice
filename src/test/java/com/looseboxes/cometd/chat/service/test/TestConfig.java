@@ -15,6 +15,8 @@
  */
 package com.looseboxes.cometd.chat.service.test;
 
+import com.looseboxes.cometd.chat.service.AppConfiguration;
+import com.looseboxes.cometd.chat.service.handlers.response.ResponseConfiguration;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
@@ -38,5 +40,10 @@ public class TestConfig {
     
     @Bean public TestUrls testUrl() {
         return new TestUrls();
+    }
+    
+    public AppConfiguration appConfig() {
+        final ResponseConfiguration resCfg = new ResponseConfiguration();
+        return new AppConfiguration(resCfg);
     }
 }
