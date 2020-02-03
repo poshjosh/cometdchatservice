@@ -29,10 +29,6 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.assertj.core.api.Assertions.fail;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author USER
@@ -79,6 +75,15 @@ public class ClientProviderMockTest {
         assertEquals(result, this.getClientSession());
     }
 
+    @Test
+    public void createClient_GivenInvalidUrl_ShouldThrowException() {
+
+        final String url = "http2://www";
+        final Map<String, Object> transportOptions = this.getValidTransportOptions();
+        
+        this.createClient_GivenArgs_ShouldThrowException("createClient_GivenInvalidUrl_ShouldThrowException", url, transportOptions);
+    }
+    
     @Test
     public void createClient_GivenEmptyUrl_ShouldThrowException() {
 

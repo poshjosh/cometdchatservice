@@ -55,6 +55,12 @@ public class ClientProviderSpringMockTest extends ClientProviderMockTest{
 
     @Test
     @Override
+    public void createClient_GivenInvalidUrl_ShouldThrowException() {
+        super.createClient_GivenInvalidUrl_ShouldThrowException(); 
+    }
+    
+    @Test
+    @Override
     public void createClient_GivenEmptyUrl_ShouldThrowException() {
         super.createClient_GivenEmptyUrl_ShouldThrowException(); 
     }
