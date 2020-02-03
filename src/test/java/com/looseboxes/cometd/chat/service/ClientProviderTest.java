@@ -15,12 +15,10 @@
  */
 package com.looseboxes.cometd.chat.service;
 
-import com.looseboxes.cometd.chat.service.handlers.response.ResponseConfiguration;
 import java.util.Map;
 import java.util.Objects;
 import org.cometd.bayeux.client.ClientSession;
 import static org.junit.Assert.assertFalse;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -28,14 +26,7 @@ import org.junit.jupiter.api.Test;
  */
 public class ClientProviderTest extends ClientProviderMockTest{
     
-    private static AppConfiguration appConfig;
-    
     public ClientProviderTest() { }
-    
-    @BeforeAll
-    public static void setUpClass() {
-        appConfig = new AppConfiguration(new ResponseConfiguration());
-    }
 
     @Override
     protected void validateResult(ClientSession result) { 
@@ -79,6 +70,6 @@ public class ClientProviderTest extends ClientProviderMockTest{
 
     @Override
     protected ClientProvider getClientProvider() {
-        return appConfig.clientProvider();
+        return getTestConfig().appConfig().clientProvider();
     }
 }

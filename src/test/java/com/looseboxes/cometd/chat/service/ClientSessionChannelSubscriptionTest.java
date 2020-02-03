@@ -16,11 +16,7 @@
 package com.looseboxes.cometd.chat.service;
 
 import com.looseboxes.cometd.chat.service.handlers.response.Response;
-import com.looseboxes.cometd.chat.service.handlers.response.ResponseConfiguration;
-import java.util.Objects;
 import org.cometd.bayeux.client.ClientSession;
-import static org.junit.Assert.*;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -28,20 +24,11 @@ import org.junit.jupiter.api.Test;
  */
 public class ClientSessionChannelSubscriptionTest extends ClientSessionChannelSubscriptionMockTest{
 
-    private static AppConfiguration appConfig;
-    
     public ClientSessionChannelSubscriptionTest() { }
-    
-    @BeforeAll
-    public static void setUpClass() {
-        appConfig = new AppConfiguration(new ResponseConfiguration());
-    }
 
     @Override
     protected void validateResult(Response result) { 
-        Objects.requireNonNull(result);
-        assertTrue(result.isSuccess());
-        assertEquals(result.getCode(), 200);
+        getTestConfig().testData().validateSuccessResponse(result);
     }
 
     @Override
@@ -87,6 +74,6 @@ public class ClientSessionChannelSubscriptionTest extends ClientSessionChannelSu
 
     @Override
     protected ClientSessionChannelSubscription getClientSessionChannelSubscription() {
-        return appConfig.clientSessionChannelSubscription();
+        return getTestConfig().appConfig().clientSessionChannelSubscription();
     }
 }
