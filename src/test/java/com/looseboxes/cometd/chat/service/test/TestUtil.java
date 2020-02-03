@@ -20,7 +20,7 @@ package com.looseboxes.cometd.chat.service.test;
  */
 public final class TestUtil {
 
-    public String getDescription(String testMethodName) {
-        return this.getClass().getSimpleName() + '#' + testMethodName;
+    public String getDescription(Class clazz, String testMethodName) {
+        return clazz.getSimpleName() + '#' + testMethodName;
     }
 }

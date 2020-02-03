@@ -137,7 +137,7 @@ public class ClientSessionChannelSubscriptionMockTest {
     }
 
     protected String getDescription(String testMethodName) {
-        return getTestConfig().testUtil().getDescription(testMethodName);
+        return getTestConfig().testUtil().getDescription(this.getClass(), testMethodName);
     }
 
     protected ClientSession getValidClientSession(){

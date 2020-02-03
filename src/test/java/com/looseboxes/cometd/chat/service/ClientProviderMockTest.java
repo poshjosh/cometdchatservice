@@ -119,7 +119,7 @@ public class ClientProviderMockTest {
     }
 
     protected String getDescription(String testMethodName) {
-        return getTestConfig().testUtil().getDescription(testMethodName);
+        return getTestConfig().testUtil().getDescription(this.getClass(), testMethodName);
     }
 
     protected String getValidUrl(){

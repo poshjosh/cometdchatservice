@@ -139,7 +139,7 @@ public class ClientSessionPublisherMockTest {
     }
 
     protected String getDescription(String testMethodName) {
-        return getTestConfig().testUtil().getDescription(testMethodName);
+        return getTestConfig().testUtil().getDescription(this.getClass(), testMethodName);
     }
 
     protected ClientSessionChannel getValidClientSessionChannel(){
