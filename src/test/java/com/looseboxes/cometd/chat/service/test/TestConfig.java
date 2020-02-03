@@ -26,12 +26,16 @@ import org.springframework.context.annotation.Bean;
 @TestConfiguration
 public class TestConfig {
     
+    @Bean public TestData testData() {
+        return new TestData();
+    }
+    
     @Bean public TestUtil testUtil() {
         return new TestUtil();
     }
     
     @Bean public Mocker mocker() {
-        return new Mocker();
+        return new Mocker(this);
     }
     
     @Bean public TestEndpointRequests testEndpoints() {

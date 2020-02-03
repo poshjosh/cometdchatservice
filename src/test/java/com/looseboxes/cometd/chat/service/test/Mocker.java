@@ -17,7 +17,7 @@ package com.looseboxes.cometd.chat.service.test;
 
 import com.looseboxes.cometd.chat.service.ClientProvider;
 import com.looseboxes.cometd.chat.service.ClientSessionChannelSubscription;
-import com.looseboxes.cometd.chat.service.handlers.response.Response;
+import com.looseboxes.cometd.chat.service.ClientSessionPublisher;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseBuilder;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseImpl;
 import java.net.URL;
@@ -29,7 +29,6 @@ import org.cometd.bayeux.client.ClientSessionChannel;
 import static org.mockito.ArgumentMatchers.any;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.mockito.stubbing.OngoingStubbing;
 
 /**
@@ -45,18 +44,19 @@ public class Mocker {
      * {@link org.mockito.Mockito#lenient() Mockito#lenient()} method.
      */
     private static final class LinientMocker extends Mocker{
+        public LinientMocker(TestConfig testConfig) {
+            super(testConfig);
+        }
         @Override
         protected <T extends Object> OngoingStubbing<T> when(T methodCall) {
             return Mockito.lenient().when(methodCall);
         }
     }
-    
-    /**
-     * @return A Mocker which does not carry out strict stub checking
-     * @see Mocker#lenientInstance() 
-     */
-    public Mocker lenient() {
-        return Mocker.lenientInstance();
+
+    private final TestConfig testConfig;
+
+    public Mocker(TestConfig testConfig) {
+        this.testConfig = Objects.requireNonNull(testConfig);
     }
     
     /**
@@ -67,25 +67,37 @@ public class Mocker {
      * method.
      * @return A Mocker which does not carry out strict stub checking
      */
-    public static Mocker lenientInstance() {
-        return new LinientMocker();
+    public Mocker lenient() {
+        return new LinientMocker(testConfig);
+    }
+    
+    public ClientSessionChannel mock(ClientSessionChannel instance) {
+        return instance;
+    }
+
+    public ClientSessionPublisher mock(ClientSessionPublisher instance) {
+        when(instance.publish(any(ClientSessionChannel.class), any(Map.class), any(long.class)))
+            .thenAnswer((InvocationOnMock invoc) -> {
+                final Object arg0 = invoc.getArgument(0);
+                Objects.requireNonNull(arg0);
+                final Map message = invoc.getArgument(1, Map.class);
+                Objects.requireNonNull(message);
+                return testConfig.testData().createSuccessResponse();
+        });
+        return instance;
     }
     
     public ClientSessionChannelSubscription mock(ClientSessionChannelSubscription instance) {
         when(instance.subscribe(any(ClientSession.class), any(String.class), any(long.class)))
-                .thenAnswer((InvocationOnMock invoc) -> {
-                    final Object arg0 = invoc.getArgument(0);
-                    Objects.requireNonNull(arg0);
-                    final String channel = invoc.getArgument(1, String.class);
-                    Objects.requireNonNull(channel);
-                    if(channel.isEmpty()) {
-                        throw new IllegalArgumentException();
-                    }
-                    final ResponseImpl res = new ResponseImpl();
-                    res.setCode(200);
-                    res.setSuccess(true);
-                    res.setMessage("subcsribed");
-                    return res;
+            .thenAnswer((InvocationOnMock invoc) -> {
+                final Object arg0 = invoc.getArgument(0);
+                Objects.requireNonNull(arg0);
+                final String channel = invoc.getArgument(1, String.class);
+                Objects.requireNonNull(channel);
+                if(channel.isEmpty()) {
+                    throw new IllegalArgumentException();
+                }
+                return testConfig.testData().createSuccessResponse();
         });
         return instance;
     }
