@@ -25,8 +25,6 @@ import org.cometd.bayeux.client.ClientSessionChannel;
 public interface ClientSessionPublisher{
     
     Response publish(final ClientSessionChannel channel, Map<String, Object> message, long timeout);
-
-    Response publishSilently(final ClientSessionChannel channel, Map<String, Object> message, long timeout);
 }
 
 

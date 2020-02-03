@@ -18,7 +18,6 @@ package com.looseboxes.cometd.chat.service;
 import com.looseboxes.cometd.chat.service.handlers.Await;
 import com.looseboxes.cometd.chat.service.handlers.response.Response;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseImpl;
-import com.looseboxes.cometd.chat.service.handlers.exceptions.ProcessingRequestTimeoutException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -55,18 +54,6 @@ public final class ClientSessionPublisherImpl implements ClientSessionPublisher,
     @Override
     public Response publish(final ClientSessionChannel channel, Map<String, Object> message, long timeout) {
         
-        this.publishSilently(channel, message, timeout);
-    
-        if( ! done.get()) {
-            throw new ProcessingRequestTimeoutException("Timeout: " + timeout + " millis");
-        }
-        
-        return response;
-    }
-
-    @Override
-    public Response publishSilently(final ClientSessionChannel channel, Map<String, Object> message, long timeout) {
-        
         this.requireNotDone();
         
         this.response = this.responseSupplier.get();
@@ -83,7 +70,7 @@ public final class ClientSessionPublisherImpl implements ClientSessionPublisher,
             response.setSuccess(false);
             response.setData(null);
         }
-        
+
         return response;
     }
 
