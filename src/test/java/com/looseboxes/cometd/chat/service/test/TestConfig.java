@@ -26,6 +26,9 @@ import org.springframework.context.annotation.Bean;
 @TestConfiguration
 public class TestConfig {
     
+    private static final ResponseConfiguration resConfig = new ResponseConfiguration();
+    private static final AppConfiguration appConfig = new AppConfiguration(resConfig);
+    
     @Bean public TestData testData() {
         return new TestData();
     }
@@ -47,7 +50,6 @@ public class TestConfig {
     }
     
     public AppConfiguration appConfig() {
-        final ResponseConfiguration resCfg = new ResponseConfiguration();
-        return new AppConfiguration(resCfg);
+        return appConfig;
     }
 }
