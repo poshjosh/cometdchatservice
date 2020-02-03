@@ -56,6 +56,9 @@ public final class ClientSessionPublisherImpl implements ClientSessionPublisher,
         
         this.requireNotDone();
         
+        Objects.requireNonNull(channel);
+        Objects.requireNonNull(message);
+        
         this.response = this.responseSupplier.get();
 
         this.startTime = System.currentTimeMillis();

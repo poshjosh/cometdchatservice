@@ -55,7 +55,13 @@ public final class ClientSessionChannelSubscriptionImpl implements
     public Response subscribe(ClientSession client, String channel, long timeout) {
         
         this.requireNotDone();
-        
+
+        Objects.requireNonNull(client);
+        Objects.requireNonNull(channel);
+        if(channel.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+
         this.response = this.responseSupplier.get();
 
         this.startTime = System.currentTimeMillis();
