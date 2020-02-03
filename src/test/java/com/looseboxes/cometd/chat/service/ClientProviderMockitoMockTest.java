@@ -48,22 +48,8 @@ public class ClientProviderMockitoMockTest {
         
         final ClientSession result = createClient_GivenArguments_ShouldCreateAndReturnNewClientSession(
                 methodName, this.getValidUrl(), this.getValidTransportOptions());
-        
-        validateResult(result);
     }
     
-    protected String getValidUrl(){
-        return "http://localhost:8080";
-    }
-    
-    protected Map<String, Object> getValidTransportOptions() {
-        return new HashMap<>();
-    }
-    
-    protected void validateResult(ClientSession result) {
-        assertEquals(result, this.getClientSession());
-    }
-
     protected ClientSession createClient_GivenArguments_ShouldCreateAndReturnNewClientSession(
             String methodName, String url, Map<String, Object> transportOptions) {
         final String description = this.getDescription(methodName);
@@ -75,6 +61,8 @@ public class ClientProviderMockitoMockTest {
         
         verifyCandidate(candidate, url, transportOptions);
         
+        validateResult(result);
+        
         return result;
     }
     
@@ -83,11 +71,15 @@ public class ClientProviderMockitoMockTest {
         verify(candidate, times(1)).createClient(eq(url), eq(transportOptions));
     }
     
+    protected void validateResult(ClientSession result) {
+        assertEquals(result, this.getClientSession());
+    }
+
     @Test
     public void createClient_GivenEmptyUrl_ShouldThrowException() {
 
         final String url = "";
-        final Map<String, Object> transportOptions = new HashMap<>();
+        final Map<String, Object> transportOptions = this.getValidTransportOptions();
         
         this.createClient_GivenArgs_ShouldThrowException("createClient_GivenEmptyUrl_ShouldThrowException", url, transportOptions);
     }
@@ -96,7 +88,7 @@ public class ClientProviderMockitoMockTest {
     public void createClient_GivenNullUrl_ShouldThrowException() {
 
         final String url = null;
-        final Map<String, Object> transportOptions = new HashMap<>();
+        final Map<String, Object> transportOptions = this.getValidTransportOptions();
         
         this.createClient_GivenArgs_ShouldThrowException("createClient_GivenNullUrl_ShouldThrowException", url, transportOptions);
     }
@@ -121,6 +113,14 @@ public class ClientProviderMockitoMockTest {
         return getTestConfig().testUtil().getDescription(testMethodName);
     }
 
+    protected String getValidUrl(){
+        return "http://localhost:8080";
+    }
+    
+    protected Map<String, Object> getValidTransportOptions() {
+        return new HashMap<>();
+    }
+    
     protected ClientProvider getCandidate() {
         return getMocker().mock(getClientProvider(), getClientSession());
     }
