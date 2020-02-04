@@ -18,14 +18,11 @@ package com.looseboxes.cometd.chat.service.test;
 import com.looseboxes.cometd.chat.service.AppConfiguration;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseConfiguration;
 import java.util.Objects;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
 /**
  * @author USER
  */
-@TestConfiguration
 public class TestConfig {
     
     private static final ResponseConfiguration resConfig = new ResponseConfiguration();
@@ -33,7 +30,11 @@ public class TestConfig {
     
     private final String contextPath;
 
-    public TestConfig(@Value("${server.servlet.context-path}") String contextPath) { 
+    public TestConfig() {
+        this("");
+    } 
+    
+    public TestConfig(String contextPath) { 
         this.contextPath = Objects.requireNonNull(contextPath);
     }
     
