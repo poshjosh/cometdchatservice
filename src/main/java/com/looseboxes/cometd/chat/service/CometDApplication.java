@@ -35,13 +35,24 @@ public class CometDApplication implements ServletContextInitializer {
     
     /**
      * Register the required servlets in the correct order.
+     * <ul>
+     *   <li>
+     *     <code>1</code> for the CometD servlet – so that the Bayeux object gets 
+     *     created and put in the ServletContext.
+     *   </li>
+     *   <li>
+     *     <code>2</code> for the configuration servlet – so that it will be
+     *     initialized only after the CometD servlet has been initialized and 
+     *     hence the BayeuxServer object is available.
+     *   </li>
+     * </ul>
      * @param servletContext 
      */
     @Override
     public void onStartup(ServletContext servletContext) {
         
         final CometDProperties cometdProps = WebApplicationContextUtils
-                .getWebApplicationContext(servletContext).getBean(CometDProperties.class);
+                .getRequiredWebApplicationContext(servletContext).getBean(CometDProperties.class);
         
         final ServletRegistration.Dynamic cometdServlet = servletContext
                 .addServlet(cometdProps.getServletName(), AnnotationCometDServlet.class);
@@ -52,6 +63,8 @@ public class CometDApplication implements ServletContextInitializer {
         cometdServlet.setLoadOnStartup(1);
         cometdServlet.setInitParameter("services", ChatService.class.getName());
         cometdServlet.setInitParameter("ws.cometdURLMapping", mapping);
+        
+        servletContext.addListener(BayeuxServletContextAttributeListener.class);
 
         ServletRegistration.Dynamic demoServlet = servletContext.addServlet(
                 cometdProps.getDefaultServletName(), CometDServlet.class);
