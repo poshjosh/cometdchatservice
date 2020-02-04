@@ -39,6 +39,17 @@ public class TestUrls{
         return getDefaultServerUrl(port) + "?req="+Objects.requireNonNull(req); 
     }
     
+    public String getQueryString(String req) {
+        Objects.requireNonNull(req);
+        switch(req) {
+            case "join": return "req="+req;
+            case "chat": return "req="+req+"&chatsender=non&chatrecipient=nel&chatroom=/chat/demo&chatmessage=Hi+love";
+            default:
+                throw new IllegalArgumentException();
+            
+        }
+    }
+
     public String getDefaultServerUrl(int port) {
         return getContextUrl(port) + cometdProps.getDefaultServletPath();
     }
