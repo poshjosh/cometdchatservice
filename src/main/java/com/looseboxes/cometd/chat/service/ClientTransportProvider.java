@@ -40,6 +40,12 @@ public interface ClientTransportProvider {
         }
     }
     
+    /**
+     * <b>Note</b> Do not pass in an unmodifiable Map as method argument.
+     * @param transportOptions the transport options
+     * @return {@link org.cometd.client.transport.ClientTransport ClientTransport}
+     * @throws com.looseboxes.cometd.chat.service.ClientTransportProvider.ClientTransportInitializationException 
+     */
     ClientTransport createClientTransport(Map<String, Object> transportOptions) 
             throws ClientTransportInitializationException;
 }

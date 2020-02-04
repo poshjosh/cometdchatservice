@@ -40,6 +40,13 @@ public interface ClientProvider {
         }
     }
     
+    /**
+     * <b>Note</b> Do not pass in an unmodifiable Map as second method argument.
+     * @param url The URL to the cometd server
+     * @param transportOptions transport options
+     * @return the {@link org.cometd.bayeux.client.ClientSession ClientSession} 
+     * @throws com.looseboxes.cometd.chat.service.ClientProvider.ClientInitializationException 
+     */
     ClientSession createClient(String url, Map<String, Object> transportOptions) 
             throws ClientInitializationException;
 }

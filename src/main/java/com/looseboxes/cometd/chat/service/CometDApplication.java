@@ -33,6 +33,10 @@ public class CometDApplication implements ServletContextInitializer {
         SpringApplication.run(CometDApplication.class, args);
     }
     
+    /**
+     * Register the required servlets in the correct order.
+     * @param servletContext 
+     */
     @Override
     public void onStartup(ServletContext servletContext) {
         
