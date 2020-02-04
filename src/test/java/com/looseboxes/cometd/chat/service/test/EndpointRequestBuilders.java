@@ -15,10 +15,9 @@
  */
 package com.looseboxes.cometd.chat.service.test;
 
-import com.looseboxes.cometd.chat.service.ParamNames;
-import com.looseboxes.cometd.chat.service.controllers.Endpoints;
+import java.util.Map;
+import java.util.Objects;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 /**
@@ -28,22 +27,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  * @author USER
  */
 public class EndpointRequestBuilders {
+    
+    private final EndpointRequestParams params;
+
+    public EndpointRequestBuilders(EndpointRequestParams params) {
+        this.params = Objects.requireNonNull(params);
+    }
 
     public MockHttpServletRequestBuilder builder(String endpoint) {
         final MockHttpServletRequestBuilder builder = get(endpoint);
-        switch(endpoint) {
-            case Endpoints.CHAT:
-                builder.param(ParamNames.USER, "Non")
-                        .param(ParamNames.PEER, "Nel")
-                        .param(ParamNames.ROOM, "/chat/demo")
-                        .param(ParamNames.CHAT, "Hi love");
-                break;
-            case Endpoints.SHUTDOWN:
-                builder.param(ParamNames.DELAY, "500");
-                break;
-            default:
-                throw new UnsupportedOperationException(endpoint);
-        }        
+        final Map<String, String> pairs = params.forEndpoint(endpoint);
+        pairs.forEach((k, v) -> {
+            builder.param(k, v);
+        });
         return builder;
     }
 }
