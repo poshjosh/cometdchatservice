@@ -32,6 +32,10 @@ public class TestUrls{
         this.endpointReqParams = Objects.requireNonNull(endpointReqParams);
     }
     
+    public TestUrls withContextPath(String s) {
+        return new TestUrls(s, this.endpointReqParams);
+    }
+    
     public String getEndPointUrl(int port, String endpoint) {
         final StringBuilder builder = new StringBuilder(getContextUrl(port));
         builder.append(endpoint);
