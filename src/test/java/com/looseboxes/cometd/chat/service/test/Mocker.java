@@ -30,6 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.OngoingStubbing;
+import static org.mockito.ArgumentMatchers.any;
 
 /**
  * Provide default mocks for object methods.
