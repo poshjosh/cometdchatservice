@@ -17,6 +17,8 @@ package com.looseboxes.cometd.chat.service.test;
 
 import com.looseboxes.cometd.chat.service.AppConfiguration;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseConfiguration;
+import java.util.Objects;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
@@ -28,6 +30,12 @@ public class TestConfig {
     
     private static final ResponseConfiguration resConfig = new ResponseConfiguration();
     private static final AppConfiguration appConfig = new AppConfiguration(resConfig);
+    
+    private final String contextPath;
+
+    public TestConfig(@Value("${server.servlet.context-path}") String contextPath) { 
+        this.contextPath = Objects.requireNonNull(contextPath);
+    }
     
     @Bean public TestData testData() {
         return new TestData();
@@ -42,11 +50,15 @@ public class TestConfig {
     }
     
     @Bean public EndpointRequestBuilders endpointRequestBuilders() {
-        return new EndpointRequestBuilders();
+        return new EndpointRequestBuilders(this.endpointRequestParams());
     }
     
     @Bean public TestUrls testUrl() {
-        return new TestUrls();
+        return new TestUrls(contextPath, this.endpointRequestParams());
+    }
+    
+    @Bean public EndpointRequestParams endpointRequestParams() {
+        return new EndpointRequestParams();
     }
     
     public AppConfiguration appConfig() {
