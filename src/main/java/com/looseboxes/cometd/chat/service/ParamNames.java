@@ -18,7 +18,7 @@ package com.looseboxes.cometd.chat.service;
 /**
  * @author USER
  */
-public interface ParamNames {
+public interface ParamNames extends ChatPropertyNames{
     String REQUEST = "req";
     String DELAY = "delay";
 }
