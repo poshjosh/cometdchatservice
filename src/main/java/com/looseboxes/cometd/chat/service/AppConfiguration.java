@@ -63,6 +63,10 @@ public class AppConfiguration {
     @Bean public ClientProvider clientProvider() {
         return new ClientProviderImpl(clientTransportProvider());
     }
+    
+    @Bean public BayeuxInitializer bayeuxInitializer() {
+        return new BayeuxInitializerImpl();
+    }
 
     @Bean public ClientTransportProvider clientTransportProvider() {
         return new ClientTransportProviderImpl();
