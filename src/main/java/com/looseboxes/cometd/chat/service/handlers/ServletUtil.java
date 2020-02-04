@@ -62,6 +62,11 @@ public final class ServletUtil {
         return paramValue;
     }
 
+    /**
+     * <code>String contextURL = baseURL + contextPath;</code>
+     * @param request
+     * @return 
+     */
     public String getContextUrl(HttpServletRequest request) {
         
         final String result = this.getBaseUrl(request) + request.getContextPath();
