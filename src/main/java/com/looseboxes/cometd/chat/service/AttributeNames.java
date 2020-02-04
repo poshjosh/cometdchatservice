@@ -20,5 +20,8 @@ package com.looseboxes.cometd.chat.service;
  * @author USER
  */
 public interface AttributeNames {
-    String COMETD_CLIENT_SESSION = "CometdClientSession";
+    interface Session{
+        String COMETD_CLIENT_SESSION = "CometdClientSession";
+        String CHAT_MEMBERS = "chatMembers";
+    }
 }
