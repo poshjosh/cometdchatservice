@@ -18,8 +18,8 @@ package com.looseboxes.cometd.chat.service.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseBuilder;
 import com.looseboxes.cometd.chat.service.test.Mocker;
-import com.looseboxes.cometd.chat.service.test.TestConfig;
-import com.looseboxes.cometd.chat.service.test.TestEndpointRequests;
+import com.looseboxes.cometd.chat.service.test.EndpointRequestBuilders;
+import com.looseboxes.cometd.chat.service.test.MyTestConfiguration;
 import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.times;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,17 +32,16 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-
 /**
  * The web server is started in this test case. 
  * @author USER
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import(TestConfig.class)
+@Import(MyTestConfiguration.class)
 public class ShutdownControllerMockWithServerIT {
 
-    @Autowired private TestEndpointRequests testEndpoints;
+    @Autowired private EndpointRequestBuilders endpointReqBuilders;
     
     @Autowired private Mocker mocker;
 
@@ -63,7 +62,7 @@ public class ShutdownControllerMockWithServerIT {
         final String expectedJson = mapper.writeValueAsString(mockResBuilder.buildSuccessResponse());
         ++invocations;
 
-        this.mockMvc.perform(testEndpoints.shutdown())
+        this.mockMvc.perform(endpointReqBuilders.builder(Endpoints.SHUTDOWN))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedJson, false));

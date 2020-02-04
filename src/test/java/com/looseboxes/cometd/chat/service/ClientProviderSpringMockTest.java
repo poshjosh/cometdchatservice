@@ -16,7 +16,7 @@
 package com.looseboxes.cometd.chat.service;
 
 import com.looseboxes.cometd.chat.service.test.Mocker;
-import com.looseboxes.cometd.chat.service.test.TestConfig;
+import com.looseboxes.cometd.chat.service.test.MyTestConfiguration;
 import org.cometd.bayeux.client.ClientSession;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
  */
 // @RunWith(MockitoJUnitRunner.class)   JUnit4 construct
 @ExtendWith(value = {SpringExtension.class})
-@Import(TestConfig.class)
+@Import(MyTestConfiguration.class)
 public class ClientProviderSpringMockTest extends ClientProviderMockTest{
     
     @Autowired private Mocker mocker;

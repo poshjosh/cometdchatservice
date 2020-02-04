@@ -15,6 +15,7 @@
  */
 package com.looseboxes.cometd.chat.service.test;
 
+import com.looseboxes.cometd.chat.service.controllers.Endpoints;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseImpl;
 import org.junit.jupiter.api.Test;
 
@@ -35,7 +36,7 @@ import org.junit.jupiter.api.TestMethodOrder;
  * @author USER
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Import(TestConfig.class)
+@Import(MyTestConfiguration.class)
 @TestMethodOrder(OrderAnnotation.class)
 public class HttpRequestIT {
     
@@ -52,7 +53,7 @@ public class HttpRequestIT {
     public void join_ShouldReturnSuccessfully() throws Exception {
         System.out.println("join_ShouldReturnSuccessfully");
         
-        this.givenRequestHandlerName_ShouldReturn("join", 200, true);
+        this.givenEndpoint_ShouldReturn(Endpoints.JOIN, 200, true);
     }
 
     @Test
@@ -62,7 +63,7 @@ public class HttpRequestIT {
     public void chat_ShouldReturnSuccessfully() throws Exception {
         System.out.println("chat_ShouldReturnSuccessfully");
         
-        this.givenRequestHandlerName_ShouldReturn("chat", 200, true);
+        this.givenEndpoint_ShouldReturn(Endpoints.CHAT, 200, true);
     }
     
     @Test
@@ -70,21 +71,12 @@ public class HttpRequestIT {
     public void shutdown_ShouldReturnSuccessfully() throws Exception {
         System.out.println("shutdown_ShouldReturnSuccessfully");
     
-        final String url = testUrls.getShutdownUrl(port);
-        
-        this.givenUrl_ShouldReturn(url, 200, true);
+        this.givenEndpoint_ShouldReturn(Endpoints.SHUTDOWN, 200, true);
     }
 
-    private void givenRequestHandlerName_ShouldReturn(String reqHandlerName, int code, boolean success) throws Exception {
-        
-        final String url = testUrls.getReqUrl(port, reqHandlerName);
-        
-        this.givenUrl_ShouldReturn(url, code, success);
-    }
-    
     private void givenEndpoint_ShouldReturn(String endpoint, int code, boolean success) throws Exception {
         
-        final String url = testUrls.getContextUrl(port) + endpoint;
+        final String url = testUrls.getEndPointUrl(port, endpoint);
         
         this.givenUrl_ShouldReturn(url, code, success);
     }

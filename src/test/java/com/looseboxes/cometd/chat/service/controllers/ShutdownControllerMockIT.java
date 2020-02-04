@@ -17,8 +17,8 @@ package com.looseboxes.cometd.chat.service.controllers;
 
 import com.looseboxes.cometd.chat.service.CometDProperties;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseBuilder;
-import com.looseboxes.cometd.chat.service.test.TestConfig;
-import com.looseboxes.cometd.chat.service.test.TestEndpointRequests;
+import com.looseboxes.cometd.chat.service.test.EndpointRequestBuilders;
+import com.looseboxes.cometd.chat.service.test.MyTestConfiguration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.Mockito.times;
@@ -46,12 +46,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
  */
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = ShutdownController.class)
-@Import(TestConfig.class)
+@Import(MyTestConfiguration.class)
 public class ShutdownControllerMockIT {
     
     public ShutdownControllerMockIT() { }
     
-    @Autowired private TestEndpointRequests testEndpoints;
+    @Autowired private EndpointRequestBuilders endpointReqBuilders;
     
     @Autowired private MockMvc mockMvc;
     
@@ -65,7 +65,7 @@ public class ShutdownControllerMockIT {
     public void shutdown_ShouldReturnSuccessfully() throws Exception{
         System.out.println("shutdown_ShouldReturnSuccessfully");
         
-        this.mockMvc.perform(testEndpoints.shutdown())
+        this.mockMvc.perform(endpointReqBuilders.builder(Endpoints.SHUTDOWN))
                 .andDo(print())
                 .andExpect(status().isOk());
 
