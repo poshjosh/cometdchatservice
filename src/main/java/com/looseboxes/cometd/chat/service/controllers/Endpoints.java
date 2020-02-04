@@ -19,6 +19,8 @@ package com.looseboxes.cometd.chat.service.controllers;
  * @author USER
  */
 public interface Endpoints {
-
     String SHUTDOWN = "/shutdown";
+    String JOIN = "/join";
+    String CHAT = "/chat";
+    String MEMBERS = "/members";
 }
