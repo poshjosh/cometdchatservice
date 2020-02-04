@@ -18,8 +18,8 @@ package com.looseboxes.cometd.chat.service;
 import java.util.Map;
 import java.util.Objects;
 import org.cometd.bayeux.client.ClientSession;
-import static org.junit.Assert.assertFalse;
 import org.junit.jupiter.api.Test;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author USER
