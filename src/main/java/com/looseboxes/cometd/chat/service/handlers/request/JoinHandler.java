@@ -47,7 +47,7 @@ public class JoinHandler extends AbstractRequestHandler{
     public boolean isJoinedToChat(HttpServletRequest req, HttpServletResponse res) {
         
         final ClientSession client = (ClientSession)req.getSession().getAttribute(
-                AttributeNames.COMETD_CLIENT_SESSION);
+                AttributeNames.Session.COMETD_CLIENT_SESSION);
         
         return client == null ? false : client.isHandshook();
     }
@@ -77,7 +77,8 @@ public class JoinHandler extends AbstractRequestHandler{
 
         final ClientSession client;
         
-        final Object attr = req.getSession().getAttribute(AttributeNames.COMETD_CLIENT_SESSION);
+        final Object attr = req.getSession().getAttribute(
+                AttributeNames.Session.COMETD_CLIENT_SESSION);
         
         if(attr != null) {
             
@@ -92,7 +93,7 @@ public class JoinHandler extends AbstractRequestHandler{
             // Create the BayeuxClient.
             client = clientProvider.createClient(url, transportOptions);
 
-            req.getSession().setAttribute(AttributeNames.COMETD_CLIENT_SESSION, client);
+            req.getSession().setAttribute(AttributeNames.Session.COMETD_CLIENT_SESSION, client);
         }
         
         // Here set up the BayeuxClient.

@@ -40,7 +40,7 @@ public final class ServletUtil {
         final ClientSessionChannel channel;
         
         final ClientSession client = (ClientSession)session
-                .getAttribute(AttributeNames.COMETD_CLIENT_SESSION);
+                .getAttribute(AttributeNames.Session.COMETD_CLIENT_SESSION);
         
         if(client == null) {
             channel = null;

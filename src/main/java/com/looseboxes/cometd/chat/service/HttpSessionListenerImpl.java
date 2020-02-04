@@ -65,7 +65,7 @@ public final class HttpSessionListenerImpl implements javax.servlet.http.HttpSes
     private void disconnectFromChatSession(HttpSession session) {
         
         final ClientSession client = (ClientSession)session
-                .getAttribute(AttributeNames.COMETD_CLIENT_SESSION);
+                .getAttribute(AttributeNames.Session.COMETD_CLIENT_SESSION);
 
         if(client != null) {
 
