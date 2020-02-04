@@ -51,7 +51,7 @@ public class BayeuxInitializerImpl implements BayeuxInitializer{
         final BayeuxServerImpl bayeux = (BayeuxServerImpl)servletContext.getAttribute(BayeuxServer.ATTRIBUTE);
 
         if (bayeux == null) {
-            throw new UnavailableException("No BayeuxServer!");
+            throw new UnavailableException("CometD BayeuxServer unavailable!");
         }
 
         // Create extensions
