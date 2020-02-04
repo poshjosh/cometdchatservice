@@ -15,43 +15,34 @@
  */
 package com.looseboxes.cometd.chat.service.test;
 
-import com.looseboxes.cometd.chat.service.CometDProperties;
-import com.looseboxes.cometd.chat.service.ParamNames;
-import com.looseboxes.cometd.chat.service.controllers.Endpoints;
+import java.util.Map;
 import java.util.Objects;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  * @author USER
  */
 public class TestUrls{
     
-    @Value("${server.servlet.context-path}") private String contextPath;
+    private final String contextPath;
     
-    @Autowired private CometDProperties cometdProps;
-    
-    public String getShutdownUrl(int port) {
-        return getContextUrl(port) + Endpoints.SHUTDOWN + '?' + ParamNames.DELAY + '=' + 5000;
-    }
-    
-    public String getReqUrl(int port, String req) {
-        return getDefaultServerUrl(port) + "?req="+Objects.requireNonNull(req); 
-    }
-    
-    public String getQueryString(String req) {
-        Objects.requireNonNull(req);
-        switch(req) {
-            case "join": return "req="+req;
-            case "chat": return "req="+req+"&chatsender=non&chatrecipient=nel&chatroom=/chat/demo&chatmessage=Hi+love";
-            default:
-                throw new IllegalArgumentException();
-            
-        }
-    }
+    private final EndpointRequestParams endpointReqParams;
 
-    public String getDefaultServerUrl(int port) {
-        return getContextUrl(port) + cometdProps.getDefaultServletPath();
+    public TestUrls(String contextPath, EndpointRequestParams endpointReqParams) {
+        this.contextPath = Objects.requireNonNull(contextPath);
+        this.endpointReqParams = Objects.requireNonNull(endpointReqParams);
+    }
+    
+    public String getEndPointUrl(int port, String endpoint) {
+        final StringBuilder builder = new StringBuilder(getContextUrl(port));
+        builder.append(endpoint);
+        final Map<String, String> params = endpointReqParams.forEndpoint(endpoint);
+        if( ! params.isEmpty()) {
+            builder.append('?');
+            params.forEach((k, v) -> {
+                builder.append(k).append('=').append(v);
+            });
+        }
+        return builder.toString();
     }
 
     public String getContextUrl(int port) {
