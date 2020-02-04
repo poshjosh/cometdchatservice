@@ -53,7 +53,7 @@ public class HttpRequestIT {
     public void join_ShouldReturnSuccessfully() throws Exception {
         System.out.println("join_ShouldReturnSuccessfully");
         
-        this.givenEndpoint_ShouldReturn(Endpoints.JOIN, 504, false);
+        this.givenEndpoint_ShouldReturn(Endpoints.JOIN, 200, true);
     }
 
     @Test
@@ -63,7 +63,7 @@ public class HttpRequestIT {
     public void chat_ShouldReturnSuccessfully() throws Exception {
         System.out.println("chat_ShouldReturnSuccessfully");
         
-        this.givenEndpoint_ShouldReturn(Endpoints.CHAT, 504, false);
+        this.givenEndpoint_ShouldReturn(Endpoints.CHAT, 200, true);
     }
     
     @Test
