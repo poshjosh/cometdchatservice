@@ -17,6 +17,7 @@ package com.looseboxes.cometd.chat.service;
 
 import com.looseboxes.cometd.chat.service.handlers.ServletUtil;
 import javax.servlet.annotation.WebListener;
+import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import org.cometd.bayeux.client.ClientSession;
 import org.cometd.bayeux.client.ClientSessionChannel;
@@ -28,30 +29,47 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 @WebListener()
 public final class HttpSessionListenerImpl implements javax.servlet.http.HttpSessionListener{
 
+    /**
+     * Un-subscribe from chat channel, disconnect from chat session.
+     * @param se 
+     */
     @Override
     public void sessionDestroyed(HttpSessionEvent se) {
 
+        final HttpSession session = se.getSession();
+        
         try{
             
-            final ServletUtil util = WebApplicationContextUtils
-                    .getRequiredWebApplicationContext(se.getSession().getServletContext())
-                    .getBean(ServletUtil.class);
+            this.unsubscribeFromChatChannel(session);
 
-            final ClientSessionChannel channel = util.getDefaultChatChannel(se.getSession(), null);
-
-            if(channel != null) {
-
-                channel.unsubscribe();
-            }
         }finally{
+            
+            this.disconnectFromChatSession(session);
+        }
+    }
+    
+    private void unsubscribeFromChatChannel(HttpSession session) {
         
-            final ClientSession client = (ClientSession)se.getSession()
-                    .getAttribute(AttributeNames.COMETD_CLIENT_SESSION);
+        final ServletUtil util = WebApplicationContextUtils
+                .getRequiredWebApplicationContext(session.getServletContext())
+                .getBean(ServletUtil.class);
 
-            if(client != null) {
-                
-                client.disconnect();
-            }
+        final ClientSessionChannel channel = util.getDefaultChatChannel(session, null);
+
+        if(channel != null) {
+
+            channel.unsubscribe();
+        }
+    }
+    
+    private void disconnectFromChatSession(HttpSession session) {
+        
+        final ClientSession client = (ClientSession)session
+                .getAttribute(AttributeNames.COMETD_CLIENT_SESSION);
+
+        if(client != null) {
+
+            client.disconnect();
         }
     }
 
