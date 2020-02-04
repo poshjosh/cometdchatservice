@@ -65,8 +65,8 @@ public final class BayeuxInitializerImpl implements BayeuxInitializer{
         bayeux.getChannel(ServerChannel.META_HANDSHAKE).addAuthorizer(GrantAuthorizer.GRANT_PUBLISH);
 
         ServerAnnotationProcessor processor = new ServerAnnotationProcessor(bayeux);
-        processor.process(new CometDServlet.EchoRPC());
-        processor.process(new CometDServlet.Monitor());
+        processor.process(new BayeuxInitializerImpl.EchoRPC());
+        processor.process(new BayeuxInitializerImpl.Monitor());
 
         final CometDProperties cometdProperties = this.getBean(servletContext, CometDProperties.class);
         
@@ -78,7 +78,7 @@ public final class BayeuxInitializerImpl implements BayeuxInitializer{
     }
 
     @Service("echo")
-    public static class EchoRPC {
+    public static final class EchoRPC {
         
         @Configure("/service/echo")
         private void configureEcho(ConfigurableServerChannel channel) {
