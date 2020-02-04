@@ -50,8 +50,8 @@ public class HttpRequestIT {
 //    @Ignore // Junit4 construct
     @Disabled("disabled until issue #1 is fixed")
     @Order(1) 
-    public void join_ShouldReturnSuccessfully() throws Exception {
-        System.out.println("join_ShouldReturnSuccessfully");
+    public void joinRequest_ShouldReturnSuccessfully() throws Exception {
+        System.out.println("joinRequest_ShouldReturnSuccessfully");
         
         this.givenEndpoint_ShouldReturn(Endpoints.JOIN, 200, true);
     }
@@ -60,14 +60,24 @@ public class HttpRequestIT {
 //    @Ignore // Junit4 construct
     @Disabled("disabled until issue #1 is fixed")
     @Order(2) 
-    public void chat_ShouldReturnSuccessfully() throws Exception {
-        System.out.println("chat_ShouldReturnSuccessfully");
+    public void chatRequest_ShouldReturnSuccessfully() throws Exception {
+        System.out.println("chatRequest_ShouldReturnSuccessfully");
         
         this.givenEndpoint_ShouldReturn(Endpoints.CHAT, 200, true);
     }
     
     @Test
+//    @Ignore // Junit4 construct
+    @Disabled("disabled until issue #1 is fixed")
     @Order(3) 
+    public void membersRequest_ShouldReturnSuccessfully() throws Exception {
+        System.out.println("membersRequest_ShouldReturnSuccessfully");
+        
+        this.givenEndpoint_ShouldReturn(Endpoints.MEMBERS, 200, true);
+    }
+
+    @Test
+    @Order(4) 
     public void shutdown_ShouldReturnSuccessfully() throws Exception {
         System.out.println("shutdown_ShouldReturnSuccessfully");
     
