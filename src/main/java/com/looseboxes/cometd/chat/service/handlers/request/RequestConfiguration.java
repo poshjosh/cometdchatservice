@@ -25,6 +25,10 @@ import org.springframework.context.annotation.Scope;
 @Configuration
 public class RequestConfiguration {
     
+    @Bean @Scope("prototype") public MembersHandler membersHandler() {
+        return new MembersHandler();
+    }
+
     @Bean @Scope("prototype") public ChatHandler chatHandler() {
         return new ChatHandler();
     }
