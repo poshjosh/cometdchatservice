@@ -25,14 +25,18 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 
 import org.springframework.context.annotation.Import;
-import org.junit.jupiter.api.Disabled;
 import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.TestMethodOrder;
 
 /**
  * @author USER
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Import(TestConfig.class)
+@TestMethodOrder(OrderAnnotation.class)
 public class HttpRequestIT {
     
     @Autowired private TestUrls testUrls;
@@ -44,6 +48,7 @@ public class HttpRequestIT {
     @Test
 //    @Ignore // Junit4 construct
     @Disabled("disabled until issue #1 is fixed")
+    @Order(1) 
     public void join_ShouldReturnSuccessfully() throws Exception {
         System.out.println("join_ShouldReturnSuccessfully");
         
@@ -53,6 +58,7 @@ public class HttpRequestIT {
     @Test
 //    @Ignore // Junit4 construct
     @Disabled("disabled until issue #1 is fixed")
+    @Order(2) 
     public void chat_ShouldReturnSuccessfully() throws Exception {
         System.out.println("chat_ShouldReturnSuccessfully");
         
@@ -60,7 +66,7 @@ public class HttpRequestIT {
     }
     
     @Test
-    @Disabled("@TODO find out why this is failing")
+    @Order(3) 
     public void shutdown_ShouldReturnSuccessfully() throws Exception {
         System.out.println("shutdown_ShouldReturnSuccessfully");
     
