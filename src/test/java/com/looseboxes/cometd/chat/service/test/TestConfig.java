@@ -41,8 +41,8 @@ public class TestConfig {
         return new Mocker(this);
     }
     
-    @Bean public TestEndpointRequests testEndpoints() {
-        return new TestEndpointRequests();
+    @Bean public EndpointRequestBuilders endpointRequestBuilders() {
+        return new EndpointRequestBuilders();
     }
     
     @Bean public TestUrls testUrl() {
