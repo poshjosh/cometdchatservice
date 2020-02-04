@@ -33,10 +33,6 @@ public class CometDProperties {
     private String servletPath = "/cometd";
     
     private String defaultChannel = "/chat/privatechannel";
-    
-    private String defaultServletName = "chat";
-    
-    private String defaultServletPath = "/chat";
 
     private int handshakeTimeout = 3000;
     
@@ -68,22 +64,6 @@ public class CometDProperties {
 
     public void setDefaultChannel(String defaultChannel) {
         this.defaultChannel = defaultChannel;
-    }
-
-    public String getDefaultServletName() {
-        return defaultServletName;
-    }
-
-    public void setDefaultServletName(String defaultServletName) {
-        this.defaultServletName = defaultServletName;
-    }
-
-    public String getDefaultServletPath() {
-        return defaultServletPath;
-    }
-
-    public void setDefaultServletPath(String defaultServletPath) {
-        this.defaultServletPath = defaultServletPath;
     }
 
     public int getHandshakeTimeout() {
