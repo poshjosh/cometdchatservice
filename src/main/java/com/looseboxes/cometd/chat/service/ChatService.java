@@ -30,6 +30,7 @@ import org.cometd.annotation.Service;
 import org.cometd.annotation.Session;
 import org.cometd.bayeux.Promise;
 import org.cometd.bayeux.client.ClientSessionChannel;
+import org.cometd.bayeux.server.BayeuxContext;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.ConfigurableServerChannel;
 import org.cometd.bayeux.server.ServerChannel;
@@ -40,9 +41,13 @@ import org.cometd.server.filter.DataFilter;
 import org.cometd.server.filter.DataFilterMessageListener;
 import org.cometd.server.filter.JSONDataFilter;
 import org.cometd.server.filter.NoMarkupFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service("chat")
 public final class ChatService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ChatService.class);
     
     private final ConcurrentMap<String, Map<String, String>> _members = new ConcurrentHashMap<>();
     
@@ -54,6 +59,7 @@ public final class ChatService {
 
     @Configure({"/chat/**", "/members/**"})
     protected void configureChatStarStar(ConfigurableServerChannel channel) {
+        LOG.debug("configureChatStarStar(ConfigurableServerChannel)");
         DataFilterMessageListener noMarkup = new DataFilterMessageListener(new NoMarkupFilter(), new BadWordFilter());
         channel.addListener(noMarkup);
         channel.addAuthorizer(GrantAuthorizer.GRANT_ALL);
@@ -61,12 +67,14 @@ public final class ChatService {
 
     @Configure("/service/members")
     protected void configureMembers(ConfigurableServerChannel channel) {
+        LOG.debug("configureMembers(ConfigurableServerChannel)");
         channel.addAuthorizer(GrantAuthorizer.GRANT_PUBLISH);
         channel.setPersistent(true);
     }
 
     @Listener("/service/members")
     public void handleMembership(ServerSession client, ServerMessage message) {
+        LOG.debug("handleMembership(ServerSession, ServerMessage)");
         Map<String, Object> data = message.getDataAsMap();
         final String room = ((String)data.get(ChatPropertyNames.ROOM)).substring("/chat/".length());
         Map<String, String> roomMembers = _members.get(room);
@@ -86,6 +94,7 @@ public final class ChatService {
         });
 
         broadcastMembers(room, members.keySet());
+        this.updateHttpServletSessionAttribute(message.getBayeuxContext());
     }
 
     private void broadcastMembers(String room, Set<String> members) {
@@ -93,9 +102,23 @@ public final class ChatService {
         ClientSessionChannel channel = _session.getLocalSession().getChannel("/members/" + room);
         channel.publish(members);
     }
+    
+    private void updateHttpServletSessionAttribute(final BayeuxContext bayeuxContext) {
+        if(bayeuxContext != null) {
+            try{
+                final Object chatMembers = bayeuxContext.getHttpSessionAttribute(
+                        AttributeNames.Session.CHAT_MEMBERS);
+                if(chatMembers == null) {
+                    bayeuxContext.setHttpSessionAttribute(
+                            AttributeNames.Session.CHAT_MEMBERS, _members);
+                }
+            }catch(IllegalStateException ignored) {}
+        }
+    }
 
     @Configure("/service/privatechat")
     protected void configurePrivateChat(ConfigurableServerChannel channel) {
+        LOG.debug("configurePrivateChat(ConfigurableServerChannel)");
         DataFilterMessageListener noMarkup = new DataFilterMessageListener(new NoMarkupFilter(), new BadWordFilter());
         channel.setPersistent(true);
         channel.addListener(noMarkup);
@@ -104,6 +127,7 @@ public final class ChatService {
 
     @Listener("/service/privatechat")
     public void privateChat(ServerSession client, ServerMessage message) {
+        LOG.debug("privateChat(ServerSession, ServerMessage)");
         Map<String, Object> data = message.getDataAsMap();
         String room = ((String)data.get(ChatPropertyNames.ROOM)).substring("/chat/".length());
         Map<String, String> membersMap = _members.get(room);
@@ -152,7 +176,7 @@ public final class ChatService {
         }
     }
 
-    class BadWordFilter extends JSONDataFilter {
+    private static class BadWordFilter extends JSONDataFilter {
         @Override
         protected Object filterString(ServerSession session, ServerChannel channel, String string) {
             if (string.contains("dang")) {
