@@ -40,6 +40,11 @@ public class ShutdownController{
         this.context = Objects.requireNonNull(context);
     }
      
+    /**
+     * Shutdown the spring application context after <code>delay millis</code>.
+     * @param delay The delay in miliseconds to wait before shutting down the application
+     * @return 
+     */
     @RequestMapping(Endpoints.SHUTDOWN)
     public Response shutdown(@RequestParam(value=ParamNames.DELAY, required=false) Long delay) {
 
@@ -61,7 +66,7 @@ public class ShutdownController{
 
         if(delay == null || delay < 1) {
         
-            ((ConfigurableApplicationContext) context).close();
+            shutdown();
             
         }else{
         
