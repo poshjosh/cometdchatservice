@@ -16,11 +16,7 @@
 package com.looseboxes.cometd.chat.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.looseboxes.cometd.chat.service.handlers.request.ChatHandler;
 import com.looseboxes.cometd.chat.service.handlers.ServletUtil;
-import com.looseboxes.cometd.chat.service.handlers.request.JoinHandler;
-import com.looseboxes.cometd.chat.service.handlers.request.RequestHandlerFactory;
-import com.looseboxes.cometd.chat.service.handlers.request.RequestHandlerFactoryImpl;
 import com.looseboxes.cometd.chat.service.handlers.Await;
 import com.looseboxes.cometd.chat.service.handlers.AwaitImpl;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseConfiguration;
@@ -62,18 +58,6 @@ public class AppConfiguration {
     
     @Bean public ServletUtil servletUtil() {
         return new ServletUtil();
-    }
-    
-    @Bean @Scope("prototype") public ChatHandler chatHandler() {
-        return new ChatHandler();
-    }
-
-    @Bean @Scope("prototype") public JoinHandler joinHandler() {
-        return new JoinHandler();
-    }
-
-    @Bean public RequestHandlerFactory requestHandlerFactory() {
-        return new RequestHandlerFactoryImpl();
     }
     
     @Bean public ClientProvider clientProvider() {
