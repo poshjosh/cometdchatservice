@@ -41,7 +41,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 /**
  * @author USER
  */
-public class BayeuxInitializerImpl implements BayeuxInitializer{
+public final class BayeuxInitializerImpl implements BayeuxInitializer{
     
     private static final Logger LOG = LoggerFactory.getLogger(BayeuxInitializerImpl.class);
     
