@@ -41,6 +41,10 @@ public class CometDProperties {
     private int publishTimeout = 3000;
     
     public CometDProperties() { }
+    
+    public int getJoinTimeout() {
+        return this.getHandshakeTimeout() + this.getSubscriptionTimeout();
+    }
 
     public String getServletName() {
         return servletName;
