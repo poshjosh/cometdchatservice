@@ -23,7 +23,7 @@ import java.util.Objects;
  */
 public class ChatConfig implements Serializable{
     
-    private String membersServiceChannel = ChatPropertyNames.MEMBERS_SERVICE_CHANNEL;
+    private String membersServiceChannel = Chat.MEMBERS_SERVICE_CHANNEL;
     
     private String channel;
     
@@ -34,14 +34,28 @@ public class ChatConfig implements Serializable{
     /** 
      * Any of [warn|info|debug]
      */
-    private String logLevel = ChatPropertyNames.LOG_LEVEL_INFO;
+    private String logLevel = Chat.LOG_LEVEL_VALUES.INFO;
     
     private boolean websocketEnabled = true;
     
     public ChatConfig(String channel, String room, String user) {
+        this(Chat.MEMBERS_SERVICE_CHANNEL, channel, 
+                room, user, Chat.LOG_LEVEL_VALUES.INFO, true);
+    }
+    
+    public ChatConfig(String membersServiceChannel, String channel, 
+            String room, String user, String logLevel, boolean websocketEnabled) {
+        this.membersServiceChannel = this.requireNonNullOrEmpty(membersServiceChannel);
         this.channel = this.requireNonNullOrEmpty(channel);
         this.room = this.requireNonNullOrEmpty(room);
         this.user = this.requireNonNullOrEmpty(user);
+        this.logLevel = this.requireNonNullOrEmpty(logLevel);
+        this.websocketEnabled = websocketEnabled;
+    }
+
+    public ChatConfig forUser(String user) {
+        return new ChatConfig(this.membersServiceChannel, this.channel, 
+                this.room, user, this.logLevel, this.websocketEnabled);
     }
 
     public String getMembersServiceChannel() {
