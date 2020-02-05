@@ -16,6 +16,7 @@
 package com.looseboxes.cometd.chat.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +29,7 @@ import org.cometd.annotation.Configure;
 import org.cometd.annotation.Listener;
 import org.cometd.annotation.Service;
 import org.cometd.annotation.Session;
+import org.cometd.bayeux.Message;
 import org.cometd.bayeux.Promise;
 import org.cometd.bayeux.client.ClientSessionChannel;
 import org.cometd.bayeux.server.BayeuxContext;
@@ -60,41 +62,46 @@ public final class ChatService {
     @Configure({"/chat/**", "/members/**"})
     protected void configureChatStarStar(ConfigurableServerChannel channel) {
         LOG.debug("configureChatStarStar(ConfigurableServerChannel)");
-        DataFilterMessageListener noMarkup = new DataFilterMessageListener(new NoMarkupFilter(), new BadWordFilter());
+        DataFilterMessageListener noMarkup = new DataFilterMessageListener(
+                new NoMarkupFilter(), new BadWordFilter());
         channel.addListener(noMarkup);
         channel.addAuthorizer(GrantAuthorizer.GRANT_ALL);
     }
 
-    @Configure("/service/members")
+    @Configure(ChatPropertyNames.MEMBERS_SERVICE_CHANNEL)
     protected void configureMembers(ConfigurableServerChannel channel) {
         LOG.debug("configureMembers(ConfigurableServerChannel)");
         channel.addAuthorizer(GrantAuthorizer.GRANT_PUBLISH);
         channel.setPersistent(true);
     }
 
-    @Listener("/service/members")
+    @Listener(ChatPropertyNames.MEMBERS_SERVICE_CHANNEL)
     public void handleMembership(ServerSession client, ServerMessage message) {
-        LOG.debug("handleMembership(ServerSession, ServerMessage)");
-        Map<String, Object> data = message.getDataAsMap();
-        final String room = ((String)data.get(ChatPropertyNames.ROOM)).substring("/chat/".length());
-        Map<String, String> roomMembers = _members.get(room);
-        if (roomMembers == null) {
-            Map<String, String> new_room = new ConcurrentHashMap<>();
-            roomMembers = _members.putIfAbsent(room, new_room);
-            if (roomMembers == null) {
-                roomMembers = new_room;
-            }
-        }
-        final Map<String, String> members = roomMembers;
-        String userName = (String)data.get(ChatPropertyNames.USER);
-        members.put(userName, client.getId());
-        client.addListener((ServerSession.RemoveListener)(session, timeout) -> {
-            members.values().remove(session.getId());
-            broadcastMembers(room, members.keySet());
-        });
+        try{
+            LOG.debug("handleMembership(ServerSession, ServerMessage={})", message);
+            final Map<String, Object> data = getData(message);
 
-        broadcastMembers(room, members.keySet());
-        this.updateHttpServletSessionAttribute(message.getBayeuxContext());
+            final String room = data == null ? null : getRoom(data, null);
+
+            final Map<String, String> roomMembers = room == null ? 
+                    Collections.EMPTY_MAP : getRoomMembersOrCreateNew(room);
+
+    //        final Map<String, String> members = roomMembers;
+
+            String userName = (String)data.get(ChatPropertyNames.USER);
+            roomMembers.put(userName, client.getId());
+            LOG.trace("Room: {}, members: {}\nAll members: {}", room, roomMembers, _members);
+
+            client.addListener((ServerSession.RemoveListener)(session, timeout) -> {
+                roomMembers.values().remove(session.getId());
+                broadcastMembers(room, roomMembers.keySet());
+            });
+
+            broadcastMembers(room, roomMembers.keySet());
+            updateHttpServletSessionAttribute(message.getBayeuxContext());
+        }catch(Exception e) {
+            LOG.warn("Exception while handling membership. ServerMessage: " + message, e);
+        }
     }
 
     private void broadcastMembers(String room, Set<String> members) {
@@ -116,64 +123,93 @@ public final class ChatService {
         }
     }
 
-    @Configure("/service/privatechat")
+    @Configure(ClientSessionChannel.SERVICE+"/privatechat")
     protected void configurePrivateChat(ConfigurableServerChannel channel) {
         LOG.debug("configurePrivateChat(ConfigurableServerChannel)");
-        DataFilterMessageListener noMarkup = new DataFilterMessageListener(new NoMarkupFilter(), new BadWordFilter());
+        DataFilterMessageListener noMarkup = new DataFilterMessageListener(
+                new NoMarkupFilter(), new BadWordFilter());
         channel.setPersistent(true);
         channel.addListener(noMarkup);
         channel.addAuthorizer(GrantAuthorizer.GRANT_PUBLISH);
     }
 
-    @Listener("/service/privatechat")
+    @Listener(ClientSessionChannel.SERVICE+"/privatechat")
     public void privateChat(ServerSession client, ServerMessage message) {
-        LOG.debug("privateChat(ServerSession, ServerMessage)");
-        Map<String, Object> data = message.getDataAsMap();
-        String room = ((String)data.get(ChatPropertyNames.ROOM)).substring("/chat/".length());
-        Map<String, String> membersMap = _members.get(room);
-        if (membersMap == null) {
+        try{
+            LOG.trace("privateChat(ServerSession, ServerMessage={})", message);
+            final Map<String, Object> data = getData(message);
+
+            final String room = data == null ? null : getRoom(data, null);
+
+            final Map<String, String> roomMembers = room == null ? 
+                    Collections.EMPTY_MAP : getRoomMembersOrCreateNew(room);
+
+            final String[] peerNames = this.getPeerNames(data);
+            final ArrayList<ServerSession> peers = new ArrayList<>(peerNames.length);
+
+            for (String peerName : peerNames) {
+                String peerId = roomMembers.get(peerName);
+                if (peerId != null) {
+                    ServerSession peer = _bayeux.getSession(peerId);
+                    if (peer != null) {
+                        peers.add(peer);
+                    }
+                }
+            }
+
+            if (peers.size() > 0) {
+                Map<String, Object> chat = new HashMap<>();
+                String text = (String)data.get(ChatPropertyNames.CHAT);
+                chat.put(ChatPropertyNames.CHAT, text);
+                chat.put(ChatPropertyNames.USER, data.get(ChatPropertyNames.USER));
+                chat.put(ChatPropertyNames.SCOPE, "private");
+                ServerMessage.Mutable forward = _bayeux.newMessage();
+                forward.setChannel("/chat/" + room);
+                forward.setId(message.getId());
+                forward.setData(chat);
+
+                // test for lazy messages
+                if (text.lastIndexOf("lazy") > 0) {
+                    forward.setLazy(true);
+                }
+
+                for (ServerSession peer : peers) {
+                    if (peer != client) {
+                        peer.deliver(_session, forward, Promise.noop());
+                    }
+                }
+                client.deliver(_session, forward, Promise.noop());
+            }
+        }catch(Exception e) {
+            LOG.warn("Exception while handling private chat. ServerMessage: " + message, e);
+        }
+    }
+    
+    private String [] getPeerNames(final Map<String, Object> data) {
+        final String peer = data == null ? null : ((String)data.get(ChatPropertyNames.PEER));
+        return peer == null || peer.isEmpty() ? new String[0] : peer.split(",");
+    }
+    
+    private String getRoom(final Map<String, Object> data, String resultIfNone) {
+        final String room = data == null ? null : ((String)data.get(ChatPropertyNames.ROOM));
+        return room == null ? resultIfNone : room.substring("/chat/".length());
+    }
+    
+    private Map<String, String> getRoomMembersOrCreateNew(String room) {
+        Map<String, String> roomMembers = _members.get(room);
+        if (roomMembers == null) {
             Map<String, String> new_room = new ConcurrentHashMap<>();
-            membersMap = _members.putIfAbsent(room, new_room);
-            if (membersMap == null) {
-                membersMap = new_room;
+            roomMembers = _members.putIfAbsent(room, new_room);
+            if (roomMembers == null) {
+                roomMembers = new_room;
             }
         }
-        String[] peerNames = ((String)data.get(ChatPropertyNames.PEER)).split(",");
-        ArrayList<ServerSession> peers = new ArrayList<>(peerNames.length);
-
-        for (String peerName : peerNames) {
-            String peerId = membersMap.get(peerName);
-            if (peerId != null) {
-                ServerSession peer = _bayeux.getSession(peerId);
-                if (peer != null) {
-                    peers.add(peer);
-                }
-            }
-        }
-
-        if (peers.size() > 0) {
-            Map<String, Object> chat = new HashMap<>();
-            String text = (String)data.get(ChatPropertyNames.CHAT);
-            chat.put(ChatPropertyNames.CHAT, text);
-            chat.put(ChatPropertyNames.USER, data.get(ChatPropertyNames.USER));
-            chat.put(ChatPropertyNames.SCOPE, "private");
-            ServerMessage.Mutable forward = _bayeux.newMessage();
-            forward.setChannel("/chat/" + room);
-            forward.setId(message.getId());
-            forward.setData(chat);
-
-            // test for lazy messages
-            if (text.lastIndexOf("lazy") > 0) {
-                forward.setLazy(true);
-            }
-
-            for (ServerSession peer : peers) {
-                if (peer != client) {
-                    peer.deliver(_session, forward, Promise.noop());
-                }
-            }
-            client.deliver(_session, forward, Promise.noop());
-        }
+        return roomMembers;
+    }    
+    
+    private Map<String, Object> getData(Message message) {
+        Map<String, Object> data = message.getDataAsMap();
+        return data == null ? message : data;
     }
 
     private static class BadWordFilter extends JSONDataFilter {
