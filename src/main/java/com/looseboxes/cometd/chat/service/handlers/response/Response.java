@@ -27,4 +27,6 @@ public interface Response<T> {
     String getMessage();
 
     boolean isSuccess();
+    
+    long getTimestamp();
 }

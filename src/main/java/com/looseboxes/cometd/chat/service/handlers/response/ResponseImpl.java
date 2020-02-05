@@ -16,7 +16,9 @@
 package com.looseboxes.cometd.chat.service.handlers.response;
 
 import java.io.Serializable;
-import java.util.Objects;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 /**
  * @author USER
@@ -26,6 +28,8 @@ public final class ResponseImpl<T> implements Serializable, Response<T>{
     private boolean success;
     
     private int code = 500; // Internal Server Error
+    
+    private long timestamp = System.currentTimeMillis();
     
     private String message = "";
     
@@ -69,6 +73,15 @@ public final class ResponseImpl<T> implements Serializable, Response<T>{
     }
 
     @Override
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    @Override
     public String getMessage() {
         return message;
     }
@@ -87,44 +100,9 @@ public final class ResponseImpl<T> implements Serializable, Response<T>{
     }
 
     @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 67 * hash + (this.success ? 1 : 0);
-        hash = 67 * hash + this.code;
-        hash = 67 * hash + Objects.hashCode(this.message);
-        hash = 67 * hash + Objects.hashCode(this.data);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final ResponseImpl other = (ResponseImpl) obj;
-        if (this.success != other.success) {
-            return false;
-        }
-        if (this.code != other.code) {
-            return false;
-        }
-        if (!Objects.equals(this.message, other.message)) {
-            return false;
-        }
-        if (!Objects.equals(this.data, other.data)) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
     public String toString() {
-        return "ResponseObject{" + "success=" + success + ", code=" + code + ", message=" + message + ", data=" + data + '}';
+        return "ResponseObject{" + "success=" + success + ", code=" + code + 
+                ", timestamp=" + LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault()) + 
+                ", message=" + message + ", data=" + data + '}';
     }
 }
