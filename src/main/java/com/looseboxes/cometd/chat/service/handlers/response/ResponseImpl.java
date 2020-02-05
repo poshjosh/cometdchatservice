@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Objects;
 
 /**
  * @author USER
@@ -97,6 +98,47 @@ public final class ResponseImpl<T> implements Serializable, Response<T>{
 
     public void setData(T data) {
         this.data = data;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 97 * hash + (this.success ? 1 : 0);
+        hash = 97 * hash + this.code;
+        hash = 97 * hash + (int) (this.timestamp ^ (this.timestamp >>> 32));
+        hash = 97 * hash + Objects.hashCode(this.message);
+        hash = 97 * hash + Objects.hashCode(this.data);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ResponseImpl<?> other = (ResponseImpl<?>) obj;
+        if (this.success != other.success) {
+            return false;
+        }
+        if (this.code != other.code) {
+            return false;
+        }
+        if (this.timestamp != other.timestamp) {
+            return false;
+        }
+        if (!Objects.equals(this.message, other.message)) {
+            return false;
+        }
+        if (!Objects.equals(this.data, other.data)) {
+            return false;
+        }
+        return true;
     }
 
     @Override
