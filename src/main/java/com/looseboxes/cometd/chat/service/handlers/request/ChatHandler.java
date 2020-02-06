@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.WebApplicationContext;
 import com.looseboxes.cometd.chat.service.ChatSession;
-import com.looseboxes.cometd.chat.service.handlers.ChatRequestServiceImpl;
+import com.looseboxes.cometd.chat.service.handlers.ChatRequestService;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseBuilder;
 import java.util.concurrent.Future;
 import org.cometd.bayeux.Message;
@@ -43,7 +43,7 @@ public final class ChatHandler extends AbstractRequestHandler{
         
         final WebApplicationContext webAppCtx = getWebAppContext(req);
 
-        final ChatRequestServiceImpl chatReqSvc = webAppCtx.getBean(ChatRequestServiceImpl.class);
+        final ChatRequestService chatReqSvc = webAppCtx.getBean(ChatRequestService.class);
         
         final Response joinResponse = chatReqSvc.joinChatIfNotAlready(req, res);
         
