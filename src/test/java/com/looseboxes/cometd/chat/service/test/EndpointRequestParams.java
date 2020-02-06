@@ -42,7 +42,7 @@ public class EndpointRequestParams {
                 params.put(ParamNames.ROOM, "/chat/demo");
                 break;
             case Endpoints.SHUTDOWN:
-                params.put(ParamNames.DELAY, "500");
+                params.put(ParamNames.DELAY, "5000");
                 break;
             default:
                 throw new UnsupportedOperationException("Unexpected endpoint: " + endpoint);
