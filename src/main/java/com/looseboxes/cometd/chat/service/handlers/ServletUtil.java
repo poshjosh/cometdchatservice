@@ -35,6 +35,24 @@ public final class ServletUtil {
         }
         return paramValue;
     }
+    
+    /**
+     * <code><pre>
+     * String endpointUrl = getContextUrl() + endpoint;
+     * </pre></code>
+     * @param request
+     * @param endpoint
+     * @see #getContextUrl(javax.servlet.http.HttpServletRequest) 
+     * @return The URL to the endpoint
+     */
+    public String getEndpointUrl(HttpServletRequest request, String endpoint) {
+       
+        final String result = this.getContextUrl(request) + endpoint;
+        
+        LOG.debug("Endpoint: {}, URL: {}", endpoint, result);
+        
+        return result;
+    }
 
     /**
      * <code>String contextURL = baseURL + contextPath;</code>
