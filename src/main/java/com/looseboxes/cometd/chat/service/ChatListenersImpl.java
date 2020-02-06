@@ -33,6 +33,11 @@ public class ChatListenersImpl implements ChatListeners{
     public ChatListenersImpl() {
         this.listeners = Collections.synchronizedList(new ArrayList<>());
     }
+
+    @Override
+    public int size() {
+        return listeners.size();
+    }
     
     @Override
     public boolean addListener(ChatListener listener) {

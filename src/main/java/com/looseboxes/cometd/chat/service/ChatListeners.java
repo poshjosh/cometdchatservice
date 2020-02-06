@@ -32,4 +32,6 @@ public interface ChatListeners {
     void fireEvent(ChatListener.Event event, BiConsumer<ChatListener, ChatListener.Event> action);
 
     boolean removeListener(ChatListener listener);
+    
+    int size();
 }
