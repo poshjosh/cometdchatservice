@@ -582,4 +582,10 @@ public final class ChatSessionImpl implements ChatSession {
             return "ServiceStatus{" + "connected=" + connected + ", disconnecting=" + disconnecting + ", subscribedToChat=" + subscribedToChat + ", subscribedToMembers=" + subscribedToMembers + '}';
         }
     }
+
+    @Override
+    public String toString() {
+        return "ChatSessionImpl{" + "Listeners=" + listeners.size() + ", clientSession=" + clientSession +  
+                "\n" + chatConfig + "\n" + status + "\n}";
+    }
 }
