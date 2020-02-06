@@ -26,20 +26,23 @@ import java.util.Map;
 public class EndpointRequestParams {
     
     public Map<String, String> forEndpoint(String endpoint) {
+        final String room = "/chat/demo";
         final Map params = new HashMap<>();
         switch(endpoint) {
             case Endpoints.JOIN:
                 params.put(ParamNames.USER, "Non");
-                params.put(ParamNames.ROOM, "/chat/demo");
+                params.put(ParamNames.ROOM, room);
                 break;
             case Endpoints.CHAT:
+                // This is required because chat triggers join if user not joined to chat
                 params.put(ParamNames.USER, "Non");
+                params.put(ParamNames.ROOM, room);
+
                 params.put(ParamNames.PEER, "Nel");
-                params.put(ParamNames.ROOM, "/chat/demo");
                 params.put(ParamNames.CHAT, "Hi love");
                 break;
             case Endpoints.MEMBERS:
-                params.put(ParamNames.ROOM, "/chat/demo");
+//                params.put(ParamNames.ROOM, room);
                 break;
             case Endpoints.SHUTDOWN:
                 params.put(ParamNames.DELAY, "5000");
