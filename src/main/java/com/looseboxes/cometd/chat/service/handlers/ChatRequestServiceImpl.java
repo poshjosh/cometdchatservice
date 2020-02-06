@@ -20,6 +20,7 @@ import com.looseboxes.cometd.chat.service.ChatConfig;
 import com.looseboxes.cometd.chat.service.ChatSession;
 import com.looseboxes.cometd.chat.service.CometDProperties;
 import com.looseboxes.cometd.chat.service.ParamNames;
+import com.looseboxes.cometd.chat.service.controllers.Endpoints;
 import com.looseboxes.cometd.chat.service.handlers.request.JoinHandler;
 import com.looseboxes.cometd.chat.service.handlers.response.Response;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseBuilder;
@@ -103,9 +104,9 @@ public class ChatRequestServiceImpl implements ChatRequestService {
 
             final CometDProperties cometdProps = webAppCtx.getBean(CometDProperties.class);
             
-// Servlet path may have an asterix e.g /cometd/*  therefore we use the literal /cometd
+// Servlet path may have an asterix e.g /cometd/*  therefore we use the literal endpoint i.e /cometd
 //            final String cometdPath = webAppCtx.getBean(CometDProperties.class).getServletPath();
-            final String url = Objects.requireNonNull(servletUtil.getContextUrl(req)) + "/cometd";
+            final String url = servletUtil.getEndpointUrl(req, Endpoints.COMETD);
             final String room = servletUtil.requireNonNullOrEmpty(req, ParamNames.ROOM);
             final String user = servletUtil.requireNonNullOrEmpty(req, ParamNames.USER);
             LOG.debug("URL: {}, room: {}, user: {}", url, room, user);
