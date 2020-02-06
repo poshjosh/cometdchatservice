@@ -15,122 +15,27 @@
  */
 package com.looseboxes.cometd.chat.service.handlers;
 
-import com.looseboxes.cometd.chat.service.AttributeNames;
-import com.looseboxes.cometd.chat.service.ChatConfig;
 import com.looseboxes.cometd.chat.service.ChatSession;
-import com.looseboxes.cometd.chat.service.CometDProperties;
-import com.looseboxes.cometd.chat.service.ParamNames;
-import com.looseboxes.cometd.chat.service.handlers.request.JoinHandler;
 import com.looseboxes.cometd.chat.service.handlers.response.Response;
-import com.looseboxes.cometd.chat.service.handlers.response.ResponseBuilder;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
- *
  * @author USER
  */
-public class ChatRequestService {
-    
-    private static final Logger LOG = LoggerFactory.getLogger(ChatRequestService.class);
-    
-    private final ServletUtil servletUtil;
+public interface ChatRequestService {
 
-    public ChatRequestService(ServletUtil servletUtil) {
-        this.servletUtil = Objects.requireNonNull(servletUtil);
-    }
-    
+    ChatSession getChatSession(HttpServletRequest req, boolean createIfNone);
+
+    boolean isJoinedToChat(HttpServletRequest req);
+
     /**
      * @param req
      * @param res
-     * @return {@link com.looseboxes.cometd.chat.service.handlers.response.Response Response} 
+     * @return {@link com.looseboxes.cometd.chat.service.handlers.response.Response Response}
      * object with success set to true if previously joined to chat or
-     * successfully joined to chat during this methods execution, otherwise 
+     * successfully joined to chat during this methods execution, otherwise
      * return false.
      */
-    public Response joinChatIfNotAlready(HttpServletRequest req, HttpServletResponse res) {
-        
-        final WebApplicationContext webAppCtx = getWebAppContext(req);
-        
-        final boolean joinedToChat = this.isJoinedToChat(req);
-        
-        if( ! joinedToChat) {
-        
-            final JoinHandler jh = webAppCtx.getBean(JoinHandler.class);
-
-            final Response jhr = jh.process(req, res);
-
-            if(!jhr.isSuccess()) {
-
-                return jhr;
-            }
-        }
-        
-        return webAppCtx.getBean(ResponseBuilder.class).buildSuccessResponse();
-    }
-
-    public boolean isJoinedToChat(HttpServletRequest req) {
-        
-        final ChatSession chatSession = this.getChatSession(req, false);
-        
-        return chatSession == null ? false : chatSession.getStatus().isConnected();
-    }
-    
-    public ChatSession getChatSession(HttpServletRequest req, boolean createIfNone) {
-        
-// Servlet path may have an asterix e.g /cometd/*  therefore we use the literal /cometd
-//        final String cometdPath = webAppCtx.getBean(CometDProperties.class).getServletPath();
-        final String url = Objects.requireNonNull(servletUtil.getContextUrl(req)) + "/cometd";
-        final String room = servletUtil.requireNonNullOrEmpty(req, ParamNames.ROOM);
-        final String user = servletUtil.requireNonNullOrEmpty(req, ParamNames.USER);
-        LOG.debug("URL: {}, room: {}, user: {}", url, room, user);
-
-        final ChatSession chatSession;
-        
-        final Object attr = req.getSession().getAttribute(
-                AttributeNames.Session.COMETD_CHAT_SESSION);
-        
-        if(attr != null) {
-            
-            chatSession = (ChatSession)attr;
-            
-        }else if(createIfNone){
-            
-            final WebApplicationContext webAppCtx = getWebAppContext(req);
-
-            final CometDProperties cometdProps = webAppCtx.getBean(CometDProperties.class);
-            
-            final ChatConfig chatConfig = webAppCtx.getBean(ChatConfig.class, 
-                    cometdProps.getDefaultChannel(), room, user);
-        
-            final Map<String, Object> transportOptions = new HashMap<>();
-            
-            chatSession = webAppCtx.getBean(ChatSession.class, url, transportOptions, chatConfig);
-
-            req.getSession().setAttribute(AttributeNames.Session.COMETD_CHAT_SESSION, chatSession);
-            
-        }else{
-        
-            chatSession = null;
-        }
-        
-        return chatSession;
-    }
-    
-    private WebApplicationContext getWebAppContext(HttpServletRequest req) {
-        return getWebAppContext(req.getSession());
-    }
-    
-    private WebApplicationContext getWebAppContext(HttpSession httpSession) {
-        return WebApplicationContextUtils
-                .getRequiredWebApplicationContext(httpSession.getServletContext());
-    }
+    Response joinChatIfNotAlready(HttpServletRequest req, HttpServletResponse res);
 }
