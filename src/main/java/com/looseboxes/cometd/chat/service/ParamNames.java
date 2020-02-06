@@ -18,7 +18,28 @@ package com.looseboxes.cometd.chat.service;
 /**
  * @author USER
  */
-public interface ParamNames extends ChatPropertyNames{
+public interface ParamNames{
+    
     String REQUEST = "req";
+    
+    /** The chat message content */
+    String CHAT = Chat.CHAT; 
+    
+    /** The sender of the chat message */
+    String USER = Chat.USER;
+    
+    /** The recipient of the chat message */
+    String PEER = Chat.PEER;
+    
+    /** The chat room through which the message is being sent */
+    String ROOM = Chat.ROOM;
+
+    /** scope of the chat, may be private etc */
+    String SCOPE = Chat.SCOPE;
+    
+    String ASYNC = "async";
+    
+    String TIMEOUT = "timeout";
+    
     String DELAY = "delay";
 }
