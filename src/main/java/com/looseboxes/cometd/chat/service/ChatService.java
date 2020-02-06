@@ -192,8 +192,10 @@ public final class ChatService {
     }
     
     private String getRoom(final Map<String, Object> data, String resultIfNone) {
-        final String room = data == null ? null : ((String)data.get(Chat.ROOM));
-        return room == null ? resultIfNone : room.substring("/chat/".length());
+        final String raw = data == null ? null : ((String)data.get(Chat.ROOM));
+        final String result = raw == null ? resultIfNone : raw.substring("/chat/".length());
+        LOG.trace("Extracted room name: {}, from: {} of: {}", result, raw, data);
+        return result;
     }
     
     private Map<String, String> getRoomMembersOrCreateNew(String room) {
