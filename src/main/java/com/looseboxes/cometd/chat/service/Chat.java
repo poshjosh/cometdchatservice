@@ -15,10 +15,12 @@
  */
 package com.looseboxes.cometd.chat.service;
 
+import org.cometd.bayeux.client.ClientSessionChannel;
+
 /**
  * @author USER
  */
-public interface ChatPropertyNames {
+public interface Chat {
     
     /** The chat message content */
     String CHAT = "chat"; 
@@ -34,4 +36,19 @@ public interface ChatPropertyNames {
 
     /** scope of the chat, may be private etc */
     String SCOPE = "scope";
+    
+    String MEMBERS_SERVICE_CHANNEL = ClientSessionChannel.SERVICE+"/members";
+
+    String WEBSOCKET_ENABLED = "websocketEnabled";
+    
+    String LOG_LEVEL = "logLevel";
+    
+    interface LOG_LEVEL_VALUES{
+        String WARN = "warn";
+        String INFO = "info";
+        String DEBUG = "debug";
+    }
+    String LOG_LEVEL_WARN = "warn";
+    String LOG_LEVEL_INFO = "info";
+    String LOG_LEVEL_DEBUG = "debug";
 }
