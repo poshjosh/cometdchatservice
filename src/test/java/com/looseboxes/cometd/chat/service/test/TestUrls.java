@@ -37,9 +37,8 @@ public class TestUrls{
         return new TestUrls(s, this.endpointReqParams);
     }
     
-    public String getEndPointUrl(int port, String endpoint) {
-        final StringBuilder builder = new StringBuilder(getContextUrl(port));
-        builder.append(endpoint);
+    public String getEndpointUrlWithParams(int port, String endpoint) {
+        final StringBuilder builder = new StringBuilder(this.getEndpointUrl(port, endpoint));
         final Map<String, String> params = endpointReqParams.forEndpoint(endpoint);
         if( ! params.isEmpty()) {
             builder.append('?');
