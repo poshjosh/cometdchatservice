@@ -18,6 +18,7 @@ package com.looseboxes.cometd.chat.service.handlers.request;
 import com.looseboxes.cometd.chat.service.AttributeNames;
 import com.looseboxes.cometd.chat.service.ParamNames;
 import com.looseboxes.cometd.chat.service.controllers.Endpoints;
+import com.looseboxes.cometd.chat.service.handlers.ChatRequestService;
 import com.looseboxes.cometd.chat.service.handlers.response.Response;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseBuilder;
 import java.util.Collections;
@@ -29,7 +30,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
  * @author USER
@@ -47,7 +47,11 @@ public final class MembersHandler extends AbstractRequestHandler{
         final String message;
         final Map outputData;
         
-        if(this.isJoinedToChat(req, res)) {
+        final WebApplicationContext webAppCtx = this.getWebAppContext(req);
+        
+        final ChatRequestService svc = webAppCtx.getBean(ChatRequestService.class);
+        
+        if(svc.isJoinedToChat(req)) {
         
             final Map roomMembers = this.getRoomMembers(req);
 
@@ -62,9 +66,6 @@ public final class MembersHandler extends AbstractRequestHandler{
             outputData = Collections.EMPTY_MAP;
         }
 
-        final WebApplicationContext webAppCtx = WebApplicationContextUtils
-                .getRequiredWebApplicationContext(req.getServletContext());
-        
         return webAppCtx.getBean(ResponseBuilder.class).buildResponse(message, outputData, error);
     }
     
@@ -72,14 +73,17 @@ public final class MembersHandler extends AbstractRequestHandler{
         
         final Map members = (Map)req.getSession().getAttribute(AttributeNames.Session.CHAT_MEMBERS);
 
+        final String room = req.getParameter(ParamNames.ROOM);
+        
         final Map roomMembers;
 
         if(members == null || members.isEmpty()) {
             roomMembers = Collections.EMPTY_MAP;
         }else{
-            final String room = req.getParameter(ParamNames.ROOM);
             roomMembers = this.getRoomMembers(members, room);
         }
+        
+        LOG.debug("{}\nRoom: {}, room members: {}", members, room, roomMembers);
         
         return roomMembers;
     }

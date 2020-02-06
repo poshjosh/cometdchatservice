@@ -15,21 +15,19 @@
  */
 package com.looseboxes.cometd.chat.service.handlers.request;
 
-import com.looseboxes.cometd.chat.service.handlers.exceptions.ProcessingRequestException;
-import com.looseboxes.cometd.chat.service.ChatPropertyNames;
-import com.looseboxes.cometd.chat.service.ClientSessionPublisher;
-import com.looseboxes.cometd.chat.service.CometDProperties;
+import com.looseboxes.cometd.chat.service.ParamNames;
 import com.looseboxes.cometd.chat.service.handlers.response.Response;
 import com.looseboxes.cometd.chat.service.handlers.ServletUtil;
-import java.util.HashMap;
-import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.cometd.bayeux.client.ClientSessionChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
+import com.looseboxes.cometd.chat.service.ChatSession;
+import com.looseboxes.cometd.chat.service.handlers.ChatRequestServiceImpl;
+import com.looseboxes.cometd.chat.service.handlers.response.ResponseBuilder;
+import java.util.concurrent.Future;
+import org.cometd.bayeux.Message;
 
 /**
  * @author USER
@@ -43,46 +41,49 @@ public final class ChatHandler extends AbstractRequestHandler{
     @Override
     public Response doProcess(HttpServletRequest req, HttpServletResponse res) {
         
-        final WebApplicationContext webAppCtx = WebApplicationContextUtils
-                .getRequiredWebApplicationContext(req.getServletContext());
+        final WebApplicationContext webAppCtx = getWebAppContext(req);
 
-        final JoinHandler jh = webAppCtx.getBean(JoinHandler.class);
-
-        final Response jhr = jh.process(req, res);
-
-        if(!jhr.isSuccess()) {
-
-            return jhr;
+        final ChatRequestServiceImpl chatReqSvc = webAppCtx.getBean(ChatRequestServiceImpl.class);
+        
+        final Response joinResponse = chatReqSvc.joinChatIfNotAlready(req, res);
+        
+        if( ! joinResponse.isSuccess()) {
+        
+            return joinResponse;
         }
 
         final ServletUtil util = webAppCtx.getBean(ServletUtil.class);
         
-        final String sender = util.requireNonNullOrEmpty(req, "chatsender");
-        final String recipient = util.requireNonNullOrEmpty(req, "chatrecipient");
-        final String chatroom = util.requireNonNullOrEmpty(req, "chatroom");
-        final String chatmessage = util.requireNonNullOrEmpty(req, "chatmessage");
+        final String peer = util.requireNonNullOrEmpty(req, ParamNames.PEER);
+        final String chat = util.requireNonNullOrEmpty(req, ParamNames.CHAT);
+         String param = req.getParameter(ParamNames.ASYNC);
+        final boolean async = param == null || param.isEmpty() ? true : Boolean.parseBoolean(param);
         
-        final ClientSessionChannel channel = util.getDefaultChatChannel(req.getSession(), null);
+        final ChatSession chatSession = chatReqSvc.getChatSession(req, false);
 
-        if(channel == null) {
+        final ResponseBuilder resBuilder = webAppCtx.getBean(ResponseBuilder.class);
+        
+        final Response response;
+        
+        if(async) {
+            
+            chatSession.send(chat, peer);
+            
+            response = resBuilder.buildSuccessResponse();
+            
+        }else{
+            
+            final Future<Message> chatFuture = chatSession.send(chat, peer);
 
-            throw new ProcessingRequestException("Chat channel not found");
+            param = req.getParameter(ParamNames.TIMEOUT);
+            final long timeout = param == null || param.isEmpty() ? 
+                    Long.MAX_VALUE : Long.parseLong(param);
+
+            response = this.awaitFutureThenBuildResponseFromResult(
+                    "Send-chat", chatFuture, timeout, resBuilder);
         }
-
-//        channel.addListener(
-//                (ClientSessionChannel.MessageListener)(ClientSessionChannel sessChannel, Message msg) -> {
-//        });
-
-        final Map<String, Object> data = new HashMap<>();
         
-        data.put(ChatPropertyNames.CHAT, chatmessage);
-        data.put(ChatPropertyNames.PEER, recipient);
-        data.put(ChatPropertyNames.ROOM, chatroom);
-        data.put(ChatPropertyNames.USER, sender);
-        
-        final long timeout = webAppCtx.getBean(CometDProperties.class).getPublishTimeout();
-
-        return webAppCtx.getBean(ClientSessionPublisher.class).publish(channel, data, timeout);
+        return response;
     }
 }
 
