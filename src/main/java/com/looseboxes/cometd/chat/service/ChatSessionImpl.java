@@ -68,8 +68,6 @@ import org.slf4j.LoggerFactory;
  */
 public final class ChatSessionImpl implements ChatSession {
     
-    private static final String REMOVE = "";
-    
     private static final Logger LOG = LoggerFactory.getLogger(ChatSessionImpl.class);
     
     private final ClientSession clientSession;
@@ -194,7 +192,7 @@ public final class ChatSessionImpl implements ChatSession {
     
     @Override
     public CompletableFuture<Message> subscribe() {
-        LOG.debug(REMOVE+"subscribe(), user: {}", chatConfig.getUser());
+        LOG.trace("subscribe(), user: {}", chatConfig.getUser());
         
         final CompletableFuture<Message> future = new CompletableFuture<>();
 
@@ -244,7 +242,7 @@ public final class ChatSessionImpl implements ChatSession {
         this.unsubscribe();
 
         return this.disconnect();
-    };
+    }
     
     @Override
     public CompletableFuture<Message> unsubscribe() {
@@ -349,28 +347,32 @@ public final class ChatSessionImpl implements ChatSession {
     }
 
     private void connectionClosed(ClientSessionChannel metaConnect) {
-        LOG.debug(REMOVE+"connectionClosed(..) user: {}", this.chatConfig.getUser());
+        LOG.trace("connectionClosed(..) user: {}", this.chatConfig.getUser());
 //        final Message msg = new HashMapMessage();
 //        msg.put(Chat.USER, "system");
-//        msg.put(Chat.ROOM, "Connection to Server Closed");
+//        msg.put(Chat.CHAT, "Connection to Server Closed");
 //        receive(msg);
-    };
+    }
 
     private void connectionBroken(ClientSessionChannel metaConnect){
-        LOG.debug(REMOVE+"connectionBroken(..) user: {}", this.chatConfig.getUser());
+        LOG.trace("connectionBroken(..) user: {}", this.chatConfig.getUser());
 //        chatUtil.clearMemberListHtml();
-    };
+    }
 
     private void connectionEstablished(ClientSessionChannel metaConnect){
-        LOG.debug(REMOVE+"connectionEstablished(..) user: {}", this.chatConfig.getUser());
+        LOG.trace("connectionEstablished(..) user: {}", this.chatConfig.getUser());
         // connection establish (maybe not for first time), so just
         // tell local user and update membership
+        this.sendMessageToMembersServiceChannel(metaConnect);
+    }
+    
+    private void sendMessageToMembersServiceChannel(ClientSessionChannel metaConnect) {
         final String channel = this.chatConfig.getMembersServiceChannel();
         final String membersRoom = "/members/" + this.chatConfig.getRoom().substring("/chat/".length());
-        LOG.debug(REMOVE+"Chat room: {}, members room: {}", this.chatConfig.getRoom(), membersRoom);
+        LOG.trace("Chat room: {}, members room: {}", this.chatConfig.getRoom(), membersRoom);
         final Message msg = this.getMessageForMembersServiceChannel();
         metaConnect.getSession().getChannel(channel).publish(msg);
-    };
+    }
     
     private Message getMessageForMembersServiceChannel() {
         final ServerMessageImpl msg = new ServerMessageImpl();
@@ -396,19 +398,19 @@ public final class ChatSessionImpl implements ChatSession {
         if(msg.isSuccessful()) {
             onSuccess.accept(msg);
             if(future != null) {
-                LOG.debug(REMOVE+"Completing " + ID + ", for user: {}", chatConfig.getUser());
+                LOG.trace("Completing " + ID + ", for user: {}", chatConfig.getUser());
                 future.complete(msg);
             }
         }else{
             if(future != null) {
-                LOG.debug(REMOVE+"Cancelling " + ID + ", for user: {}", chatConfig.getUser());
+                LOG.trace("Cancelling " + ID + ", for user: {}", chatConfig.getUser());
                 future.completeExceptionally(newCancellationException());
             }
         }
     }
     private void log(String ID, Message msg) {
         ID = ID.toUpperCase();
-        LOG.debug(REMOVE+ID+", user: {}, success: {}, message: {}", 
+        LOG.trace(ID+", user: {}, success: {}, message: {}", 
                 chatConfig.getUser(), msg.isSuccessful(), msg);
     }
     
