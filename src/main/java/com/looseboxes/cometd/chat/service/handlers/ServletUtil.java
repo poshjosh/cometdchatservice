@@ -16,16 +16,10 @@
 package com.looseboxes.cometd.chat.service.handlers;
 
 import com.looseboxes.cometd.chat.service.handlers.exceptions.InvalidRequestParameterException;
-import com.looseboxes.cometd.chat.service.AttributeNames;
-import com.looseboxes.cometd.chat.service.CometDProperties;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import org.cometd.bayeux.client.ClientSession;
-import org.cometd.bayeux.client.ClientSessionChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
  * @author USER
@@ -33,26 +27,6 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 public final class ServletUtil {
     
     private static final Logger LOG = LoggerFactory.getLogger(ServletUtil.class);
-    
-    public ClientSessionChannel getDefaultChatChannel(
-            HttpSession session, ClientSessionChannel resultIfNone) {
-        
-        final ClientSessionChannel channel;
-        
-        final ClientSession client = (ClientSession)session
-                .getAttribute(AttributeNames.Session.COMETD_CLIENT_SESSION);
-        
-        if(client == null) {
-            channel = null;
-        }else{    
-            final CometDProperties cometdProps = WebApplicationContextUtils
-                    .getRequiredWebApplicationContext(session.getServletContext())
-                    .getBean(CometDProperties.class);
-            channel = client.getChannel(cometdProps.getDefaultChannel());
-        }
-        
-        return channel == null ? resultIfNone : channel;
-    }
     
     public String requireNonNullOrEmpty(ServletRequest req, String paramName) {
         final String paramValue = req.getParameter(paramName);
