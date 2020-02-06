@@ -15,13 +15,9 @@
  */
 package com.looseboxes.cometd.chat.service;
 
-import com.looseboxes.cometd.chat.service.handlers.ServletUtil;
 import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
-import org.cometd.bayeux.client.ClientSession;
-import org.cometd.bayeux.client.ClientSessionChannel;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
  * @author USER
@@ -38,38 +34,12 @@ public final class HttpSessionListenerImpl implements javax.servlet.http.HttpSes
 
         final HttpSession session = se.getSession();
         
-        try{
-            
-            this.unsubscribeFromChatChannel(session);
-
-        }finally{
-            
-            this.disconnectFromChatSession(session);
-        }
-    }
-    
-    private void unsubscribeFromChatChannel(HttpSession session) {
+        final ChatSession chatSession = (ChatSession)session.getAttribute(
+                AttributeNames.Session.COMETD_CHAT_SESSION);
         
-        final ServletUtil util = WebApplicationContextUtils
-                .getRequiredWebApplicationContext(session.getServletContext())
-                .getBean(ServletUtil.class);
-
-        final ClientSessionChannel channel = util.getDefaultChatChannel(session, null);
-
-        if(channel != null) {
-
-            channel.unsubscribe();
-        }
-    }
-    
-    private void disconnectFromChatSession(HttpSession session) {
+        if(chatSession != null) {
         
-        final ClientSession client = (ClientSession)session
-                .getAttribute(AttributeNames.Session.COMETD_CLIENT_SESSION);
-
-        if(client != null) {
-
-            client.disconnect();
+            chatSession.leave();
         }
     }
 
