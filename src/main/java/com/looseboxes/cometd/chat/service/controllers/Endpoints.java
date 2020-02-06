@@ -19,6 +19,7 @@ package com.looseboxes.cometd.chat.service.controllers;
  * @author USER
  */
 public interface Endpoints {
+    String COMETD = "/cometd";
     String SHUTDOWN = "/shutdown";
     String JOIN = "/join";
     String CHAT = "/chat";
