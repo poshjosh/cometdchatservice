@@ -31,8 +31,17 @@ public class ChatController {
     
     @Autowired private ChatHandler chatHandler;
     
+    /**
+     * <p>Send a chat message to a specified chat user</p>
+     * May trigger a call to <code>/join</code> endpoint, if the user has not
+     * previously called that endpoint to join chat. In which case. the parameters
+     * required for joining chat would be expected. 
+     * @param req
+     * @param res
+     * @return 
+     */
     @RequestMapping(Endpoints.CHAT)
-    public Response join(ServletRequest req, ServletResponse res) {
+    public Response chat(ServletRequest req, ServletResponse res) {
         
         return chatHandler.process(req, res);
     }
