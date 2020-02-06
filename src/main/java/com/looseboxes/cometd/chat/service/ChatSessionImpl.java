@@ -366,17 +366,22 @@ public final class ChatSessionImpl implements ChatSession {
         // connection establish (maybe not for first time), so just
         // tell local user and update membership
         final String channel = this.chatConfig.getMembersServiceChannel();
-        final String room = "/members/" + this.chatConfig.getRoom().substring("/chat/".length());
-        LOG.debug(REMOVE+"Chat room: {}, members room: {}", this.chatConfig.getRoom(), room);
+        final String membersRoom = "/members/" + this.chatConfig.getRoom().substring("/chat/".length());
+        LOG.debug(REMOVE+"Chat room: {}, members room: {}", this.chatConfig.getRoom(), membersRoom);
+        final Message msg = this.getMessageForMembersServiceChannel();
+        metaConnect.getSession().getChannel(channel).publish(msg);
+    };
+    
+    private Message getMessageForMembersServiceChannel() {
         final ServerMessageImpl msg = new ServerMessageImpl();
-        msg.setChannel(channel);
+        msg.setChannel(this.chatConfig.getMembersServiceChannel());
         msg.setClientId(clientSession.getId());
         final Message data = new HashMapMessage();
         data.put(Chat.USER, this.chatConfig.getUser());
-        data.put(Chat.ROOM, room);
+        data.put(Chat.ROOM, this.chatConfig.getRoom());
         msg.setData(data);
-        metaConnect.getSession().getChannel(channel).publish(msg);
-    };
+        return msg;
+    }
     
     private void update(String ID, Message msg, Consumer<Message> onSuccess){
         update(ID, msg, onSuccess, null);
