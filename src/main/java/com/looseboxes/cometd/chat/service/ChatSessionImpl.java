@@ -35,20 +35,21 @@ import org.slf4j.LoggerFactory;
 
 /**
  * <code>
- String channel = "/service/privatechat";
- String room = "/chat/johnsfamily";
- ClientSession johnClient = getClientSession();
- ChatSession john = new ChatSessionImpl(johnClient, new ChatConfig(channel, room, "John");
- 
- // Join John to chat
- Future&lt;Message&gt; johnJoin = john.join();
- 
- // Seperate client for each user
- ClientSession maryClient = getClientSession();
- ChatSession mary = new ChatSessionImpl(maryClient, new ChatConfig(channel, room, "Mary");
- 
- // Join Mary to chat
- Future&lt;Message&gt; maryJoin = mary.join();
+ * <pre>
+ * String channel = "/service/privatechat";
+ * String room = "/chat/johnsfamily";
+ * ClientSession johnClient = getClientSession();
+ * ChatSession john = new ChatSessionImpl(johnClient, new ChatConfig(channel, room, "John");
+ * 
+ * // Join John to chat
+ * Future&lt;Message&gt; johnJoin = john.join();
+ * 
+ * // Seperate client for each user
+ * ClientSession maryClient = getClientSession();
+ * ChatSession mary = new ChatSessionImpl(maryClient, new ChatConfig(channel, room, "Mary");
+ * 
+ * // Join Mary to chat
+ * Future&lt;Message&gt; maryJoin = mary.join();
  * 
  * // Wait for John and Mary joining chat to return
  * long timeout = 5_000;
@@ -61,7 +62,7 @@ import org.slf4j.LoggerFactory;
  * 
  * john.leave();
  * mary.leave();
- * 
+ * </pre>
  * </code>
  * @author USER
  */
