@@ -15,16 +15,21 @@
  */
 package com.looseboxes.cometd.chat.service.handlers.request;
 
-import com.looseboxes.cometd.chat.service.AttributeNames;
 import com.looseboxes.cometd.chat.service.handlers.response.Response;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseHandler;
 import com.looseboxes.cometd.chat.service.handlers.exceptions.ProcessingRequestException;
+import com.looseboxes.cometd.chat.service.handlers.exceptions.ProcessingRequestInterruptedException;
+import com.looseboxes.cometd.chat.service.handlers.exceptions.ProcessingRequestTimeoutException;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseBuilder;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.cometd.bayeux.client.ClientSession;
+import org.cometd.bayeux.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.WebApplicationContext;
@@ -40,44 +45,6 @@ public abstract class AbstractRequestHandler implements RequestHandler<Response>
     public AbstractRequestHandler() { }
 
     public abstract Response doProcess(HttpServletRequest req, HttpServletResponse res) throws ProcessingRequestException;
-    
-    /**
-     * @param req
-     * @param res
-     * @return {@link com.looseboxes.cometd.chat.service.handlers.response.Response Response} 
-     * object with success set to true if previously joined to chat or
-     * successfully joined to chat during this methods execution, otherwise 
-     * return false.
-     */
-    public Response joinIfNotAlready(HttpServletRequest req, HttpServletResponse res) {
-        
-        final WebApplicationContext webAppCtx = WebApplicationContextUtils
-                .getRequiredWebApplicationContext(req.getServletContext());
-        
-        final boolean joinedToChat = this.isJoinedToChat(req, res);
-        
-        if( ! joinedToChat) {
-        
-            final JoinHandler jh = webAppCtx.getBean(JoinHandler.class);
-
-            final Response jhr = jh.process(req, res);
-
-            if(!jhr.isSuccess()) {
-
-                return jhr;
-            }
-        }
-        
-        return webAppCtx.getBean(ResponseBuilder.class).buildSuccessResponse();
-    }
-
-    public boolean isJoinedToChat(HttpServletRequest req, HttpServletResponse res) {
-        
-        final ClientSession client = (ClientSession)req.getSession().getAttribute(
-                AttributeNames.Session.COMETD_CLIENT_SESSION);
-        
-        return client == null ? false : client.isHandshook();
-    }
     
     @Override
     public void process(ServletRequest req, ServletResponse res, ResponseHandler<Response> callback) {
@@ -108,11 +75,44 @@ public abstract class AbstractRequestHandler implements RequestHandler<Response>
                 throw new UnsupportedOperationException();
             }
         }catch(ProcessingRequestException | UnsupportedOperationException e) {
+            
+            LOG.warn("Unexpected Exception", e);
         
-            final WebApplicationContext webAppCtx = WebApplicationContextUtils
-                .getRequiredWebApplicationContext(req.getServletContext());
+            final WebApplicationContext webAppCtx = getWebAppContext(req);
 
             return webAppCtx.getBean(ResponseBuilder.class).buildErrorResponse(e);
         }
+    }
+    
+    protected Response awaitFutureThenBuildResponseFromResult(String ID, 
+            Future<Message> future, long timeout, ResponseBuilder resBuilder) {
+
+        LOG.trace("Will wait at most {} millis for {} to return.", timeout, ID);
+
+        final Message chatResponse = get(future, timeout);
+
+        final boolean success = chatResponse.isSuccessful();
+
+        return resBuilder.buildResponse(ID +" = " + success, chatResponse, ! success);
+    }
+    
+    protected <T> T get(Future<T> future, long timeoutMillis) {
+        
+        try{
+            
+            return future.get(timeoutMillis, TimeUnit.MILLISECONDS);
+            
+        }catch(ExecutionException e) {
+            throw new ProcessingRequestException(e);
+        }catch(TimeoutException e) {    
+            throw new ProcessingRequestTimeoutException(e);
+        }catch(InterruptedException e) {
+            throw new ProcessingRequestInterruptedException(e);
+        }
+    }
+    
+    protected WebApplicationContext getWebAppContext(ServletRequest req) {
+        return WebApplicationContextUtils
+            .getRequiredWebApplicationContext(req.getServletContext());
     }
 }
