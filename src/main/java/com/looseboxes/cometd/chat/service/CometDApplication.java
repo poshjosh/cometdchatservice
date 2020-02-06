@@ -34,18 +34,7 @@ public class CometDApplication implements ServletContextInitializer {
     }
     
     /**
-     * Register the required servlets in the correct order.
-     * <ul>
-     *   <li>
-     *     <code>1</code> for the CometD servlet – so that the Bayeux object gets 
-     *     created and put in the ServletContext.
-     *   </li>
-     *   <li>
-     *     <code>2</code> for the configuration servlet – so that it will be
-     *     initialized only after the CometD servlet has been initialized and 
-     *     hence the BayeuxServer object is available.
-     *   </li>
-     * </ul>
+     * Register the CometD servlet and initialize the Bayeux server.
      * @param servletContext 
      */
     @Override
