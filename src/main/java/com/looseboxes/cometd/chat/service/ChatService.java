@@ -68,14 +68,14 @@ public final class ChatService {
         channel.addAuthorizer(GrantAuthorizer.GRANT_ALL);
     }
 
-    @Configure(ChatPropertyNames.MEMBERS_SERVICE_CHANNEL)
+    @Configure(Chat.MEMBERS_SERVICE_CHANNEL)
     protected void configureMembers(ConfigurableServerChannel channel) {
         LOG.debug("configureMembers(ConfigurableServerChannel)");
         channel.addAuthorizer(GrantAuthorizer.GRANT_PUBLISH);
         channel.setPersistent(true);
     }
 
-    @Listener(ChatPropertyNames.MEMBERS_SERVICE_CHANNEL)
+    @Listener(Chat.MEMBERS_SERVICE_CHANNEL)
     public void handleMembership(ServerSession client, ServerMessage message) {
         try{
             LOG.debug("handleMembership(ServerSession, ServerMessage={})", message);
@@ -88,7 +88,7 @@ public final class ChatService {
 
     //        final Map<String, String> members = roomMembers;
 
-            String userName = (String)data.get(ChatPropertyNames.USER);
+            String userName = (String)data.get(Chat.USER);
             roomMembers.put(userName, client.getId());
             LOG.trace("Room: {}, members: {}\nAll members: {}", room, roomMembers, _members);
 
@@ -112,14 +112,15 @@ public final class ChatService {
     
     private void updateHttpServletSessionAttribute(final BayeuxContext bayeuxContext) {
         if(bayeuxContext != null) {
+            final String attrName = AttributeNames.Session.CHAT_MEMBERS;
             try{
-                final Object chatMembers = bayeuxContext.getHttpSessionAttribute(
-                        AttributeNames.Session.CHAT_MEMBERS);
+                final Object chatMembers = bayeuxContext.getHttpSessionAttribute(attrName);
                 if(chatMembers == null) {
-                    bayeuxContext.setHttpSessionAttribute(
-                            AttributeNames.Session.CHAT_MEMBERS, _members);
+                    bayeuxContext.setHttpSessionAttribute(attrName, _members);
                 }
-            }catch(IllegalStateException ignored) {}
+            }catch(IllegalStateException e) {
+                LOG.warn("Exception updating session attribute: " + attrName, e);
+            }
         }
     }
 
@@ -159,10 +160,10 @@ public final class ChatService {
 
             if (peers.size() > 0) {
                 Map<String, Object> chat = new HashMap<>();
-                String text = (String)data.get(ChatPropertyNames.CHAT);
-                chat.put(ChatPropertyNames.CHAT, text);
-                chat.put(ChatPropertyNames.USER, data.get(ChatPropertyNames.USER));
-                chat.put(ChatPropertyNames.SCOPE, "private");
+                String text = (String)data.get(Chat.CHAT);
+                chat.put(Chat.CHAT, text);
+                chat.put(Chat.USER, data.get(Chat.USER));
+                chat.put(Chat.SCOPE, "private");
                 ServerMessage.Mutable forward = _bayeux.newMessage();
                 forward.setChannel("/chat/" + room);
                 forward.setId(message.getId());
@@ -186,12 +187,12 @@ public final class ChatService {
     }
     
     private String [] getPeerNames(final Map<String, Object> data) {
-        final String peer = data == null ? null : ((String)data.get(ChatPropertyNames.PEER));
+        final String peer = data == null ? null : ((String)data.get(Chat.PEER));
         return peer == null || peer.isEmpty() ? new String[0] : peer.split(",");
     }
     
     private String getRoom(final Map<String, Object> data, String resultIfNone) {
-        final String room = data == null ? null : ((String)data.get(ChatPropertyNames.ROOM));
+        final String room = data == null ? null : ((String)data.get(Chat.ROOM));
         return room == null ? resultIfNone : room.substring("/chat/".length());
     }
     
