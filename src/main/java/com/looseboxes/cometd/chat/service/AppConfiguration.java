@@ -120,16 +120,6 @@ public class AppConfiguration {
         return new HttpClient();
     }
     
-    @Bean @Scope("prototype") public ClientSessionPublisher clientSessionPublisher() {
-        return new ClientSessionPublisherImpl(this.responseConfiguration.responseSupplier(), await());
-    }
-    
-    @Bean @Scope("prototype") public ClientSessionChannelSubscription 
-        clientSessionChannelSubscription() {
-        return new ClientSessionChannelSubscriptionImpl(
-                this.responseConfiguration.responseSupplier(), await());
-    }
-    
     @Bean @Scope("prototype") public Await await() {
         return new AwaitImpl();
     }
@@ -142,16 +132,8 @@ public class AppConfiguration {
         return new ServletUtil();
     }
     
-    @Bean public ClientProvider clientProvider() {
-        return new ClientProviderImpl(clientTransportProvider());
-    }
-    
     @Bean public BayeuxInitializer bayeuxInitializer() {
         return new BayeuxInitializerImpl();
-    }
-
-    @Bean public ClientTransportProvider clientTransportProvider() {
-        return new ClientTransportProviderImpl();
     }
 
     @Bean public TerminateBean getTerminateBean() {
