@@ -28,11 +28,18 @@ public class EndpointRequestParams {
     public Map<String, String> forEndpoint(String endpoint) {
         final Map params = new HashMap<>();
         switch(endpoint) {
+            case Endpoints.JOIN:
+                params.put(ParamNames.USER, "Non");
+                params.put(ParamNames.ROOM, "/chat/demo");
+                break;
             case Endpoints.CHAT:
                 params.put(ParamNames.USER, "Non");
                 params.put(ParamNames.PEER, "Nel");
                 params.put(ParamNames.ROOM, "/chat/demo");
                 params.put(ParamNames.CHAT, "Hi love");
+                break;
+            case Endpoints.MEMBERS:
+                params.put(ParamNames.ROOM, "/chat/demo");
                 break;
             case Endpoints.SHUTDOWN:
                 params.put(ParamNames.DELAY, "500");
