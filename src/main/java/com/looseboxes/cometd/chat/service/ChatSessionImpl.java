@@ -23,7 +23,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import org.cometd.bayeux.Channel;
 import org.cometd.bayeux.Message;
 import org.cometd.bayeux.client.ClientSession;
@@ -81,6 +81,8 @@ public final class ChatSessionImpl implements ChatSession {
     private final ClientSessionChannel.MessageListener connectListener;
     private final ClientSessionChannel.MessageListener disconnectListener;
     
+    private final ChatListeners listeners;
+    
     public ChatSessionImpl(ClientSession client, ChatConfig chatConfig) {
     
         this.clientSession = Objects.requireNonNull(client);
@@ -101,6 +103,18 @@ public final class ChatSessionImpl implements ChatSession {
                 metaDisconnect(csc, msg);
         };
         client.getChannel(Channel.META_DISCONNECT).addListener(this.disconnectListener);
+        
+        this.listeners = new ChatListenersImpl();
+    }
+    
+    @Override
+    public boolean addListener(ChatListener listener) {
+        return this.listeners.addListener(listener);
+    }
+    
+    @Override
+    public boolean removeListener(ChatListener listener) {
+        return this.listeners.removeListener(listener);
     }
 
     /**
@@ -114,7 +128,8 @@ public final class ChatSessionImpl implements ChatSession {
         final CompletableFuture<Message> future = new CompletableFuture<>();
         
         this.send(textMessage, peerUserName, (Message msg) -> {
-            this.update("response to send request", msg, future);
+            
+            this.update("response to send request",  msg, future);
         });
         
         return future;
@@ -184,6 +199,7 @@ public final class ChatSessionImpl implements ChatSession {
         template.put(Chat.LOG_LEVEL, this.chatConfig.getLogLevel());
 
         clientSession.handshake(template, (Message msg) -> {
+            
             this.update("response to handshake request", msg, handshakeFuture);
         });
         
@@ -198,15 +214,15 @@ public final class ChatSessionImpl implements ChatSession {
 
         clientSession.batch(() -> {
             
-            final Consumer<Message> onChatSuccess = (msg) -> {
+            final BiConsumer<ClientSessionChannel, Message> onChatSuccess = (csc, msg) -> {
                 this.status.setSubscribedToChat(true);
-                receive(msg);
+                receive(csc, msg);
             };
             subscribe(chatConfig.getChannel(), onChatSuccess, future);
             
-            final Consumer<Message> onMembersSuccess = (msg) -> {
+            final BiConsumer<ClientSessionChannel, Message> onMembersSuccess = (csc, msg) -> {
                 this.status.setSubscribedToMembers(true);
-                members(msg);
+                members(csc, msg);
             };
             subscribe(chatConfig.getMembersServiceChannel(), onMembersSuccess);
         });
@@ -214,19 +230,23 @@ public final class ChatSessionImpl implements ChatSession {
         return future;
     }
 
-    private void subscribe(String channel, Consumer<Message> onSuccess) {
+    private void subscribe(String channel, BiConsumer<ClientSessionChannel, Message> onSuccess) {
         subscribe(channel, onSuccess, null);
     }
     
     private void subscribe(String channel, 
-            Consumer<Message> onSuccess, CompletableFuture<Message> future) {
+            BiConsumer<ClientSessionChannel, Message> onSuccess, CompletableFuture<Message> future) {
         
         final String u = chatConfig.getUser();
         
         LOG.debug("[{}] Subscribing to channel: {}", u, channel);
         
         clientSession.getChannel(channel).subscribe((csc, msg) -> {
-            this.update("response to subscribe request", msg, onSuccess, future);
+            
+            this.update("response to subscribe request", csc, msg, onSuccess, future);
+
+            this.listeners.fireEvent(this, csc, msg, 
+                (listener, event) -> listener.onSubscribe(event));
         });
     }
 
@@ -253,28 +273,32 @@ public final class ChatSessionImpl implements ChatSession {
         clientSession.batch(() -> {
             
             unsubscribe(chatConfig.getChannel(), 
-                    (msg) -> status.setSubscribedToChat(false),
+                    (csc, msg) -> status.setSubscribedToChat(false),
                     future);
             
             unsubscribe(chatConfig.getMembersServiceChannel(), 
-                    (msg) -> status.setSubscribedToMembers(false));
+                    (csc, msg) -> status.setSubscribedToMembers(false));
         });
         
         return future;
     }
     
-    private void unsubscribe(String channel, Consumer<Message> onSuccess) {
+    private void unsubscribe(String channel, BiConsumer<ClientSessionChannel, Message> onSuccess) {
         this.unsubscribe(channel, onSuccess, null);
     }
     
     private void unsubscribe(String channel, 
-            Consumer<Message> onSuccess, CompletableFuture<Message> future) {
+            BiConsumer<ClientSessionChannel, Message> onSuccess, CompletableFuture<Message> future) {
         final String u = chatConfig.getUser();
         
         LOG.debug("[{}] Unsubscribing from channel: {}", u, channel);
 
         this.clientSession.getChannel(channel).unsubscribe((csc, msg) -> {
-            this.update("response to unsubscribe request", msg, onSuccess, future);
+            
+            this.update("response to unsubscribe request", csc, msg, onSuccess, future);
+            
+            this.listeners.fireEvent(this, csc, msg, 
+                (listener, event) -> listener.onUnsubscribe(event));
         });
     }
     
@@ -303,67 +327,94 @@ public final class ChatSessionImpl implements ChatSession {
     }
     
     private void metaHandshake(ClientSessionChannel metaHandshake, Message msg) {
-        this.update("metaHandshake(..)", msg, handshakeFuture);
+        this.update("metaHandshake(..)", metaHandshake, msg, handshakeFuture);
+
+        this.listeners.fireEvent(this, metaHandshake, msg, 
+                (listener, event) -> listener.onHandshake(event));
     }
     
     private void metaConnect(ClientSessionChannel metaConnect, Message msg) {
         log("metaConnect(..)", msg);
          
+        this.listeners.fireEvent(this, metaConnect, msg, 
+                (listener, event) -> listener.onConnect(event));
+
         if (this.status.isDisconnecting()) {
             this.status.setConnected(false);
-            this.connectionClosed(metaConnect);
+            this.connectionClosed(metaConnect, msg);
         } else {
             final boolean wasConnected = this.status.isConnected();
             this.status.setConnected(msg.isSuccessful());
             if (!wasConnected && this.status.isConnected()) {
-                this.connectionEstablished(metaConnect);
+                this.connectionEstablished(metaConnect, msg);
             } else if (wasConnected && !this.status.isConnected()) {
-                this.connectionBroken(metaConnect);
+                this.connectionBroken(metaConnect, msg);
             }
         }
     }
     
     private void metaDisconnect(ClientSessionChannel metaDisconnect, Message msg) {
-        this.update("metaDisconnect(..)", msg, (message) -> {
+        this.update("metaDisconnect(..)", metaDisconnect, msg, (channel, message) -> {
             this.status.setConnected(false);
             this.status.setDisconnecting(false);
         }, this.disconnectFuture);
+
+        this.listeners.fireEvent(this, metaDisconnect, msg, 
+                (listener, event) -> listener.onDisconnect(event));
     }
     
     /**
      * This function is invoked each time a message arrives on the chat channel
+     * @param channel
      * @param message
      */
-    private void receive(Message message) { 
+    private void receive(ClientSessionChannel channel, Message message) { 
         log("receive(..)", message);
+    
+        this.listeners.fireEvent(this, channel, message, 
+                (listener, event) -> listener.onMessageReceived(event));
     }
 
     /**
      * This function is called each time a message arrives on the members channel
+     * @param channel
      * @param message
      */
-    private void members(Message message) {
+    private void members(ClientSessionChannel channel, Message message) {
         log("members(..)", message);
+
+        this.listeners.fireEvent(this, channel, message, 
+                (listener, event) -> listener.onMembersUpdated(event));
     }
 
-    private void connectionClosed(ClientSessionChannel metaConnect) {
+    private void connectionClosed(ClientSessionChannel metaConnect, Message message) {
         LOG.trace("connectionClosed(..) user: {}", this.chatConfig.getUser());
 //        final Message msg = new HashMapMessage();
 //        msg.put(Chat.USER, "system");
 //        msg.put(Chat.CHAT, "Connection to Server Closed");
 //        receive(msg);
+
+        this.listeners.fireEvent(this, metaConnect, message, 
+                (listener, event) -> listener.onConnectionClosed(event));
     }
 
-    private void connectionBroken(ClientSessionChannel metaConnect){
+    private void connectionBroken(ClientSessionChannel metaConnect, Message message){
         LOG.trace("connectionBroken(..) user: {}", this.chatConfig.getUser());
 //        chatUtil.clearMemberListHtml();
+
+        this.listeners.fireEvent(this, metaConnect, message, 
+                (listener, event) -> listener.onConnectionBroken(event));
     }
 
-    private void connectionEstablished(ClientSessionChannel metaConnect){
+    private void connectionEstablished(ClientSessionChannel metaConnect, Message message){
         LOG.trace("connectionEstablished(..) user: {}", this.chatConfig.getUser());
+        
         // connection establish (maybe not for first time), so just
         // tell local user and update membership
         this.sendMessageToMembersServiceChannel(metaConnect);
+        
+        this.listeners.fireEvent(this, metaConnect, message, 
+                (listener, event) -> listener.onConnectionEstablished(event));
     }
     
     private void sendMessageToMembersServiceChannel(ClientSessionChannel metaConnect) {
@@ -385,18 +436,26 @@ public final class ChatSessionImpl implements ChatSession {
         return msg;
     }
     
-    private void update(String ID, Message msg, Consumer<Message> onSuccess){
-        update(ID, msg, onSuccess, null);
+    private void update(String ID, ClientSessionChannel csc, Message msg, 
+            BiConsumer<ClientSessionChannel, Message> onSuccess){
+        update(ID, csc, msg, onSuccess, null);
     }
     private void update(String ID, Message msg, CompletableFuture<Message> future){
-        update(ID, msg, (message) -> {}, future);
+        update(ID, null, msg, (channel, message) -> {}, future);
     }
-    private void update(String ID, Message msg, 
-            Consumer<Message> onSuccess, CompletableFuture<Message> future){
+    private void update(String ID, ClientSessionChannel csc, Message msg, CompletableFuture<Message> future){
+        update(ID, csc, msg, (channel, message) -> {}, future);
+    }
+    private void update(String ID, ClientSessionChannel csc, Message msg, 
+            BiConsumer<ClientSessionChannel, Message> onSuccess, CompletableFuture<Message> future){
+        
         ID = ID.toUpperCase();
         log(ID, msg);
+        
         if(msg.isSuccessful()) {
-            onSuccess.accept(msg);
+        
+            onSuccess.accept(csc, msg);
+            
             if(future != null) {
                 LOG.trace("Completing " + ID + ", for user: {}", chatConfig.getUser());
                 future.complete(msg);

@@ -64,6 +64,10 @@ public interface ChatSession {
         boolean isSubscribedToMembers();
     }
     
+    boolean addListener(ChatListener listener);
+    
+    boolean removeListener(ChatListener listener);
+    
     Future<Message> connect();
     
     Future<Message> disconnect();
