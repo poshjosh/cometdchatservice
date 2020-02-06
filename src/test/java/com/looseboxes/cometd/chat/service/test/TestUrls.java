@@ -17,6 +17,7 @@ package com.looseboxes.cometd.chat.service.test;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author USER
@@ -42,11 +43,20 @@ public class TestUrls{
         final Map<String, String> params = endpointReqParams.forEndpoint(endpoint);
         if( ! params.isEmpty()) {
             builder.append('?');
+            final AtomicInteger index = new AtomicInteger(0);
             params.forEach((k, v) -> {
+                if(index.get() > 0) {
+                    builder.append('&');
+                }
                 builder.append(k).append('=').append(v);
+                index.incrementAndGet();
             });
         }
         return builder.toString();
+    }
+
+    public String getEndpointUrl(int port, String endpoint) {
+        return this.getContextUrl(port) + endpoint;
     }
 
     public String getContextUrl(int port) {
