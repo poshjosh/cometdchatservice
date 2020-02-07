@@ -23,8 +23,6 @@ import java.util.Objects;
  */
 public class ChatConfig implements Serializable{
     
-    private String membersServiceChannel = Chat.MEMBERS_SERVICE_CHANNEL;
-    
     private String channel;
     
     private String room;
@@ -43,13 +41,11 @@ public class ChatConfig implements Serializable{
     private boolean websocketEnabled = false;
     
     public ChatConfig(String channel, String room, String user) {
-        this(Chat.MEMBERS_SERVICE_CHANNEL, channel, 
-                room, user, Chat.LOG_LEVEL_VALUES.INFO, false);
+        this(channel, room, user, Chat.LOG_LEVEL_VALUES.INFO, false);
     }
     
-    public ChatConfig(String membersServiceChannel, String channel, 
-            String room, String user, String logLevel, boolean websocketEnabled) {
-        this.membersServiceChannel = this.requireNonNullOrEmpty(membersServiceChannel);
+    public ChatConfig(String channel, String room, String user, 
+            String logLevel, boolean websocketEnabled) {
         this.channel = this.requireNonNullOrEmpty(channel);
         this.room = this.requireNonNullOrEmpty(room);
         this.user = this.requireNonNullOrEmpty(user);
@@ -58,16 +54,7 @@ public class ChatConfig implements Serializable{
     }
 
     public ChatConfig forUser(String user) {
-        return new ChatConfig(this.membersServiceChannel, this.channel, 
-                this.room, user, this.logLevel, this.websocketEnabled);
-    }
-
-    public String getMembersServiceChannel() {
-        return membersServiceChannel;
-    }
-
-    public void setMembersServiceChannel(String membersServiceChannel) {
-        this.membersServiceChannel = membersServiceChannel;
+        return new ChatConfig(this.channel, this.room, user, this.logLevel, this.websocketEnabled);
     }
 
     public String getChannel() {
@@ -128,7 +115,6 @@ public class ChatConfig implements Serializable{
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 29 * hash + Objects.hashCode(this.membersServiceChannel);
         hash = 29 * hash + Objects.hashCode(this.channel);
         hash = 29 * hash + Objects.hashCode(this.room);
         hash = 29 * hash + Objects.hashCode(this.user);
@@ -152,9 +138,6 @@ public class ChatConfig implements Serializable{
         if (this.websocketEnabled != other.websocketEnabled) {
             return false;
         }
-        if (!Objects.equals(this.membersServiceChannel, other.membersServiceChannel)) {
-            return false;
-        }
         if (!Objects.equals(this.channel, other.channel)) {
             return false;
         }
@@ -172,6 +155,6 @@ public class ChatConfig implements Serializable{
 
     @Override
     public String toString() {
-        return "ChatConfig{" + "membersServiceChannel=" + membersServiceChannel + ", channel=" + channel + ", room=" + room + ", user=" + user + ", logLevel=" + logLevel + ", websocketEnabled=" + websocketEnabled + '}';
+        return "ChatConfig{" + "channel=" + channel + ", room=" + room + ", user=" + user + ", logLevel=" + logLevel + ", websocketEnabled=" + websocketEnabled + '}';
     }
 }
