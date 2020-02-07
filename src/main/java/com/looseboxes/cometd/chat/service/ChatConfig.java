@@ -36,11 +36,15 @@ public class ChatConfig implements Serializable{
      */
     private String logLevel = Chat.LOG_LEVEL_VALUES.INFO;
     
-    private boolean websocketEnabled = true;
+    /**
+     * If you enable web socket then HttpSession/HttpRequest may be unavailable
+     * @see #setWebsocketEnabled(boolean) 
+     */
+    private boolean websocketEnabled = false;
     
     public ChatConfig(String channel, String room, String user) {
         this(Chat.MEMBERS_SERVICE_CHANNEL, channel, 
-                room, user, Chat.LOG_LEVEL_VALUES.INFO, true);
+                room, user, Chat.LOG_LEVEL_VALUES.INFO, false);
     }
     
     public ChatConfig(String membersServiceChannel, String channel, 
@@ -102,6 +106,13 @@ public class ChatConfig implements Serializable{
         return websocketEnabled;
     }
 
+    /**
+     * If you enable web socket then there may be no HttpSession/HttpRequest. Hence,
+     * calls to {@link org.cometd.bayeux.server.BayeuxContext#setHttpSessionAttribute(java.lang.String, java.lang.Object) BayeuxContext#setHttpSessionAttribute}
+     * or {@link org.cometd.bayeux.server.BayeuxContext#getHttpSessionAttribute(java.lang.String) BayeuxContext#getHttpSessionAttribute}
+     * amongst other methods accessing the HttpSession/HttpRequest will throw an Exception
+     * @param websocketEnabled if true web socket will be enabled, otherwise it will be disabled
+     */
     public void setWebsocketEnabled(boolean websocketEnabled) {
         this.websocketEnabled = websocketEnabled;
     }
