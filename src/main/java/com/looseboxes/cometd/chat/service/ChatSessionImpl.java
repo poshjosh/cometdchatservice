@@ -228,16 +228,9 @@ public final class ChatSessionImpl implements ChatSession {
             
             subscribe(chatConfig.getChannel(), chatConfig.getRoom(), 
                     (csc, msg) -> this.status.setSubscribedToChat(true), future);
-            
-            subscribe(chatConfig.getMembersServiceChannel(), getMembersRoom(), 
-                    (csc, msg) -> this.status.setSubscribedToMembers(true));
         });
         
         return future;
-    }
-
-    private void subscribe(String channel, String room, BiConsumer<ClientSessionChannel, Message> onSuccess) {
-        subscribe(channel, room, onSuccess, null);
     }
     
     private void subscribe(String channel, String room,
@@ -284,16 +277,9 @@ public final class ChatSessionImpl implements ChatSession {
             
             unsubscribe(chatConfig.getChannel(), chatConfig.getRoom(), 
                     (csc, msg) -> this.status.setSubscribedToChat(false), future);
-            
-            unsubscribe(chatConfig.getMembersServiceChannel(), getMembersRoom(), 
-                    (csc, msg) -> this.status.setSubscribedToMembers(false));
         });
         
         return future;
-    }
-    
-    private void unsubscribe(String channel, String room, BiConsumer<ClientSessionChannel, Message> onSuccess) {
-        unsubscribe(channel, room, onSuccess, null);
     }
     
     private void unsubscribe(String channel, String room,
@@ -378,9 +364,6 @@ public final class ChatSessionImpl implements ChatSession {
         final String key = "subscription";
         if(this.chatConfig.getChannel().equals(msg.get(key))){
             this.status.setSubscribedToChat(flag);
-        }else
-        if(this.chatConfig.getMembersServiceChannel().equals(msg.get(key))){
-            this.status.setSubscribedToMembers(flag);
         }
     }
 
@@ -435,7 +418,7 @@ public final class ChatSessionImpl implements ChatSession {
     }
     
     private void sendMessageToMembersServiceChannel(ClientSessionChannel metaConnect) {
-        final String channel = this.chatConfig.getMembersServiceChannel();
+        final String channel = Chat.MEMBERS_SERVICE_CHANNEL;
         final Message msg = this.getMessageForMembersServiceChannel();
         metaConnect.getSession().getChannel(channel).publish(msg);
     }
@@ -448,7 +431,7 @@ public final class ChatSessionImpl implements ChatSession {
     
     private Message getMessageForMembersServiceChannel() {
         final ServerMessageImpl msg = new ServerMessageImpl();
-        msg.setChannel(this.chatConfig.getMembersServiceChannel());
+        msg.setChannel(Chat.MEMBERS_SERVICE_CHANNEL);
         msg.setClientId(clientSession.getId());
         final Message data = new HashMapMessage();
         data.put(Chat.USER, this.chatConfig.getUser());
