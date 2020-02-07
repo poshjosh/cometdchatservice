@@ -108,3 +108,18 @@ johnSession.addListener(new ChatListener(){
 });
 ```
 
+### Naming Conventions for Channels and Rooms
+- Chat rooms must start with ```/chat``` e.g ```/chat/soccer``` or ```/chat/customercare```
+
+- Service rooms start with ```/service```
+
+- For each chat room there is a corresponding service channel. 
+E.g. For ```/chat/soccer``` the service would be ```/service/soccer```
+
+- For each chat room there is a members channel on the server local session i.e 
+```java
+ServerSession.getLocalSession().getChannel(..) 
+```
+E.g. For ```/chat/soccer``` the members channel would be ```/members/soccer``` 
+
+- Private chat configured at room ```/chat/privatechat```
