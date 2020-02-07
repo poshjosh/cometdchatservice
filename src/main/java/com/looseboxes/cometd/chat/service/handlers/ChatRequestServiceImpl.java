@@ -100,25 +100,7 @@ public class ChatRequestServiceImpl implements ChatRequestService {
             
         }else if(createIfNone){
             
-            final WebApplicationContext webAppCtx = getWebAppContext(req);
-
-            final CometDProperties cometdProps = webAppCtx.getBean(CometDProperties.class);
-            
-// Servlet path may have an asterix e.g /cometd/*  therefore we use the literal endpoint i.e /cometd
-//            final String cometdPath = webAppCtx.getBean(CometDProperties.class).getServletPath();
-            final String url = servletUtil.getEndpointUrl(req, Endpoints.COMETD);
-            final String room = servletUtil.requireNonNullOrEmpty(req, ParamNames.ROOM);
-            final String user = servletUtil.requireNonNullOrEmpty(req, ParamNames.USER);
-            LOG.debug("URL: {}, room: {}, user: {}", url, room, user);
-
-            final ChatConfig chatConfig = webAppCtx.getBean(ChatConfig.class, 
-                    cometdProps.getDefaultChannel(), room, user);
-        
-            final Map<String, Object> transportOptions = new HashMap<>();
-            
-            chatSession = webAppCtx.getBean(ChatSession.class, url, transportOptions, chatConfig);
-
-            req.getSession().setAttribute(AttributeNames.Session.COMETD_CHAT_SESSION, chatSession);
+            chatSession = this.createChatSession(req);
             
         }else{
         
@@ -128,6 +110,31 @@ public class ChatRequestServiceImpl implements ChatRequestService {
         return chatSession;
     }
     
+    public ChatSession createChatSession(HttpServletRequest req) {
+        
+        final WebApplicationContext webAppCtx = getWebAppContext(req);
+
+        final CometDProperties cometdProps = webAppCtx.getBean(CometDProperties.class);
+
+// Servlet path may have an asterix e.g /cometd/*  therefore we use the literal endpoint i.e /cometd
+//            final String cometdPath = webAppCtx.getBean(CometDProperties.class).getServletPath();
+        final String url = servletUtil.getEndpointUrl(req, Endpoints.COMETD);
+        final String room = servletUtil.requireNonNullOrEmpty(req, ParamNames.ROOM);
+        final String user = servletUtil.requireNonNullOrEmpty(req, ParamNames.USER);
+        LOG.debug("URL: {}, room: {}, user: {}", url, room, user);
+
+        final ChatConfig chatConfig = webAppCtx.getBean(ChatConfig.class, 
+                cometdProps.getDefaultChannel(), room, user);
+
+        final Map<String, Object> transportOptions = new HashMap<>();
+
+        final ChatSession chatSession = webAppCtx.getBean(ChatSession.class, url, transportOptions, chatConfig);
+        
+        req.getSession().setAttribute(AttributeNames.Session.COMETD_CHAT_SESSION, chatSession);
+        
+        return chatSession;
+    }
+
     private WebApplicationContext getWebAppContext(HttpServletRequest req) {
         return getWebAppContext(req.getSession());
     }
