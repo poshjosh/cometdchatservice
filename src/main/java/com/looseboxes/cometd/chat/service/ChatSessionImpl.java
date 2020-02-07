@@ -417,30 +417,6 @@ public final class ChatSessionImpl implements ChatSession {
         this.listeners.fireEvent(this, channel, message, 
                 (listener, event) -> listener.onDisconnect(event));
     }
-    
-    /**
-     * This function is invoked each time a message arrives on the chat channel
-     * @param channel
-     * @param message
-     */
-    private void receive(ClientSessionChannel channel, Message message) { 
-        log("receive(..)", message);
-    
-        this.listeners.fireEvent(this, channel, message, 
-                (listener, event) -> listener.onMessageReceived(event));
-    }
-
-    /**
-     * This function is called each time a message arrives on the members channel
-     * @param channel
-     * @param message
-     */
-    private void members(ClientSessionChannel channel, Message message) {
-        log("members(..)", message);
-
-        this.listeners.fireEvent(this, channel, message, 
-                (listener, event) -> listener.onMembersUpdated(event));
-    }
 
     private void connectionClosed(ClientSessionChannel channel, Message message) {
         LOG.debug("connectionClosed(..) user: {}", this.chatConfig.getUser());
