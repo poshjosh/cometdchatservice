@@ -15,6 +15,7 @@
  */
 package com.looseboxes.cometd.chat.service;
 
+import java.util.Objects;
 import javax.servlet.ServletContext;
 import javax.servlet.UnavailableException;
 import org.cometd.annotation.Configure;
@@ -45,14 +46,27 @@ public final class BayeuxInitializerImpl implements BayeuxInitializer{
     
     private static final Logger LOG = LoggerFactory.getLogger(BayeuxInitializerImpl.class);
     
+    private final MembersService membersService;
+    
+    private final SafeContentService safeContentService;
+
+    public BayeuxInitializerImpl(
+            MembersService membersService, SafeContentService safeContentService) {
+        this.membersService = Objects.requireNonNull(membersService);
+        this.safeContentService = Objects.requireNonNull(safeContentService);
+    }
+    
     @Override
     public void init(ServletContext servletContext) throws UnavailableException{
         
-        final BayeuxServerImpl bayeux = (BayeuxServerImpl)servletContext.getAttribute(BayeuxServer.ATTRIBUTE);
+        final BayeuxServer bayeux = (BayeuxServer)servletContext.getAttribute(BayeuxServer.ATTRIBUTE);
 
         if (bayeux == null) {
             throw new UnavailableException("CometD BayeuxServer unavailable!");
         }
+        
+        bayeux.setOption(MembersService.class.getSimpleName(), membersService);
+        bayeux.setOption(SafeContentService.class.getSimpleName(), safeContentService);
 
         // Create extensions
         bayeux.addExtension(new TimesyncExtension());
@@ -73,7 +87,9 @@ public final class BayeuxInitializerImpl implements BayeuxInitializer{
         bayeux.createChannelIfAbsent(cometdProperties.getDefaultChannel(), new ConfigurableServerChannel.Initializer.Persistent());
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug(bayeux.dump());
+            if(bayeux instanceof BayeuxServerImpl) {
+                LOG.debug(((BayeuxServerImpl)bayeux).dump());
+            }
         }
     }
 
