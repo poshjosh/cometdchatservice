@@ -83,6 +83,8 @@ public final class ChatSessionImpl implements ChatSession {
     private final ClientSessionChannel.MessageListener unsubscribeListener;
     private final ClientSessionChannel.MessageListener disconnectListener;
     
+    private final ClientSessionChannel.MessageListener chatListener;
+
     private final ChatListeners listeners;
     
     public ChatSessionImpl(ClientSession client, ChatConfig chatConfig) {
@@ -115,7 +117,12 @@ public final class ChatSessionImpl implements ChatSession {
                 metaDisconnect(csc, msg);
         };
         client.getChannel(Channel.META_DISCONNECT).addListener(this.disconnectListener);
-        
+
+        this.chatListener = (ClientSessionChannel csc, Message msg) -> {
+                chatReceived(csc, msg);
+        };
+        client.getChannel(this.chatConfig.getChannel()).addListener(this.chatListener);
+
         this.listeners = new ChatListenersImpl();
     }
     
@@ -378,6 +385,13 @@ public final class ChatSessionImpl implements ChatSession {
         this.listeners.fireEvent(this, channel, message, 
                 (listener, event) -> listener.onDisconnect(event));
     }
+    
+    private void chatReceived(ClientSessionChannel channel, Message message) {
+        this.trace("chatReceived(..)", message);
+
+        this.listeners.fireEvent(this, channel, message, 
+                (listener, event) -> listener.onChatReceived(event));
+    }
 
     private void connectionClosed(ClientSessionChannel channel, Message message) {
         this.trace("connectionClosed(..)", message);
@@ -403,7 +417,9 @@ public final class ChatSessionImpl implements ChatSession {
         
         // connection establish (maybe not for first time), so just
         // tell local user and update membership
-        this.sendMessageToMembersServiceChannel(channel);
+        final String ch = Chat.MEMBERS_SERVICE_CHANNEL;
+        final Message msg = this.getUserRoomMessage(ch);
+        channel.getSession().getChannel(ch).publish(msg);
         
         this.listeners.fireEvent(this, channel, message, 
                 (listener, event) -> listener.onConnectionEstablished(event));
@@ -415,12 +431,7 @@ public final class ChatSessionImpl implements ChatSession {
         clientSession.getChannel(Channel.META_SUBSCRIBE).removeListener(this.subscribeListener);
         clientSession.getChannel(Channel.META_UNSUBSCRIBE).removeListener(this.unsubscribeListener);
         clientSession.getChannel(Channel.META_DISCONNECT).removeListener(this.disconnectListener);
-    }
-    
-    private void sendMessageToMembersServiceChannel(ClientSessionChannel metaConnect) {
-        final String channel = Chat.MEMBERS_SERVICE_CHANNEL;
-        final Message msg = this.getMessageForMembersServiceChannel();
-        metaConnect.getSession().getChannel(channel).publish(msg);
+        clientSession.getChannel(this.chatConfig.getChannel()).removeListener(this.chatListener);
     }
     
     private String getMembersRoom() {
@@ -429,9 +440,9 @@ public final class ChatSessionImpl implements ChatSession {
         return membersRoom;
     }
     
-    private Message getMessageForMembersServiceChannel() {
+    private Message getUserRoomMessage(String channel) {
         final ServerMessageImpl msg = new ServerMessageImpl();
-        msg.setChannel(Chat.MEMBERS_SERVICE_CHANNEL);
+        msg.setChannel(channel);
         msg.setClientId(clientSession.getId());
         final Message data = new HashMapMessage();
         data.put(Chat.USER, this.chatConfig.getUser());
@@ -488,7 +499,8 @@ public final class ChatSessionImpl implements ChatSession {
     }
     
     private CancellationException newCancellationException(String ID) {
-        return new CancellationException("Cancelling: " + ID + "\n"+this.status + "\n" + this.chatConfig);
+        return new CancellationException("Cancelling: " + ID + 
+                "\n" + this.status + "\n" + this.chatConfig);
     }
 
     private void requireNonNullOrEmpty(String s) {

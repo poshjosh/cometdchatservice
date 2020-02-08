@@ -35,6 +35,8 @@ public interface ChatListener {
     default void onDisconnect(ChatListener.Event event){}
     default void onSubscribe(ChatListener.Event event){}
     default void onUnsubscribe(ChatListener.Event event){}
+    default void onChatReceived(ChatListener.Event event){}
+    
     default void onConnectionClosed(ChatListener.Event event){}
     default void onConnectionBroken(ChatListener.Event event){}
     default void onConnectionEstablished(ChatListener.Event event){}
