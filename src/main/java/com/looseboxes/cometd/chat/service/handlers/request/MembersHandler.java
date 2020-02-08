@@ -15,18 +15,17 @@
  */
 package com.looseboxes.cometd.chat.service.handlers.request;
 
-import com.looseboxes.cometd.chat.service.AttributeNames;
+import com.looseboxes.cometd.chat.service.MembersService;
 import com.looseboxes.cometd.chat.service.ParamNames;
 import com.looseboxes.cometd.chat.service.controllers.Endpoints;
 import com.looseboxes.cometd.chat.service.handlers.ChatRequestService;
 import com.looseboxes.cometd.chat.service.handlers.response.Response;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseBuilder;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.cometd.bayeux.server.BayeuxServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.WebApplicationContext;
@@ -53,7 +52,7 @@ public final class MembersHandler extends AbstractRequestHandler{
         
         if(svc.isJoinedToChat(req)) {
         
-            final Map roomMembers = this.getRoomMembers(req);
+            final Map roomMembers = this.getMembers(req);
 
             error = false;
             outputData = Collections.singletonMap(Endpoints.MEMBERS.substring(1), roomMembers);
@@ -66,45 +65,28 @@ public final class MembersHandler extends AbstractRequestHandler{
             outputData = Collections.EMPTY_MAP;
         }
 
-        return webAppCtx.getBean(ResponseBuilder.class).buildResponse(message, outputData, error);
+        return webAppCtx.getBean(ResponseBuilder.class)
+                .buildResponse(message, outputData, error);
     }
     
-    private Map getRoomMembers(HttpServletRequest req) {
+    private Map getMembers(HttpServletRequest req) {
         
-        final Map members = (Map)req.getSession().getAttribute(AttributeNames.Session.CHAT_MEMBERS);
-
+        final BayeuxServer bayeuxServer = (BayeuxServer)req.getServletContext()
+                .getAttribute(BayeuxServer.ATTRIBUTE);
+        
+        final MembersService membersService = (MembersService)bayeuxServer
+                .getOption(MembersService.class.getSimpleName());
+        
+        final Map result;
+       
         final String room = req.getParameter(ParamNames.ROOM);
-        
-        final Map roomMembers;
-
-        if(members == null || members.isEmpty()) {
-            roomMembers = Collections.EMPTY_MAP;
-        }else{
-            roomMembers = this.getRoomMembers(members, room);
-        }
-        
-        LOG.debug("{}\nRoom: {}, room members: {}", members, room, roomMembers);
-        
-        return roomMembers;
-    }
-
-    private Map getRoomMembers(Map members, String room) {
-        Objects.requireNonNull(members);
-        
-        final Map roomMembers;
-
         if(room == null || room.isEmpty()) {
-            roomMembers = members;
+            result = membersService.getMembers();
         }else{
-            final Map rmMembers = (Map)members.get(room);
-            if(rmMembers == null || rmMembers.isEmpty()) {
-                roomMembers = Collections.EMPTY_MAP;
-            }else{
-                roomMembers = new HashMap();
-                roomMembers.put(room, rmMembers);
-            }
+            final Map roomMembers = membersService.getMembers(room);
+            result = Collections.singletonMap(room, roomMembers);
         }
         
-        return roomMembers;
+        return result;
     }
 }
