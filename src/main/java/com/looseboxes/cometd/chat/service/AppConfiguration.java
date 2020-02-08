@@ -21,16 +21,13 @@ import com.looseboxes.cometd.chat.service.handlers.Await;
 import com.looseboxes.cometd.chat.service.handlers.AwaitImpl;
 import com.looseboxes.cometd.chat.service.handlers.ChatRequestService;
 import com.looseboxes.cometd.chat.service.handlers.ChatRequestServiceImpl;
-import com.looseboxes.cometd.chat.service.handlers.response.ResponseConfiguration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import org.cometd.bayeux.client.ClientSession;
 import org.cometd.client.BayeuxClient;
 import org.cometd.client.transport.ClientTransport;
 import org.cometd.client.transport.LongPollingTransport;
 import org.eclipse.jetty.client.HttpClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -41,12 +38,21 @@ import org.springframework.context.annotation.Scope;
 @Configuration
 public class AppConfiguration {
     
-    private final ResponseConfiguration responseConfiguration;
-
-    public AppConfiguration(@Autowired ResponseConfiguration responseConfiguration) {
-        this.responseConfiguration = Objects.requireNonNull(responseConfiguration);
-    }
+    public AppConfiguration(){}
     
+    
+    @Bean public BayeuxInitializer bayeuxInitializer() {
+        return new BayeuxInitializerImpl(this.membersService(), this.safeContentService());
+    }
+
+    @Bean public MembersService membersService() {
+        return new MembersServiceImpl();
+    }
+
+    @Bean public SafeContentService safeContentService() {
+        return new SafeContentServiceImpl();
+    }
+
     @Bean public ChatRequestService chatRequestService() {
         return new ChatRequestServiceImpl(this.servletUtil());
     }
@@ -130,10 +136,6 @@ public class AppConfiguration {
     
     @Bean public ServletUtil servletUtil() {
         return new ServletUtil();
-    }
-    
-    @Bean public BayeuxInitializer bayeuxInitializer() {
-        return new BayeuxInitializerImpl();
     }
 
     @Bean public TerminateBean getTerminateBean() {
