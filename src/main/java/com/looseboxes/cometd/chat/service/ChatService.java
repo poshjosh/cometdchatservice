@@ -16,12 +16,10 @@
 package com.looseboxes.cometd.chat.service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import javax.inject.Inject;
 
@@ -32,7 +30,6 @@ import org.cometd.annotation.Session;
 import org.cometd.bayeux.Message;
 import org.cometd.bayeux.Promise;
 import org.cometd.bayeux.client.ClientSessionChannel;
-import org.cometd.bayeux.server.BayeuxContext;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.ConfigurableServerChannel;
 import org.cometd.bayeux.server.ServerChannel;
@@ -51,8 +48,6 @@ public final class ChatService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ChatService.class);
     
-    private final ConcurrentMap<String, Map<String, String>> _members = new ConcurrentHashMap<>();
-    
     @Inject
     private BayeuxServer _bayeux;
     
@@ -63,7 +58,7 @@ public final class ChatService {
     protected void configureChatStarStar(ConfigurableServerChannel channel) {
         LOG.debug("configureChatStarStar(ConfigurableServerChannel)");
         DataFilterMessageListener noMarkup = new DataFilterMessageListener(
-                new NoMarkupFilter(), new BadWordFilter());
+                new NoMarkupFilter(), new BadWordFilter(getSafeContentService()));
         channel.addListener(noMarkup);
         channel.addAuthorizer(GrantAuthorizer.GRANT_ALL);
     }
@@ -83,52 +78,41 @@ public final class ChatService {
 
             final String room = data == null ? null : getRoom(data, null);
 
-            final Map<String, String> roomMembers = room == null ? 
-                    Collections.EMPTY_MAP : getRoomMembersOrCreateNew(room);
+            final MembersService membersSvc = this.getMembersService();
+            
+            final String userName = (String)data.get(Chat.USER);
 
-    //        final Map<String, String> members = roomMembers;
-
-            String userName = (String)data.get(Chat.USER);
-            roomMembers.put(userName, client.getId());
-            LOG.trace("Room: {}, members: {}\nAll members: {}", room, roomMembers, _members);
+            membersSvc.addMember(room, userName, client.getId());
 
             client.addListener((ServerSession.RemoveListener)(session, timeout) -> {
-                roomMembers.values().remove(session.getId());
-                broadcastMembers(room, roomMembers.keySet());
+                membersSvc.removeMemberByValue(room, session.getId());
+                broadcastMembers(room);
             });
 
-            broadcastMembers(room, roomMembers.keySet());
-            updateHttpServletSessionAttribute(message.getBayeuxContext());
+            broadcastMembers(room);
+            
         }catch(Exception e) {
             LOG.warn("Exception while handling membership. ServerMessage: " + message, e);
         }
     }
 
-    private void broadcastMembers(String room, Set<String> members) {
+    private boolean broadcastMembers(String room) {
+        final Map<String, String> roomMembers = this.getMembersService().getMembers(room);
+        if(roomMembers == null || roomMembers.isEmpty()) {
+            return false;
+        }
+        final Set<String> users = roomMembers.keySet();
         // Broadcast the new members list
         ClientSessionChannel channel = _session.getLocalSession().getChannel("/members/" + room);
-        channel.publish(members);
-    }
-    
-    private void updateHttpServletSessionAttribute(final BayeuxContext bayeuxContext) {
-        if(bayeuxContext != null) {
-            final String attrName = AttributeNames.Session.CHAT_MEMBERS;
-            try{
-                final Object chatMembers = bayeuxContext.getHttpSessionAttribute(attrName);
-                if(chatMembers == null) {
-                    bayeuxContext.setHttpSessionAttribute(attrName, _members);
-                }
-            }catch(IllegalStateException e) {
-                LOG.warn("Exception updating session attribute: " + attrName, e);
-            }
-        }
+        channel.publish(users);
+        return true;
     }
 
     @Configure(ClientSessionChannel.SERVICE+"/privatechat")
     protected void configurePrivateChat(ConfigurableServerChannel channel) {
         LOG.debug("configurePrivateChat(ConfigurableServerChannel)");
         DataFilterMessageListener noMarkup = new DataFilterMessageListener(
-                new NoMarkupFilter(), new BadWordFilter());
+                new NoMarkupFilter(), new BadWordFilter(getSafeContentService()));
         channel.setPersistent(true);
         channel.addListener(noMarkup);
         channel.addAuthorizer(GrantAuthorizer.GRANT_PUBLISH);
@@ -142,14 +126,15 @@ public final class ChatService {
 
             final String room = data == null ? null : getRoom(data, null);
 
-            final Map<String, String> roomMembers = room == null ? 
-                    Collections.EMPTY_MAP : getRoomMembersOrCreateNew(room);
+            final MembersService membersSvc = this.getMembersService();
 
             final String[] peerNames = this.getPeerNames(data);
             final ArrayList<ServerSession> peers = new ArrayList<>(peerNames.length);
 
             for (String peerName : peerNames) {
-                String peerId = roomMembers.get(peerName);
+                
+                final String peerId = membersSvc.getMembersValue(room, peerName);
+                
                 if (peerId != null) {
                     ServerSession peer = _bayeux.getSession(peerId);
                     if (peer != null) {
@@ -198,27 +183,30 @@ public final class ChatService {
         return result;
     }
     
-    private Map<String, String> getRoomMembersOrCreateNew(String room) {
-        Map<String, String> roomMembers = _members.get(room);
-        if (roomMembers == null) {
-            Map<String, String> new_room = new ConcurrentHashMap<>();
-            roomMembers = _members.putIfAbsent(room, new_room);
-            if (roomMembers == null) {
-                roomMembers = new_room;
-            }
-        }
-        return roomMembers;
-    }    
-    
     private Map<String, Object> getData(Message message) {
         Map<String, Object> data = message.getDataAsMap();
         return data == null ? message : data;
     }
+    
+    private MembersService getMembersService() {
+        return (MembersService)_bayeux.getOption(MembersService.class.getSimpleName());
+    }
+
+    private SafeContentService getSafeContentService() {
+        return (SafeContentService)_bayeux.getOption(SafeContentService.class.getSimpleName());
+    }
 
     private static class BadWordFilter extends JSONDataFilter {
+        
+        private final SafeContentService safeContentService;
+
+        public BadWordFilter(SafeContentService safeContentService) {
+            this.safeContentService = Objects.requireNonNull(safeContentService);
+        }
+        
         @Override
         protected Object filterString(ServerSession session, ServerChannel channel, String string) {
-            if (string.contains("dang")) {
+            if ( ! safeContentService.isSafe(string)) {
                 throw new DataFilter.AbortException();
             }
             return string;
