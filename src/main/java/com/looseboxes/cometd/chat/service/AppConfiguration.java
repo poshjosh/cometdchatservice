@@ -17,8 +17,6 @@ package com.looseboxes.cometd.chat.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.looseboxes.cometd.chat.service.handlers.ServletUtil;
-import com.looseboxes.cometd.chat.service.handlers.Await;
-import com.looseboxes.cometd.chat.service.handlers.AwaitImpl;
 import com.looseboxes.cometd.chat.service.handlers.ChatRequestService;
 import com.looseboxes.cometd.chat.service.handlers.ChatRequestServiceImpl;
 import java.util.HashMap;
@@ -131,10 +129,6 @@ public class AppConfiguration {
 
     @Bean @Scope("prototype") public HttpClient httpClient() {
         return new HttpClient();
-    }
-    
-    @Bean @Scope("prototype") public Await await() {
-        return new AwaitImpl();
     }
     
     @Bean @Scope("prototype") public ObjectMapper objectMapper() {
