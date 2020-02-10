@@ -35,8 +35,12 @@ public class EndpointRequestBuilders {
     }
 
     public MockHttpServletRequestBuilder builder(String endpoint) {
-        final MockHttpServletRequestBuilder builder = get(endpoint);
         final Map<String, String> pairs = params.forEndpoint(endpoint);
+        return builder(endpoint, pairs);
+    }
+
+    public MockHttpServletRequestBuilder builder(String endpoint, Map<String, String> pairs) {
+        final MockHttpServletRequestBuilder builder = get(endpoint);
         pairs.forEach((k, v) -> {
             builder.param(k, v);
         });
