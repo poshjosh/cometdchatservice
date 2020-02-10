@@ -28,6 +28,9 @@ import org.cometd.client.BayeuxClient;
 import org.cometd.client.transport.ClientTransport;
 import org.cometd.client.transport.LongPollingTransport;
 import org.eclipse.jetty.client.HttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -37,20 +40,24 @@ import org.springframework.context.annotation.Scope;
  */
 @Configuration
 public class AppConfiguration {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AppConfiguration.class);
     
     public AppConfiguration(){}
     
-    
-    @Bean public BayeuxInitializer bayeuxInitializer() {
-        return new BayeuxInitializerImpl(this.membersService(), this.safeContentService());
+    @Bean public BayeuxInitializer bayeuxInitializer(
+            @Value("${services.safecontent.url}") String url) {
+        return new BayeuxInitializerImpl(this.membersService(), this.safeContentService(url));
     }
 
     @Bean public MembersService membersService() {
         return new MembersServiceImpl();
     }
 
-    @Bean public SafeContentService safeContentService() {
-        return new SafeContentServiceImpl();
+    @Bean @Scope("singleton") public SafeContentService safeContentService(
+            @Value("${services.safecontent.url}") String url) {
+        LOG.debug("${services.safecontent.url} = {}", url);
+        return new SafeContentServiceImpl(url);
     }
 
     @Bean public ChatRequestService chatRequestService() {
@@ -138,7 +145,7 @@ public class AppConfiguration {
         return new ServletUtil();
     }
 
-    @Bean public TerminateBean getTerminateBean() {
+    @Bean public TerminateBean terminateBean() {
         return new TerminateBean();
     }
 }
