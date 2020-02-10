@@ -51,10 +51,6 @@ public class ResponseConfiguration {
     @Bean public ResponseCodeProvider responseCodeProvider() {
         return new ResponseCodeFromSpringAnnotationProvider();
     }
-    
-    @Bean public JsonResponseHandler jsonResponseHandler() {
-        return new JsonResponseHandler();
-    }
 
     @Bean @Scope("prototype") public Response response() {
         return new ResponseImpl();
