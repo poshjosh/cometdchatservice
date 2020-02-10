@@ -15,20 +15,58 @@
  */
 package com.looseboxes.cometd.chat.service;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * @author USER
  */
 public class SafeContentServiceImpl implements SafeContentService {
 
-    private static Logger LOG = LoggerFactory.getLogger(SafeContentServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SafeContentServiceImpl.class);
     
-    public SafeContentServiceImpl() { }
+    // Request the load-balanced template with Ribbon built-in
+    @Autowired        
+    @LoadBalanced     
+    private RestTemplate restTemplate; 
+
+    private final String serviceUrl;
+
+    public SafeContentServiceImpl(String serviceUrl) {
+        this.serviceUrl = serviceUrl.startsWith("http") ?
+               serviceUrl : "http://" + serviceUrl;
+    }
     
     @Override
     public boolean isSafe(String text) {
-        return !text.contains("dang");
+        
+        if(text == null || text.isEmpty()) {
+            return true;
+        }
+        
+        //@TODO add caching
+
+        //@TODO make these properties
+        final String endpoint = "/issafe";
+        final String textName = "text";
+        final String timeoutName = "timeout";
+        final Map<String, Object> params = new HashMap<>();
+        params.put(textName, text);
+        params.put(timeoutName, "10000");
+        
+        final Map response = restTemplate.getForObject(serviceUrl
+                + endpoint, Map.class, Collections.singletonMap(textName, text));
+        
+        LOG.debug("{}", response);
+        
+        final Object value = response == null ? null : response.get(endpoint);
+        
+        return value == null ? false : Boolean.parseBoolean(value.toString());
     }
 }
