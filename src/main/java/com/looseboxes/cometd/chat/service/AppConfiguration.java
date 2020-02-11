@@ -29,9 +29,11 @@ import org.eclipse.jetty.client.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * @author USER
@@ -129,6 +131,10 @@ public class AppConfiguration {
 
     @Bean @Scope("prototype") public HttpClient httpClient() {
         return new HttpClient();
+    }
+    
+    @LoadBalanced @Bean public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
     
     @Bean @Scope("prototype") public ObjectMapper objectMapper() {
