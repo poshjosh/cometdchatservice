@@ -44,7 +44,7 @@ public class SafeContentServiceImpl implements SafeContentService {
                serviceUrl : "http://" + serviceUrl;
     }
     
-    @Cacheable(value="safeContentCache", sync=true)
+    @Cacheable(value="cometdchatservice_safeContentCache", sync=true)
     @Override
     public boolean isSafe(String text) {
         

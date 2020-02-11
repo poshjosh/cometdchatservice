@@ -1,0 +1,21 @@
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="ehcache.xsd"
+    updateCheck="true"
+    monitoring="autodetect"
+    dynamicConfig="true">
+ 
+    <diskStore path="java.io.tmpdir" />
+     
+    <cache name="cometdchatservice_safeContentCache"
+        maxEntriesLocalHeap="1000"
+        maxEntriesLocalDisk="10000"
+        maxBytesLocalHeap="10M"
+        maxBytesLocalDisk="100M"
+        eternal="true" 
+        overflowToDisk="true" 
+        diskPersistent="true"
+        transactionalMode="off">
+        <persistence strategy="localTempSwap" />
+    </cache>
+ 
+</ehcache>
