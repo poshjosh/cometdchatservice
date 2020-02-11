@@ -15,6 +15,9 @@
  */
 package com.looseboxes.cometd.chat.service.test;
 
+import com.looseboxes.cometd.chat.service.controllers.ChatController;
+import com.looseboxes.cometd.chat.service.controllers.JoinController;
+import com.looseboxes.cometd.chat.service.controllers.MembersController;
 import com.looseboxes.cometd.chat.service.controllers.ShutdownController;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
@@ -27,11 +30,28 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 public class SmokeTest {
 
+    @Autowired private JoinController joinController;
+    @Autowired private ChatController chatController;
+    @Autowired private MembersController membersController;
     @Autowired private ShutdownController shutdownController;
 
     @Test
-    public void contexLoads() throws Exception {
-        System.out.println("ShutdownController loads");
+    public void cometDApplication_whenRun_joinControllerLoads() throws Exception {
+        assertThat(joinController).isNotNull();
+    }
+
+    @Test
+    public void cometDApplication_whenRun_chatControllerLoads() throws Exception {
+        assertThat(chatController).isNotNull();
+    }
+
+    @Test
+    public void cometDApplication_whenRun_membersControllerLoads() throws Exception {
+        assertThat(membersController).isNotNull();
+    }
+
+    @Test
+    public void cometDApplication_whenRun_shutdownControllerLoads() throws Exception {
         assertThat(shutdownController).isNotNull();
     }
 }
