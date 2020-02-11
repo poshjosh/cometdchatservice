@@ -15,18 +15,17 @@
  */
 package com.looseboxes.cometd.chat.service.test;
 
-import com.looseboxes.cometd.chat.service.ClientProvider;
-import com.looseboxes.cometd.chat.service.ClientSessionChannelSubscription;
-import com.looseboxes.cometd.chat.service.ClientSessionPublisher;
+import com.looseboxes.cometd.chat.service.ChatSession;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseBuilder;
 import com.looseboxes.cometd.chat.service.handlers.response.ResponseImpl;
-import java.net.URL;
-import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 import java.util.function.Function;
+import org.cometd.bayeux.Message;
 import org.cometd.bayeux.client.ClientSession;
 import org.cometd.bayeux.client.ClientSessionChannel;
-import static org.mockito.ArgumentMatchers.any;
+import org.cometd.common.HashMapMessage;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.OngoingStubbing;
@@ -72,34 +71,48 @@ public class Mocker {
         return new LinientMocker(testConfig);
     }
     
-    public ClientSessionChannel mock(ClientSessionChannel instance) {
-        return instance;
-    }
-
-    public ClientSessionPublisher mock(ClientSessionPublisher instance) {
-        when(instance.publish(any(ClientSessionChannel.class), any(Map.class), any(long.class)))
-            .thenAnswer((InvocationOnMock invoc) -> {
-                final Object arg0 = invoc.getArgument(0);
-                Objects.requireNonNull(arg0);
-                final Map message = invoc.getArgument(1, Map.class);
-                Objects.requireNonNull(message);
-                return testConfig.testData().createSuccessResponse();
+    public ChatSession mock(ChatSession instance) {
+        
+        when(instance.connect()).thenReturn(this.createMessageFuture(true, true));
+        when(instance.disconnect()).thenReturn(this.createMessageFuture(true, true));
+        when(instance.getStatus()).thenReturn(new ChatSession.Status() {
+            @Override
+            public boolean isConnected() { return true; }
+            @Override
+            public boolean isDisconnecting() { return false; }
+            @Override
+            public boolean isSubscribedToChat() { return true; }
+            @Override
+            public boolean isSubscribedToMembers() { return true; }
         });
+        when(instance.join()).thenReturn(this.createMessageFuture(true, true));
+        when(instance.leave()).thenReturn(this.createMessageFuture(true, true));
+        when(instance.send(any(String.class), any(String.class))).thenReturn(this.createMessageFuture(false, true));
+//        when(instance.send(any(String.class), any(String.class), any(ClientSession.MessageListener.class)))
+        when(instance.subscribe()).thenReturn(this.createMessageFuture(true, true));
+        when(instance.unsubscribe()).thenReturn(this.createMessageFuture(true, true));
         return instance;
     }
     
-    public ClientSessionChannelSubscription mock(ClientSessionChannelSubscription instance) {
-        when(instance.subscribe(any(ClientSession.class), any(String.class), any(long.class)))
-            .thenAnswer((InvocationOnMock invoc) -> {
-                final Object arg0 = invoc.getArgument(0);
-                Objects.requireNonNull(arg0);
-                final String channel = invoc.getArgument(1, String.class);
-                Objects.requireNonNull(channel);
-                if(channel.isEmpty()) {
-                    throw new IllegalArgumentException();
-                }
-                return testConfig.testData().createSuccessResponse();
-        });
+    public Future<Message> createMessageFuture(boolean meta, boolean successful) {
+        return CompletableFuture.completedFuture(this.createMessage(meta, successful));
+    }
+    
+    private Message createMessage(boolean meta, boolean successful) {
+        return this.createMessage(false, meta, false, successful);
+    }
+    
+    private Message createMessage(boolean empty, boolean meta, 
+            boolean publishReply, boolean successful) {
+        final Message msg = new HashMapMessage();
+        msg.put("empty", empty);
+        msg.put("meta", meta);
+        msg.put("publishReply", publishReply);
+        msg.put("successful", successful);
+        return msg;
+    }
+
+    public ClientSessionChannel mock(ClientSessionChannel instance) {
         return instance;
     }
 
@@ -118,7 +131,6 @@ public class Mocker {
         when(instance.buildErrorResponse(any(Object.class), any(Throwable.class))).thenCallRealMethod();
         when(instance.buildResponse(any(Object.class), any(String.class), any(Object.class), any(boolean.class))).thenCallRealMethod();
         when(instance.buildSuccessResponse()).thenCallRealMethod();
-        when(instance.buildErrorResponse(any(Object.class))).thenCallRealMethod();
         when(instance.buildResponse(any(Object.class), any(Object.class), any(boolean.class))).then(
             (InvocationOnMock invocation) -> {
                 final ResponseImpl res = new ResponseImpl();
@@ -129,19 +141,6 @@ public class Mocker {
                 return res;
             }
         );
-        return instance;
-    }
-    
-    public ClientProvider mock(ClientProvider instance, ClientSession clientSession) {
-        when(instance.createClient(any(String.class), any(Map.class)))
-                .thenAnswer((InvocationOnMock iom) -> {
-            final String url = iom.getArgument(0, String.class);
-            Objects.requireNonNull(url);
-            new URL(url); // If invalid url, will throw MalformedURLException
-            final Map transportOptions = iom.getArgument(1, Map.class);
-            Objects.requireNonNull(transportOptions);
-            return clientSession;
-        });
         return instance;
     }
     
