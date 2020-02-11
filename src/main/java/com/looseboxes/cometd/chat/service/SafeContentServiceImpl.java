@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -43,6 +44,7 @@ public class SafeContentServiceImpl implements SafeContentService {
                serviceUrl : "http://" + serviceUrl;
     }
     
+    @Cacheable(value="safeContentCache", sync=true)
     @Override
     public boolean isSafe(String text) {
         
