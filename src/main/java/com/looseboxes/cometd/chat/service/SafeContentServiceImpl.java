@@ -15,14 +15,16 @@
  */
 package com.looseboxes.cometd.chat.service;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * @author USER
@@ -30,15 +32,13 @@ import org.springframework.web.client.RestTemplate;
 public class SafeContentServiceImpl implements SafeContentService {
 
     private static final Logger LOG = LoggerFactory.getLogger(SafeContentServiceImpl.class);
-    
-    // Request the load-balanced template with Ribbon built-in
-    @Autowired        
-    @LoadBalanced     
-    private RestTemplate restTemplate; 
+
+    private final RestTemplate restTemplate; 
 
     private final String serviceUrl;
 
-    public SafeContentServiceImpl(String serviceUrl) {
+    public SafeContentServiceImpl(RestTemplate restTemplate, String serviceUrl) {
+        this.restTemplate = Objects.requireNonNull(restTemplate);
         this.serviceUrl = serviceUrl.startsWith("http") ?
                serviceUrl : "http://" + serviceUrl;
     }
@@ -52,21 +52,41 @@ public class SafeContentServiceImpl implements SafeContentService {
         
         //@TODO add caching
 
-        //@TODO make these properties
+        //@TODO make this a property
         final String endpoint = "/issafe";
-        final String textName = "text";
-        final String timeoutName = "timeout";
-        final Map<String, Object> params = new HashMap<>();
-        params.put(textName, text);
-        params.put(timeoutName, "10000");
+        final String url = serviceUrl + endpoint;
         
-        final Map response = restTemplate.getForObject(serviceUrl
-                + endpoint, Map.class, Collections.singletonMap(textName, text));
+        LOG.debug("URL: {}", url);
         
-        LOG.debug("{}", response);
+        //@TODO make this number literal a property
+        final HttpEntity<Map> res = this.get(url, text, 10_000);
         
-        final Object value = response == null ? null : response.get(endpoint);
+        final Map body = res == null ? null : res.getBody();
         
-        return value == null ? false : Boolean.parseBoolean(value.toString());
+        LOG.debug("URL: {}, response: {}", url, body);
+        
+        final Object value = body == null ? null : body.get(endpoint);
+
+        final String sval = value == null ? null : value.toString();
+        
+        return sval == null || sval.isEmpty() ? false : Boolean.parseBoolean(sval);
+    }
+    
+    private HttpEntity<Map> get(String url, String text, long timeout){
+        
+        final HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
+
+        //@TODO make these properties
+        final UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
+                .queryParam("text", text)
+                .queryParam("timeout", timeout);
+
+        final HttpEntity<?> entity = new HttpEntity<>(headers);
+
+        url = builder.toUriString();
+        LOG.debug("URL: {}", url);
+        
+        return restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);    
     }
 }
