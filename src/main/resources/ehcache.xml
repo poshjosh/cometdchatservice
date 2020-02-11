@@ -7,13 +7,9 @@
     <diskStore path="java.io.tmpdir" />
      
     <cache name="cometdchatservice_safeContentCache"
-        maxEntriesLocalHeap="1000"
-        maxEntriesLocalDisk="10000"
         maxBytesLocalHeap="10M"
         maxBytesLocalDisk="100M"
         eternal="true" 
-        overflowToDisk="true" 
-        diskPersistent="true"
         transactionalMode="off">
         <persistence strategy="localTempSwap" />
     </cache>
