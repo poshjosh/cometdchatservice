@@ -20,18 +20,20 @@ import com.looseboxes.cometd.chat.service.handlers.response.ResponseBuilder;
 import com.looseboxes.cometd.chat.service.test.Mocker;
 import com.looseboxes.cometd.chat.service.test.EndpointRequestBuilders;
 import com.looseboxes.cometd.chat.service.test.MyTestConfiguration;
+import static org.hamcrest.CoreMatchers.is;
 import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.times;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 /**
  * The web server is started in this test case. 
  * @author USER
@@ -61,11 +63,14 @@ public class ShutdownControllerMockWithServerIT {
         
         final String expectedJson = mapper.writeValueAsString(mockResBuilder.buildSuccessResponse());
         ++invocations;
-
+        
         this.mockMvc.perform(endpointReqBuilders.builder(Endpoints.SHUTDOWN))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().json(expectedJson, false));
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(model().attribute("success", true))
+                .andExpect(jsonPath("$.success", is(true)));
+                // Timestamp is different
+//                .andExpect(content().json(expectedJson, false));
         ++invocations;
 
         verify(mockResBuilder, times(invocations)).buildSuccessResponse();
