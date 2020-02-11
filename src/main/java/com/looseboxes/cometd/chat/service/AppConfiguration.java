@@ -57,7 +57,7 @@ public class AppConfiguration {
     @Bean @Scope("singleton") public SafeContentService safeContentService(
             @Value("${services.safecontent.url}") String url) {
         LOG.debug("${services.safecontent.url} = {}", url);
-        return new SafeContentServiceImpl(url);
+        return new SafeContentServiceImpl(this.restTemplate(), url);
     }
 
     @Bean public ChatRequestService chatRequestService() {
