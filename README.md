@@ -38,7 +38,7 @@ httpClient.start();
 
 final LongPollingTransport tpt = new LongPollingTransport(new HashMap(), httpClient);
 
-final String url = "http://localhost:8092/chatservice/cometd";
+final String url = "http://localhost:8092/cometd";
 
 final BayeuxClient johnClient = new BayeuxClient(url, tpt);
 ```
