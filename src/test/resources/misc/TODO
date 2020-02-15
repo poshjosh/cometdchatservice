@@ -1,0 +1,17 @@
+WRITE TESTS TO ENSURE THIS DOESN'T REPEAT
+Wrong value for room. ce/privatechat instead of service/privatechat
+-------------------------------------------------------
+02:34:03 DEBUG ChatService: handleMembership(ServerSession, ServerMessage={clientId=5c4x4dc57rwlz1cnk7qj9chgfc, data={user=Nel, room=/service/privatechat}, channel=/service/members, id=16})
+02:34:03 TRACE ChatService: Extracted room name: ce/privatechat, from: /service/privatechat of: {user=Nel, room=/service/privatechat}
+02:34:03 DEBUG MembersServiceImpl: After adding. Member: Nel, value: 5c4x4dc57rwlz1cnk7qj9chgfc, room: ce/privatechat, room members: {Nel=5c4x4dc57rwlz1cnk7qj9chgfc, Non=4jl8qrudtt84f1uszs63wfd9r0}
+02:34:03 DEBUG MembersServiceImpl: Room: ce/privatechat, room members: {Nel=5c4x4dc57rwlz1cnk7qj9chgfc, Non=4jl8qrudtt84f1uszs63wfd9r0}
+
+Send rather than message text sent to safecontentservice from chatservice
+--------------------------------------------------------------------
+cometdchatservice  depends on   bcsafecontentservice
+This because cometdsvc sends messages to safesvc for flagging
+However, instead of sending the message, it is sending the sender
+
+Logs from cometdchatservice
+09:13:07 DEBUG ChatSessionImpl: send("Hi love", "Nel") sender: Non
+09:13:08 DEBUG SafeContentServiceImpl: URL: http://safecontentservice/flag?text=Non&timeout=5000

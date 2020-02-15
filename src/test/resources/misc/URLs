@@ -1,0 +1,7 @@
+http://localhost:8092/join?user=Non&room=/chat/privatechat
+
+http://localhost:8092/chat?user=Non&peer=Nel&room=/chat/privatechat&chat=Hi+love
+
+http://localhost:8092/members
+
+localhost:8092/shutdown?delay=5000
