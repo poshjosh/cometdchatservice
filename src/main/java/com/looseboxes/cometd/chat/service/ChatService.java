@@ -206,9 +206,19 @@ public final class ChatService {
         
         @Override
         protected Object filterString(ServerSession session, ServerChannel channel, String string) {
-            if ( ! safeContentService.isSafe(string)) {
+            
+            if(string == null || string.isEmpty()) {
+                return string;
+            }
+            
+            final String flags = safeContentService.flag(string);
+            
+            final boolean safe = flags == null || flags.isEmpty();
+            
+            if ( ! safe) {
                 throw new DataFilter.AbortException();
             }
+            
             return string;
         }
     }

@@ -37,31 +37,41 @@ public class SafeContentServiceImpl implements SafeContentService {
     private final RestTemplate restTemplate; 
 
     private final String serviceUrl;
+    
+    private final String endpoint;
+    
+    private final long timeout;
 
-    public SafeContentServiceImpl(RestTemplate restTemplate, String serviceUrl) {
+    public SafeContentServiceImpl(RestTemplate restTemplate, 
+            String serviceUrl, String endpoint, long timeout) {
         this.restTemplate = Objects.requireNonNull(restTemplate);
         this.serviceUrl = serviceUrl.startsWith("http") ?
                serviceUrl : "http://" + serviceUrl;
+        this.endpoint = Objects.requireNonNull(endpoint);
+        this.timeout = timeout;
     }
     
-    @Cacheable(value="cometdchatservice_safeContentCache", sync=true)
+    /**
+     * This call may invoke third party services.
+     * @param text The content to flag
+     * @return The flags, if the content is flagged as unsafe. E.g of flags = 
+     * <code>adult,violence,racy,graphic,medical,spoof</code>; empty text if the 
+     * content is flagged as safe or <code>null</code> if the safety or otherwise
+     * of the content could not be ascertained.
+     */
+    @Cacheable(value = "cometdchatservice_contentFlagCache", unless="#result == null", sync=true)
     @Override
-    public boolean isSafe(String text) {
+    public String flag(String text) {
         
         if(text == null || text.isEmpty()) {
-            return true;
+            return null;
         }
         
-        //@TODO add caching
-
-        //@TODO make this a property
-        final String endpoint = "/issafe";
         final String url = serviceUrl + endpoint;
         
         LOG.debug("URL: {}", url);
         
-        //@TODO make this number literal a property
-        final HttpEntity<Map> res = this.get(url, text, 10_000);
+        final HttpEntity<Map> res = this.get(url, text, this.timeout);
         
         final Map body = res == null ? null : res.getBody();
         
@@ -69,26 +79,34 @@ public class SafeContentServiceImpl implements SafeContentService {
         
         final Object value = body == null ? null : body.get(endpoint);
 
-        final String sval = value == null ? null : value.toString();
+        final String flags = value == null ? null : value.toString();
         
-        return sval == null || sval.isEmpty() ? false : Boolean.parseBoolean(sval);
+        return flags;
     }
-    
-    private HttpEntity<Map> get(String url, String text, long timeout){
+
+    private HttpEntity get(String url, String text, long timeout){
+        try{
+            
+            final HttpHeaders headers = new HttpHeaders();
+            headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
+
+            //@TODO make these properties
+            final UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
+                    .queryParam("text", text)
+                    .queryParam("timeout", timeout);
+
+            final HttpEntity<?> entity = new HttpEntity<>(headers);
+
+            url = builder.toUriString();
+            LOG.debug("URL: {}", url);
+
+            return restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);    
+            
+        }catch(RuntimeException e) {
+            
+            LOG.warn("Exception accessing service at: " + url, e);
         
-        final HttpHeaders headers = new HttpHeaders();
-        headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
-
-        //@TODO make these properties
-        final UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
-                .queryParam("text", text)
-                .queryParam("timeout", timeout);
-
-        final HttpEntity<?> entity = new HttpEntity<>(headers);
-
-        url = builder.toUriString();
-        LOG.debug("URL: {}", url);
-        
-        return restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);    
+            return HttpEntity.EMPTY;
+        }
     }
 }
