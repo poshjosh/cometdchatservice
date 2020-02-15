@@ -29,13 +29,13 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 // @RunWith(MockitoJUnitRunner.class)   JUnit4 construct
 @ExtendWith(value = {SpringExtension.class})
 @Import(MyTestConfiguration.class)
-public class ChatSessionSpringMockTest extends ChatSessionMockTest{
+public class ChatSessionMockSpringTest extends ChatSessionMockTest{
     
     @Autowired private Mocker mocker;
     
     @MockBean private ChatSession chatSession;
 
-    public ChatSessionSpringMockTest() { }
+    public ChatSessionMockSpringTest() { }
 
     @Override
     protected ChatSession getChatSession() {
