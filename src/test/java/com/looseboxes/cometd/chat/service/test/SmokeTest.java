@@ -36,22 +36,26 @@ public class SmokeTest {
     @Autowired private ShutdownController shutdownController;
 
     @Test
-    public void cometDApplication_whenRun_joinControllerLoads() throws Exception {
+    public void cometDApplication_WhenRun_ShouldLoadJoinController() throws Exception {
+        System.out.println("cometDApplication_WhenRun_ShouldLoadJoinController");
         assertThat(joinController).isNotNull();
     }
 
     @Test
-    public void cometDApplication_whenRun_chatControllerLoads() throws Exception {
+    public void cometDApplication_WhenRun_ShouldLoadChatController() throws Exception {
+        System.out.println("cometDApplication_WhenRun_ShouldLoadChatController");
         assertThat(chatController).isNotNull();
     }
 
     @Test
-    public void cometDApplication_whenRun_membersControllerLoads() throws Exception {
+    public void cometDApplication_WhenRun_ShouldLoadMembersController() throws Exception {
+        System.out.println("cometDApplication_WhenRun_ShouldLoadMembersController");
         assertThat(membersController).isNotNull();
     }
 
     @Test
-    public void cometDApplication_whenRun_shutdownControllerLoads() throws Exception {
+    public void cometDApplication_WhenRun_ShouldLoadShutdownController() throws Exception {
+        System.out.println("cometDApplication_WhenRun_ShouldLoadShutdownController");
         assertThat(shutdownController).isNotNull();
     }
 }
