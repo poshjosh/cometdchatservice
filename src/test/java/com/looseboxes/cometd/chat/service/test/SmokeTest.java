@@ -18,7 +18,6 @@ package com.looseboxes.cometd.chat.service.test;
 import com.looseboxes.cometd.chat.service.controllers.ChatController;
 import com.looseboxes.cometd.chat.service.controllers.JoinController;
 import com.looseboxes.cometd.chat.service.controllers.MembersController;
-import com.looseboxes.cometd.chat.service.controllers.ShutdownController;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +32,6 @@ public class SmokeTest {
     @Autowired private JoinController joinController;
     @Autowired private ChatController chatController;
     @Autowired private MembersController membersController;
-    @Autowired private ShutdownController shutdownController;
 
     @Test
     public void cometDApplication_WhenRun_ShouldLoadJoinController() throws Exception {
@@ -51,11 +49,5 @@ public class SmokeTest {
     public void cometDApplication_WhenRun_ShouldLoadMembersController() throws Exception {
         System.out.println("cometDApplication_WhenRun_ShouldLoadMembersController");
         assertThat(membersController).isNotNull();
-    }
-
-    @Test
-    public void cometDApplication_WhenRun_ShouldLoadShutdownController() throws Exception {
-        System.out.println("cometDApplication_WhenRun_ShouldLoadShutdownController");
-        assertThat(shutdownController).isNotNull();
     }
 }

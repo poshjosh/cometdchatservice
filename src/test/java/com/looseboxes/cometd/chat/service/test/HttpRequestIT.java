@@ -91,14 +91,6 @@ public class HttpRequestIT {
         this.givenEndpoint_ShouldReturn(Endpoints.CHAT, 200, true);
     }
     
-    @Test
-    @Order(4) 
-    public void shutdownRequest_ShouldReturnSuccessfully() throws Exception {
-        System.out.println("shutdownRequest_ShouldReturnSuccessfully");
-    
-        this.givenEndpoint_ShouldReturn(Endpoints.SHUTDOWN, 200, true);
-    }
-
     private ResponseEntity<ResponseImpl> givenEndpoint_ShouldReturn(String endpoint, 
             int code, boolean success) throws Exception {
         

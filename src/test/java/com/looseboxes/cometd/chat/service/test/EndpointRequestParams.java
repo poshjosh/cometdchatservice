@@ -44,9 +44,6 @@ public class EndpointRequestParams {
             case Endpoints.MEMBERS:
 //                params.put(ParamNames.ROOM, room);
                 break;
-            case Endpoints.SHUTDOWN:
-                params.put(ParamNames.DELAY, "5000");
-                break;
             default:
                 throw new UnsupportedOperationException("Unexpected endpoint: " + endpoint);
         }        
