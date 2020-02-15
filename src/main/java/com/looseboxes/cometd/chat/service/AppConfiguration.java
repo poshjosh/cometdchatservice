@@ -63,8 +63,10 @@ public class AppConfiguration {
     }
     
     @Bean public BayeuxInitializer bayeuxInitializer(
-            @Value("${services.safecontent.url}") String url) {
-        return new BayeuxInitializerImpl(this.membersService(), this.safeContentService(url));
+            @Value("${services.safecontent.url}") String url,
+            @Value("${services.safecontent.endpoint.flag}") String endpoint,
+            @Value("${services.safecontent.endpoint.flag.timeout}") long timeout) {
+        return new BayeuxInitializerImpl(this.membersService(), this.safeContentService(url, endpoint, timeout));
     }
 
     @Bean public MembersService membersService() {
@@ -72,9 +74,12 @@ public class AppConfiguration {
     }
 
     @Bean @Scope("singleton") public SafeContentService safeContentService(
-            @Value("${services.safecontent.url}") String url) {
-        LOG.debug("${services.safecontent.url} = {}", url);
-        return new SafeContentServiceImpl(this.restTemplate(), url);
+            @Value("${services.safecontent.url}") String url,
+            @Value("${services.safecontent.endpoint.flag}") String endpoint,
+            @Value("${services.safecontent.endpoint.flag.timeout}") long timeout) {
+        LOG.debug("${services.safecontent} .url={}, .endpoint.flag={}, .endpoint.flag.timeout={}", 
+                url, endpoint, timeout);
+        return new SafeContentServiceImpl(this.restTemplate(), url, endpoint, timeout);
     }
 
     @Bean public ChatRequestService chatRequestService() {
