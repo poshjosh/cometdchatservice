@@ -6,7 +6,7 @@
  
     <diskStore path="java.io.tmpdir" />
      
-    <cache name="cometdchatservice_safeContentCache"
+    <cache name="cometdchatservice_contentFlagCache"
         maxBytesLocalHeap="10M"
         maxBytesLocalDisk="100M"
         eternal="true" 
