@@ -58,5 +58,7 @@ public class CometDApplication implements ServletContextInitializer {
         cometdServlet.setInitParameter("ws.cometdURLMapping", mapping);
         
         servletContext.addListener(BayeuxServletContextAttributeListener.class);
+        
+        servletContext.addListener(HttpSessionListenerImpl.class);
     }
 }
