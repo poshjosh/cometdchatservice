@@ -53,13 +53,18 @@ public class SafeContentServiceImpl implements SafeContentService {
     
     /**
      * This call may invoke third party services.
+     * The result is cached using Spring's {@link org.springframework.cache.annotation.Cacheable @Cacheable} 
+     * annotation. One limitation though, when using @Cacheable -> no synchronization.
+     * <b>Reason: <code>sync</code> may not be used together with <code>unless</code></b>
+     * @see https://github.com/spring-projects/spring-framework/issues/20956
+     * @see https://docs.spring.io/spring-framework/docs/5.0.0.RELEASE/javadoc-api/org/springframework/cache/annotation/Cacheable.html#sync--
      * @param text The content to flag
      * @return The flags, if the content is flagged as unsafe. E.g of flags = 
      * <code>adult,violence,racy,graphic,medical,spoof</code>; empty text if the 
      * content is flagged as safe or <code>null</code> if the safety or otherwise
      * of the content could not be ascertained.
      */
-    @Cacheable(value = "cometdchatservice_contentFlagCache", unless="#result == null", sync=true)
+    @Cacheable(value = "cometdchatservice_contentFlagCache", unless="#result == null")
     @Override
     public String flag(String text) {
         

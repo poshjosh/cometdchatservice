@@ -22,6 +22,7 @@ public interface SafeContentService {
 
     /**
      * This call may invoke third party services.
+     * The result may be cached, for use on subsequent calls.
      * @param text The content to flag
      * @return The flags, if the content is flagged as unsafe. E.g of flags = 
      * <code>adult,violence,racy,graphic,medical,spoof</code>; empty text if the 
