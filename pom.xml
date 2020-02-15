@@ -2,24 +2,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <java.version>1.8</java.version>
         <cometd.version>4.0.5</cometd.version>
-        <spring-cloud.version>Hoxton.SR1</spring-cloud.version>
-        <it.skip>true</it.skip>
-        <argLine>-Dfile.encoding=UTF-8</argLine>
     </properties>
-
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.2.2.RELEASE</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <groupId>com.looseboxes</groupId>
+        <artifactId>services</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <relativePath>../services/pom.xml</relativePath>
     </parent>
 
-    <groupId>com.looseboxes</groupId>
     <artifactId>cometdchatservice</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -27,10 +18,6 @@
     <description>A Java microservice exposing cometd chat services</description>
 
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
@@ -78,58 +65,14 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-<!-- In line with excluding JUnit 4 we exclude junit-vintage-engine. 
-The default JUnit for spring 2.2.0+ is JUnit5 -->
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.junit.vintage</groupId>
-                        <artifactId>junit-vintage-engine</artifactId>
-                    </exclusion>
-                </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.cometd.java</groupId>
             <artifactId>cometd-java-websocket-javax-client</artifactId>
             <version>${cometd.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-core</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <configuration>
-                    <skip>${it.skip}</skip>
-                </configuration>                
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -139,25 +82,7 @@ The default JUnit for spring 2.2.0+ is JUnit5 -->
                 <executions>
                     <execution>
                         <goals>
-                              <goal>repackage</goal>
-                        </goals>
-                        <configuration>
-                            <skip>${it.skip}</skip>
-                        </configuration>                
-                    </execution>
-                    <execution>
-                        <id>pre-integration-test</id>
-                        <goals>
-                            <goal>start</goal>
-                        </goals>
-                        <configuration>
-                            <skip>${it.skip}</skip>
-                        </configuration>                
-                    </execution>
-                    <execution>
-                        <id>post-integration-test</id>
-                        <goals>
-                            <goal>stop</goal>
+                            <goal>repackage</goal>
                         </goals>
                         <configuration>
                             <skip>${it.skip}</skip>
@@ -193,6 +118,7 @@ The default JUnit for spring 2.2.0+ is JUnit5 -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
                 <executions>
                     <execution>
                         <id>docker-package</id>
@@ -217,11 +143,4 @@ The default JUnit for spring 2.2.0+ is JUnit5 -->
             </plugin>            
         </plugins>
     </build>
-    <repositories>
-        <repository>
-            <id>spring-milestones</id>
-            <name>Spring Milestones</name>
-            <url>https://repo.spring.io/milestone</url>
-        </repository>
-    </repositories>
 </project>
