@@ -23,7 +23,7 @@ import org.springframework.boot.test.context.TestConfiguration;
  */
 @TestConfiguration
 public class MyTestConfiguration extends TestConfig{
-    public MyTestConfiguration(@Value("${server.servlet.context-path:''}") String contextPath) { 
+    public MyTestConfiguration(@Value("${server.servlet.context-path:}") String contextPath) { 
         super(contextPath);
     }
 }
