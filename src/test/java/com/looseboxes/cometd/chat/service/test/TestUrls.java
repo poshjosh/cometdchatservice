@@ -15,6 +15,8 @@
  */
 package com.looseboxes.cometd.chat.service.test;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -51,15 +53,27 @@ public class TestUrls{
                 index.incrementAndGet();
             });
         }
-        return builder.toString();
+        final String url = builder.toString();
+        return validate(url);
     }
 
     public String getEndpointUrl(int port, String endpoint) {
-        return this.getContextUrl(port) + endpoint;
+        final String url = this.getContextUrl(port) + endpoint;
+        return validate(url);
     }
 
     public String getContextUrl(int port) {
-        return getBaseUrl(port) + Objects.requireNonNull(contextPath);
+        final String url = getBaseUrl(port) + Objects.requireNonNull(contextPath);
+        return validate(url);
+    }
+    
+    private String validate(String url) {
+        try{
+            new URL(url);
+        }catch(MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+        return url;
     }
     
     public String getBaseUrl(int port) {
