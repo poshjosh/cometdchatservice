@@ -44,7 +44,12 @@ public class BayeuxInitActionMockTestBase<T> {
     public BayeuxInitActionMockTestBase(Supplier<List<T>> argsSupplier) { 
         this.argsSupplier = Objects.requireNonNull(argsSupplier);
     }
-    
+
+    /**
+     * Overriding methods should first call super.getArgs() and build on top of
+     * the returned List.
+     * @return The list of arguments for test cases
+     */
     public List<T> getArgs() {
         return argsSupplier.get();
     }
