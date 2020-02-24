@@ -15,6 +15,7 @@
  */
 package com.looseboxes.cometd.chat.service.initializers;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -36,14 +37,28 @@ public class BayeuxInitActionMockTestBase<T> {
     
     private final Supplier<List<T>> argsSupplier;
     
+    public BayeuxInitActionMockTestBase() {
+        this(() -> Collections.EMPTY_LIST);
+    } 
+    
     public BayeuxInitActionMockTestBase(Supplier<List<T>> argsSupplier) { 
         this.argsSupplier = Objects.requireNonNull(argsSupplier);
     }
     
+    public List<T> getArgs() {
+        return argsSupplier.get();
+    }
+    
     public List<T> mockWhenApplyIsCalled(
             BiConsumer<BayeuxServer, T> actionToInvokeWhenApplyMethodIsCalled) {
-        final List<T> args = argsSupplier.get();
-        return this.mockWhenApplyIsCalled(actionToInvokeWhenApplyMethodIsCalled, args);
+        
+        List<T> args = argsSupplier.get();
+        
+        args = this.mockWhenApplyIsCalled(actionToInvokeWhenApplyMethodIsCalled, args);
+        
+//        when(bayeuxInitAction.apply(isA(BayeuxServer.class), isNull())).thenThrow(NullPointerException.class);
+        
+        return args;
     }
     
     public List<T> mockWhenApplyIsCalled(
