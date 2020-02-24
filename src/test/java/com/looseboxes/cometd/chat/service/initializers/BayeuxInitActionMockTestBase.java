@@ -25,9 +25,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import org.mockito.invocation.InvocationOnMock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author USER
@@ -46,6 +43,11 @@ public class BayeuxInitActionMockTestBase<T> {
     public List<T> mockWhenApplyIsCalled(
             BiConsumer<BayeuxServer, T> actionToInvokeWhenApplyMethodIsCalled) {
         final List<T> args = argsSupplier.get();
+        return this.mockWhenApplyIsCalled(actionToInvokeWhenApplyMethodIsCalled, args);
+    }
+    
+    public List<T> mockWhenApplyIsCalled(
+            BiConsumer<BayeuxServer, T> actionToInvokeWhenApplyMethodIsCalled, List<T> args) {
         when(bayeuxInitAction.apply(bayeuxServer, args)).thenAnswer((InvocationOnMock iom) -> {
             final BayeuxServer server = (BayeuxServer)iom.getArgument(0);
             for(T arg : args) {
@@ -55,7 +57,7 @@ public class BayeuxInitActionMockTestBase<T> {
         });
         return args;
     }
-    
+
     public BayeuxServer callApplyThenVerify(List<T> args){
         final BayeuxServer result = bayeuxInitAction.apply(bayeuxServer, args);
         verify(bayeuxInitAction, times(1)).apply(bayeuxServer, args);
