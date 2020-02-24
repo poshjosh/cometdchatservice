@@ -52,7 +52,7 @@ public class BayeuxInitActionMockTestBase<T> {
     public List<T> mockWhenApplyIsCalled(
             BiConsumer<BayeuxServer, T> actionToInvokeWhenApplyMethodIsCalled) {
         
-        List<T> args = argsSupplier.get();
+        List<T> args = getArgs();
         
         args = this.mockWhenApplyIsCalled(actionToInvokeWhenApplyMethodIsCalled, args);
         
