@@ -15,7 +15,6 @@
  */
 package com.looseboxes.cometd.chat.service;
 
-import com.looseboxes.cometd.chat.service.initializers.BayeuxInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeEvent;
 import javax.servlet.ServletContextAttributeListener;
@@ -23,6 +22,7 @@ import org.cometd.bayeux.server.BayeuxServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+import com.looseboxes.cometd.chat.service.initializers.ChatServerInitializer;
 
 /**
  * @author USER
@@ -47,7 +47,7 @@ public final class ChatServletContextAttributeListener implements ServletContext
 //            }
             
             WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext)
-                    .getBean(BayeuxInitializer.class).init(bayeux);
+                    .getBean(ChatServerInitializer.class).init(bayeux);
         }
     }
 
