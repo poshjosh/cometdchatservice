@@ -21,6 +21,10 @@ import org.cometd.bayeux.MarkedReference;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.ConfigurableServerChannel;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author USER
@@ -60,7 +64,14 @@ public class CreateDefaultChannelsIfAbsentTest extends BayeuxInitActionMockTestB
     }
 
     @Override
-    public BayeuxServer mockBayeuxServer(BayeuxServer bayeuxServer, List<String> args) {
+    public CreateDefaultChannelsIfAbsent createBayeuxInitAction() {
+        final CreateDefaultChannelsIfAbsent bayeuxInitAction = mock(CreateDefaultChannelsIfAbsent.class);
+        return bayeuxInitAction;
+    }
+    
+    @Override
+    public BayeuxServer createBayeuxServer(List<String> args) {
+        final BayeuxServer bayeuxServer = super.createBayeuxServer(args);
         //@TODO remove lenient... Without lenient throws UnnecessaryStubbingException
         for(String channel : args) {
             lenient().when(bayeuxServer.createChannelIfAbsent(channel, init))

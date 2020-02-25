@@ -21,6 +21,9 @@ import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.server.BayeuxServerImpl;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author USER
@@ -60,13 +63,13 @@ public class DumpBayeuxServerStateTest extends BayeuxInitActionMockTestBase{
     }
 
     @Override
-    public DumpBayeuxServerState mockBayeuxInitAction() {
+    public DumpBayeuxServerState createBayeuxInitAction() {
         final DumpBayeuxServerState bayeuxInitAction = mock(DumpBayeuxServerState.class);
         return bayeuxInitAction;
     }
     
     @Override
-    public BayeuxServer mockBayeuxServer(List args) {
+    public BayeuxServer createBayeuxServer(List args) {
         final BayeuxServerImpl bayeuxServer = mock(BayeuxServerImpl.class);
         //@TODO remove lenient... Without lenient throws UnnecessaryStubbingException
         lenient().when(bayeuxServer.dump()).thenReturn(SAMPLE_DUMP);

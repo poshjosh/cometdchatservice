@@ -15,20 +15,27 @@
  */
 package com.looseboxes.cometd.chat.service.initializers;
 
-import com.looseboxes.cometd.chat.service.MembersService;
 import com.looseboxes.cometd.chat.service.MembersServiceInMemoryCache;
-import com.looseboxes.cometd.chat.service.SafeContentService;
 import java.util.Arrays;
 import java.util.List;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author USER
@@ -40,9 +47,6 @@ public class AddOptionsToBayeuxServerMockTest extends BayeuxInitActionMockTestBa
     private static final class ContextImpl implements BayeuxInitActionMockTestBase.Context{
 
         private static final Logger LOG = LoggerFactory.getLogger(ContextImpl.class);
-        
-        @Mock private MembersService membersService;
-        @Mock private SafeContentService safeContentService;
         
         private final BayeuxInitActionMockTestBase test;
         
@@ -79,7 +83,14 @@ public class AddOptionsToBayeuxServerMockTest extends BayeuxInitActionMockTestBa
     }
 
     @Override
-    public BayeuxServer mockBayeuxServer(BayeuxServer bayeuxServer, List args) {
+    public AddOptionsToBayeuxServer createBayeuxInitAction() {
+        final AddOptionsToBayeuxServer bayeuxInitAction = mock(AddOptionsToBayeuxServer.class);
+        return bayeuxInitAction;
+    }
+    
+    @Override
+    public BayeuxServer createBayeuxServer(List args) {
+        final BayeuxServer bayeuxServer = super.createBayeuxServer(args);
         //@TODO remove lenient... Without lenient throws UnnecessaryStubbingException
         for(Object opt : args) {
             lenient().when(bayeuxServer.getOption(opt.getClass().getSimpleName())).thenReturn(opt);

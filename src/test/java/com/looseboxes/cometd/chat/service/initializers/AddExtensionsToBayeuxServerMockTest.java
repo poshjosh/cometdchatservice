@@ -23,9 +23,10 @@ import org.cometd.server.ext.AcknowledgedMessagesExtension;
 import org.cometd.server.ext.TimesyncExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.mockito.Mockito.lenient;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author USER
@@ -67,7 +68,14 @@ public class AddExtensionsToBayeuxServerMockTest extends BayeuxInitActionMockTes
     }
 
     @Override
-    public BayeuxServer mockBayeuxServer(BayeuxServer bayeuxServer, List<Extension> args) {
+    public AddExtensionsToBayeuxServer createBayeuxInitAction() {
+        final AddExtensionsToBayeuxServer bayeuxInitAction = mock(AddExtensionsToBayeuxServer.class);
+        return bayeuxInitAction;
+    }
+    
+    @Override
+    public BayeuxServer createBayeuxServer(List<Extension> args) {
+        final BayeuxServer bayeuxServer = super.createBayeuxServer(args);
         //@TODO remove lenient... Without lenient throws UnnecessaryStubbingException
         lenient().when(bayeuxServer.getExtensions()).thenReturn(args);
         return bayeuxServer;

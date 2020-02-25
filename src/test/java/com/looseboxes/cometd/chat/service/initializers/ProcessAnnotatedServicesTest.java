@@ -27,6 +27,9 @@ import org.cometd.bayeux.server.ConfigurableServerChannel;
 import static org.mockito.Mockito.mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author USER
@@ -65,7 +68,7 @@ public class ProcessAnnotatedServicesTest extends BayeuxInitActionMockTestBase{
     }
 
     @Override
-    public ProcessAnnotatedServices mockBayeuxInitAction() {
+    public ProcessAnnotatedServices createBayeuxInitAction() {
         final ProcessAnnotatedServices bayeuxInitAction = mock(ProcessAnnotatedServices.class);
         return bayeuxInitAction;
     }
@@ -73,11 +76,11 @@ public class ProcessAnnotatedServicesTest extends BayeuxInitActionMockTestBase{
     @Service("DummyAnnotatedService")
     private static final class DummyAnnotatedService{
         @Configure("/service/echo")
-        private void configureEcho(ConfigurableServerChannel channel) {
+        private void configureActor(ConfigurableServerChannel channel) {
             LOG.info("Configuring: {}", channel);
         }
         @RemoteCall("echo")
-        public void doEcho(RemoteCall.Caller caller, Object data) {
+        public void doAction(RemoteCall.Caller caller, Object data) {
             LOG.info("ECHO from " + caller.getServerSession() + ": " + data);
             caller.result(data);
         }
