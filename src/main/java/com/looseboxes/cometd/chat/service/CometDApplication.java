@@ -57,7 +57,7 @@ public class CometDApplication implements ServletContextInitializer {
         cometdServlet.setInitParameter("services", ChatService.class.getName());
         cometdServlet.setInitParameter("ws.cometdURLMapping", mapping);
         
-        servletContext.addListener(BayeuxServletContextAttributeListener.class);
+        servletContext.addListener(ChatServletContextAttributeListener.class);
         
         servletContext.addListener(HttpSessionListenerImpl.class);
     }
