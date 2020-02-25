@@ -16,15 +16,19 @@
 package com.looseboxes.cometd.chat.service.initializers;
 
 import com.looseboxes.cometd.chat.service.MembersService;
+import com.looseboxes.cometd.chat.service.MembersServiceInMemoryCache;
 import com.looseboxes.cometd.chat.service.SafeContentService;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiConsumer;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import static org.mockito.Mockito.doNothing;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.lenient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author USER
@@ -34,6 +38,8 @@ public class AddOptionsToBayeuxServerMockTest extends BayeuxInitActionMockTestBa
     // @RunWith(MockitoJUnitRunner.class)   JUnit4 construct
     @ExtendWith(MockitoExtension.class)
     private static final class ContextImpl implements BayeuxInitActionMockTestBase.Context{
+
+        private static final Logger LOG = LoggerFactory.getLogger(ContextImpl.class);
         
         @Mock private MembersService membersService;
         @Mock private SafeContentService safeContentService;
@@ -52,27 +58,32 @@ public class AddOptionsToBayeuxServerMockTest extends BayeuxInitActionMockTestBa
         }
         @Override
         public List getArgs(){
-            return Arrays.asList(membersService, safeContentService);
+            return Arrays.asList(new MembersServiceInMemoryCache());
         }
         @Override
-        public BayeuxServer mockBayeuxServer(List args) {
-            for(Object option : args) {
-                doNothing().when(test.getBayeuxServer()).setOption(getId(option), option);
+        public void onApplyMethodCalled(BayeuxServer server, List args) {
+            for(Object opt : args) {
+                server.setOption(opt.getClass().getSimpleName(), opt);
             }
-            return test.getBayeuxServer();
         }
         @Override
-        public BiConsumer<BayeuxServer, Object> getActionToInvokeWhenApplyMethodIsCalled() {
-            return (server, option) -> {
-                server.setOption(getId(option), option);
-            };
-        }
-        private String getId(Object obj) {
-            return obj.getClass().getName();
+        public void assertThatResultsAreValid(BayeuxServer server, List args) {
+            for(Object opt : args) {
+                assertThat(server.getOption(opt.getClass().getSimpleName()), is(opt));
+            }
         }
     }
     
     public AddOptionsToBayeuxServerMockTest() { 
         super(new ContextImpl());
+    }
+
+    @Override
+    public BayeuxServer mockBayeuxServer(BayeuxServer bayeuxServer, List args) {
+        //@TODO remove lenient... Without lenient throws UnnecessaryStubbingException
+        for(Object opt : args) {
+            lenient().when(bayeuxServer.getOption(opt.getClass().getSimpleName())).thenReturn(opt);
+        }
+        return bayeuxServer;
     }
 }
