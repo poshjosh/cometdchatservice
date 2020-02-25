@@ -17,20 +17,19 @@ package com.looseboxes.cometd.chat.service.initializers;
 
 import java.util.List;
 import org.cometd.bayeux.server.BayeuxServer;
-import org.cometd.bayeux.server.BayeuxServer.Extension;
 
 /**
  * @author USER
  */
-public final class AddExtensionsToBayeuxServer implements BayeuxInitAction<Extension>{
-    
-    public AddExtensionsToBayeuxServer() { }
+public final class AddOptionsToChatServer implements ChatServerInitAction<Object>{
+
+    public AddOptionsToChatServer() { }
     
     @Override
-    public BayeuxServer apply(BayeuxServer bayeux, List<Extension> extensions) {
-        for(Extension ext : extensions) {
-            bayeux.addExtension(ext);
-        }
+    public BayeuxServer apply(BayeuxServer bayeux, List options) {
+        options.stream().forEach((option) -> {
+            bayeux.setOption(option.getClass().getSimpleName(), option);
+        });
         return bayeux;
     }
 }

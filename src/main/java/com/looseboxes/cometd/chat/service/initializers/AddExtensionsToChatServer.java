@@ -15,22 +15,22 @@
  */
 package com.looseboxes.cometd.chat.service.initializers;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.function.BiFunction;
 import org.cometd.bayeux.server.BayeuxServer;
+import org.cometd.bayeux.server.BayeuxServer.Extension;
 
 /**
  * @author USER
  */
-public interface BayeuxInitAction<T> extends BiFunction<BayeuxServer, List<T>, BayeuxServer>{
-
-    default BayeuxServer apply(BayeuxServer bayeux, T... args) {
-        return this.apply(bayeux, args == null || args.length == 0 ? 
-                Collections.EMPTY_LIST : Arrays.asList(args));
-    }
-
+public final class AddExtensionsToChatServer implements ChatServerInitAction<Extension>{
+    
+    public AddExtensionsToChatServer() { }
+    
     @Override
-    BayeuxServer apply(BayeuxServer bayeux, List<T> args);
+    public BayeuxServer apply(BayeuxServer bayeux, List<Extension> extensions) {
+        for(Extension ext : extensions) {
+            bayeux.addExtension(ext);
+        }
+        return bayeux;
+    }
 }

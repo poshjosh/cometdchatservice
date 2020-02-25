@@ -25,7 +25,7 @@ import org.cometd.server.authorizer.GrantAuthorizer;
 /**
  * @author USER
  */
-public final class CreateDefaultChannelsIfAbsent implements BayeuxInitAction<String>{
+public final class CreateDefaultChannelsIfAbsent implements ChatServerInitAction<String>{
 
     public CreateDefaultChannelsIfAbsent() { }
     
