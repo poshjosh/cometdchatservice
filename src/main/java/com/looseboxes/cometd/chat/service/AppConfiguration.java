@@ -26,18 +26,13 @@ import org.cometd.client.BayeuxClient;
 import org.cometd.client.transport.ClientTransport;
 import org.cometd.client.transport.LongPollingTransport;
 import org.eclipse.jetty.client.HttpClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.ehcache.EhCacheCacheManager;
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * @author USER
@@ -45,7 +40,7 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class AppConfiguration {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AppConfiguration.class);
+//    private static final Logger LOG = LoggerFactory.getLogger(AppConfiguration.class);
     
     public AppConfiguration(){}
     
@@ -62,26 +57,6 @@ public class AppConfiguration {
         return factory;
     }
     
-    @Bean public BayeuxInitializer bayeuxInitializer(
-            @Value("${services.safecontent.url}") String url,
-            @Value("${services.safecontent.endpoint.flag}") String endpoint,
-            @Value("${services.safecontent.endpoint.flag.timeout}") long timeout) {
-        return new BayeuxInitializerImpl(this.membersService(), this.safeContentService(url, endpoint, timeout));
-    }
-
-    @Bean public MembersService membersService() {
-        return new MembersServiceImpl();
-    }
-
-    @Bean @Scope("singleton") public SafeContentService safeContentService(
-            @Value("${services.safecontent.url}") String url,
-            @Value("${services.safecontent.endpoint.flag}") String endpoint,
-            @Value("${services.safecontent.endpoint.flag.timeout}") long timeout) {
-        LOG.debug("${services.safecontent} .url={}, .endpoint.flag={}, .endpoint.flag.timeout={}", 
-                url, endpoint, timeout);
-        return new SafeContentServiceImpl(this.restTemplate(), url, endpoint, timeout);
-    }
-
     @Bean public ChatRequestService chatRequestService() {
         return new ChatRequestServiceImpl(this.servletUtil());
     }
@@ -153,10 +128,6 @@ public class AppConfiguration {
 
     @Bean @Scope("prototype") public HttpClient httpClient() {
         return new HttpClient();
-    }
-    
-    @LoadBalanced @Bean public RestTemplate restTemplate() {
-        return new RestTemplate();
     }
     
     @Bean @Scope("prototype") public ObjectMapper objectMapper() {
