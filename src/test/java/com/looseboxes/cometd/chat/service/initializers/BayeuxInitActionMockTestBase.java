@@ -24,14 +24,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.Mockito.times;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author USER
@@ -117,8 +117,7 @@ public class BayeuxInitActionMockTestBase<T> {
     public void callActionThenVerifyThenAssertThatResultsAreValid(
             BayeuxInitAction<T> bayeuxInitAction, 
             BayeuxServer bayeuxServer, List<T> args){
-        this.callActionThenVerify(
-                bayeuxInitAction, bayeuxServer, args);
+        this.callActionThenVerify(bayeuxInitAction, bayeuxServer, args);
         LOG.debug("Context: {}, BayeuxServer: {}, arguments: {}", 
                 context, bayeuxServer, args);
         context.assertThatResultsAreValid(bayeuxServer, args);
@@ -134,16 +133,17 @@ public class BayeuxInitActionMockTestBase<T> {
     
     public BayeuxInitAction<T> getServerInitAction(BayeuxServer bayeuxServer, List<T> args) {
         
-        final BayeuxInitAction bayeuxInitAction = mock(BayeuxInitAction.class);
+        final BayeuxInitAction bayeuxInitAction = this.createBayeuxInitAction();
         
         //@TODO remove lenient... Without lenient throws UnnecessaryStubbingException
         lenient().when(bayeuxInitAction.apply(isA(BayeuxServer.class), isA(List.class)))
             .thenAnswer((InvocationOnMock iom) -> {
                 final BayeuxServer server = (BayeuxServer)iom.getArgument(0);
+                LOG.debug("\nServer: {}", server);
                 Objects.requireNonNull(server);
                 final List<T> listArg = (List<T>)iom.getArgument(1);
-                Objects.requireNonNull(listArg);
                 LOG.debug("\nArgs: {}", listArg);
+                Objects.requireNonNull(listArg);
                 context.onApplyMethodCalled(server, listArg);
                 return server;
             }
@@ -154,30 +154,19 @@ public class BayeuxInitActionMockTestBase<T> {
                 .thenThrow(NullPointerException.class);
         return bayeuxInitAction;
     }
+    
+    public BayeuxInitAction createBayeuxInitAction() {
+        final BayeuxInitAction bayeuxInitAction = mock(BayeuxInitAction.class);
+        return bayeuxInitAction;
+    }
 
     public BayeuxServer getBayeuxServer(List<T> args) {
-        final BayeuxServer bayeuxServer = mock(BayeuxServer.class);
-        this.mockBayeuxServer(bayeuxServer, args);
+        final BayeuxServer bayeuxServer = this.createBayeuxServer(args);
         return bayeuxServer;
     }
     
-    public BayeuxServer mockBayeuxServer(BayeuxServer bayeuxServer, List<T> args) {
+    public BayeuxServer createBayeuxServer(List<T> args) {
+        final BayeuxServer bayeuxServer = mock(BayeuxServer.class);
         return bayeuxServer;
     } 
 }
-/**
- * 
-    public BayeuxInitAction<T> getInstance(){
-        final BayeuxInitAction bayeuxInitAction = mock(BayeuxInitAction.class);
-        when(bayeuxInitAction.apply(isA(BayeuxServer.class), isA(List.class)))
-            .thenAnswer((InvocationOnMock iom) -> {
-                final BayeuxServer server = (BayeuxServer)iom.getArgument(0);
-                final List<T> args = (List<T>)iom.getArgument(1);
-                context.onApplyMethodCalled(server, args);
-                return server;
-            }
-        );
-        return bayeuxInitAction;
-    }
- * 
- */
