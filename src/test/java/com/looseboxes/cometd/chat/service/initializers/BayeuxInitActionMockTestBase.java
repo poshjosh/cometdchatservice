@@ -25,7 +25,9 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.isA;
 import org.mockito.Mock;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import org.mockito.invocation.InvocationOnMock;
@@ -39,7 +41,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class BayeuxInitActionMockTestBase<T> {
     
-    @Mock private BayeuxInitAction<T> bayeuxInitAction;
+//    @Mock private BayeuxInitAction<T> bayeuxInitAction;
     @Mock private BayeuxServer bayeuxServer;
     
     public static interface Context<T>{
@@ -59,15 +61,16 @@ public class BayeuxInitActionMockTestBase<T> {
     public void apply_whenCalledMultipleTimesWithValidArgs_shouldReturnUpdatedResultForEachCall() {
         System.out.println("apply_whenCalledMultipleTimesWithValidArgs_shouldReturnUpdatedResultForEachCall");
         
-        final List<T> args = this.mockWhenApplyIsCalled(
-                context.getActionToInvokeWhenApplyMethodIsCalled());
+        final List<T> args = context.getArgs();
+        
+        final BayeuxInitAction instance = getInstance(args);
         
         context.mockBayeuxServer(args);
-
-        BayeuxServer result = this.callApplyThenVerify(args);
+        
+        BayeuxServer result = this.callApplyThenVerify(instance, args);
         assertThat(result.getExtensions(), is(args));
 
-        result = this.callApplyThenVerify(args);
+        result = this.callApplyThenVerify(instance, args);
         assertThat(result.getExtensions(), is(args));
     }
     
@@ -75,12 +78,13 @@ public class BayeuxInitActionMockTestBase<T> {
     public void apply_whenCalledWithValidArgs_shouldReturnUpdatedResult() {
         System.out.println("apply_whenCalledWithValidArgs_shouldReturnUpdatedResult");
         
-        final List<T> args = this.mockWhenApplyIsCalled(
-                context.getActionToInvokeWhenApplyMethodIsCalled());
+        final List<T> args = context.getArgs();
+        
+        final BayeuxInitAction instance = getInstance(args);
         
         context.mockBayeuxServer(args);
         
-        final BayeuxServer result = this.callApplyThenVerify(args);
+        final BayeuxServer result = this.callApplyThenVerify(instance, args);
         
         assertThat(result.getExtensions(), is(args));
     }
@@ -89,12 +93,13 @@ public class BayeuxInitActionMockTestBase<T> {
     public void apply_whenCalledWithEmptyArgs_shouldReturnUnchangedResult() {
         System.out.println("apply_whenCalledWithEmptyArgs_shouldReturnUnchangedResult");
         
-        final List<T> args = this.mockWhenApplyIsCalled(
-                context.getActionToInvokeWhenApplyMethodIsCalled(), Collections.EMPTY_LIST);
+        final List<T> args = Collections.EMPTY_LIST;
+
+        final BayeuxInitAction instance = getInstance(args);
         
         context.mockBayeuxServer(args);
         
-        final BayeuxServer result = this.callApplyThenVerify(args);
+        final BayeuxServer result = this.callApplyThenVerify(instance, args);
         
         assertThat(result.getExtensions(), is(args));
     }
@@ -104,49 +109,50 @@ public class BayeuxInitActionMockTestBase<T> {
         System.out.println("apply_whenCalledWithNullArg_shouldReturnUnchangedResult");
         
         try{
-            final List<T> args = this.mockWhenApplyIsCalled(
-                    context.getActionToInvokeWhenApplyMethodIsCalled(), null);
+            
+            final List<T> args = null;
+            
+            final BayeuxInitAction instance = getInstance(args);
 
             context.mockBayeuxServer(args);
 
-            final BayeuxServer result = this.callApplyThenVerify(args);
+            final BayeuxServer result = this.callApplyThenVerify(instance, args);
             
             fail("Should fail but exection completed");
         
         }catch(Exception expected) { }
     }
     
-    public List<T> mockWhenApplyIsCalled(
-            BiConsumer<BayeuxServer, T> actionToInvokeWhenApplyMethodIsCalled) {
-        
-        List<T> args = context.getArgs();
-        
-        args = this.mockWhenApplyIsCalled(actionToInvokeWhenApplyMethodIsCalled, args);
-        
-//        when(bayeuxInitAction.apply(isA(BayeuxServer.class), isNull())).thenThrow(NullPointerException.class);
-        
-        return args;
-    }
-    
-    public List<T> mockWhenApplyIsCalled(
-            BiConsumer<BayeuxServer, T> actionToInvokeWhenApplyMethodIsCalled, List<T> args) {
-        when(bayeuxInitAction.apply(bayeuxServer, args)).thenAnswer((InvocationOnMock iom) -> {
-            final BayeuxServer server = (BayeuxServer)iom.getArgument(0);
-            for(T arg : args) {
-                actionToInvokeWhenApplyMethodIsCalled.accept(server, arg);
-            }
-            return server;
-        });
-        return args;
-    }
-
-    public BayeuxServer callApplyThenVerify(List<T> args){
+    public BayeuxServer callApplyThenVerify(BayeuxInitAction<T> bayeuxInitAction, List<T> args){
         final BayeuxServer result = bayeuxInitAction.apply(bayeuxServer, args);
         verify(bayeuxInitAction, times(1)).apply(bayeuxServer, args);
         return result;
     }
+    
+    public BayeuxInitAction<T> getInstance(List<T> args) {
+        final BayeuxInitAction bayeuxInitAction = mock(BayeuxInitAction.class);
+        when(bayeuxInitAction.apply(bayeuxServer, args)).thenAnswer((InvocationOnMock iom) -> {
+            final BayeuxServer server = (BayeuxServer)iom.getArgument(0);
+            for(T arg : args) {
+                context.getActionToInvokeWhenApplyMethodIsCalled().accept(server, arg);
+            }
+            return server;
+        });
+        return bayeuxInitAction;
+    }
 
-    public BayeuxInitAction<T> getBayeuxInitAction() {
+    public BayeuxInitAction<T> getInstance(){
+        final BayeuxInitAction bayeuxInitAction = mock(BayeuxInitAction.class);
+        when(bayeuxInitAction.apply(isA(BayeuxServer.class), isA(List.class)))
+            .thenAnswer((InvocationOnMock iom) -> {
+                final BayeuxServer server = (BayeuxServer)iom.getArgument(0);
+                final List<T> args = (List<T>)iom.getArgument(1);
+                for(T arg : args) {
+                    context.getActionToInvokeWhenApplyMethodIsCalled().accept(server, arg);
+                }
+                return server;
+            }
+        );
         return bayeuxInitAction;
     }
 
