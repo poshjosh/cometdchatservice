@@ -16,6 +16,9 @@
 package com.looseboxes.cometd.chat.service.test;
 
 import com.looseboxes.cometd.chat.service.AppConfiguration;
+import com.looseboxes.cometd.chat.service.handlers.request.RequestConfiguration;
+import com.looseboxes.cometd.chat.service.handlers.response.ResponseConfiguration;
+import com.looseboxes.cometd.chat.service.initializers.InitConfiguration;
 import java.util.Objects;
 import org.springframework.context.annotation.Bean;
 
@@ -25,6 +28,9 @@ import org.springframework.context.annotation.Bean;
 public class TestConfig {
     
     private static final AppConfiguration appConfig = new AppConfiguration();
+    private static final RequestConfiguration requestConfig = new RequestConfiguration();
+    private static final ResponseConfiguration responseConfig = new ResponseConfiguration();
+    private static final InitConfiguration initConfig = new InitConfiguration();
     
     private final String contextPath;
 
@@ -62,5 +68,17 @@ public class TestConfig {
     
     public AppConfiguration appConfig() {
         return appConfig;
+    }
+
+    public RequestConfiguration getRequestConfig() {
+        return requestConfig;
+    }
+
+    public ResponseConfiguration getResponseConfig() {
+        return responseConfig;
+    }
+
+    public InitConfiguration getInitConfig() {
+        return initConfig;
     }
 }
