@@ -29,9 +29,9 @@ import org.slf4j.LoggerFactory;
 /**
  * @author USER
  */
-public class ProcessAnnotatedServicesTest extends ChatServerInitActionMockTestBase{
+public class ProcessAnnotatedServicesMockTest extends ChatServerInitActionMockTestBase{
     
-    private static final Logger LOG = LoggerFactory.getLogger(ProcessAnnotatedServicesTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProcessAnnotatedServicesMockTest.class);
     
     private static final class ContextImpl implements ChatServerInitActionMockTestBase.Context{
         @Override
@@ -49,7 +49,7 @@ public class ProcessAnnotatedServicesTest extends ChatServerInitActionMockTestBa
         public void assertThatResultsAreValid(BayeuxServer server, List args) { }
     }
     
-    public ProcessAnnotatedServicesTest() { 
+    public ProcessAnnotatedServicesMockTest() { 
         super(new ContextImpl());
     }
     

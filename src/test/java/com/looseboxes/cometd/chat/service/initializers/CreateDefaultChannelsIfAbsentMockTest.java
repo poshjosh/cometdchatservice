@@ -15,29 +15,23 @@
  */
 package com.looseboxes.cometd.chat.service.initializers;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.cometd.bayeux.ChannelId;
-import org.cometd.bayeux.MarkedReference;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.ConfigurableServerChannel;
-import org.cometd.bayeux.server.ServerChannel;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author USER
  */
-public class CreateDefaultChannelsIfAbsentTest extends ChatServerInitActionMockTestBase<String>{
+public class CreateDefaultChannelsIfAbsentMockTest extends ChatServerInitActionMockTestBase<String>{
 
     private static final Logger LOG = LoggerFactory
-            .getLogger(CreateDefaultChannelsIfAbsentTest.class);
+            .getLogger(CreateDefaultChannelsIfAbsentMockTest.class);
     
     private static final ConfigurableServerChannel.Initializer CHANNEL_INIT = 
             new ConfigurableServerChannel.Initializer.Persistent();
@@ -66,7 +60,7 @@ public class CreateDefaultChannelsIfAbsentTest extends ChatServerInitActionMockT
         }
     }
     
-    public CreateDefaultChannelsIfAbsentTest() { 
+    public CreateDefaultChannelsIfAbsentMockTest() { 
         super(new ContextImpl());
     }
 }

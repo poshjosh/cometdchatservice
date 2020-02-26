@@ -23,7 +23,7 @@ import org.cometd.server.BayeuxServerImpl;
 /**
  * @author USER
  */
-public class DumpBayeuxServerStateTest extends ChatServerInitActionMockTestBase{
+public class DumpBayeuxServerStateMockTest extends ChatServerInitActionMockTestBase{
     
 //    private static final String SAMPLE_DUMP = "Sample Dump";
        
@@ -42,7 +42,7 @@ public class DumpBayeuxServerStateTest extends ChatServerInitActionMockTestBase{
         public void assertThatResultsAreValid(BayeuxServer server, List args) { }
     }
     
-    public DumpBayeuxServerStateTest() { 
+    public DumpBayeuxServerStateMockTest() { 
         super(new ContextImpl());
     }
 }
