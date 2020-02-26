@@ -18,7 +18,6 @@ package com.looseboxes.cometd.chat.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 /**
  * @author USER
@@ -51,11 +50,10 @@ public class ChatListenersImpl implements ChatListeners{
     }
 
     @Override
-    public void fireEvent(ChatListener.Event event, 
-            BiConsumer<ChatListener, ChatListener.Event> action) {
+    public void fireEvent(ChatListener.Event event, EventHandler eventHandler) {
         synchronized(listeners) {
             for(ChatListener listener : listeners) {
-                action.accept(listener, event);
+                eventHandler.accept(listener, event);
             }
         }
     }

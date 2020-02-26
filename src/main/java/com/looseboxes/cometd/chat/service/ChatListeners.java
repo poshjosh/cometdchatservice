@@ -21,10 +21,14 @@ import java.util.function.BiConsumer;
  * @author USER
  */
 public interface ChatListeners {
+    
+    interface EventHandler extends BiConsumer<ChatListener, ChatListener.Event>{
+        
+    }
 
     boolean addListener(ChatListener listener);
 
-    void fireEvent(ChatListener.Event event, BiConsumer<ChatListener, ChatListener.Event> action);
+    void fireEvent(ChatListener.Event event, EventHandler eventHandler);
 
     boolean removeListener(ChatListener listener);
     
