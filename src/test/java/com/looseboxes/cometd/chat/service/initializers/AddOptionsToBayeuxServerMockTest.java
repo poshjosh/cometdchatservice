@@ -15,86 +15,83 @@
  */
 package com.looseboxes.cometd.chat.service.initializers;
 
-import com.looseboxes.cometd.chat.service.MembersServiceInMemoryCache;
+import com.looseboxes.cometd.chat.service.MembersService;
+import com.looseboxes.cometd.chat.service.SafeContentService;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author USER
  */
-public class AddOptionsToBayeuxServerMockTest extends BayeuxInitActionMockTestBase{
+// @RunWith(MockitoJUnitRunner.class)   JUnit4 construct
+@ExtendWith(MockitoExtension.class)
+public class AddOptionsToBayeuxServerMockTest extends ChatServerInitActionMockTestBase{
        
-    // @RunWith(MockitoJUnitRunner.class)   JUnit4 construct
-    @ExtendWith(MockitoExtension.class)
-    private static final class ContextImpl implements BayeuxInitActionMockTestBase.Context{
+    private static final Logger LOG = LoggerFactory.getLogger(ContextImpl.class);
+    
+    private static final class ContextImpl 
+            implements ChatServerInitActionMockTestBase.Context{
 
-        private static final Logger LOG = LoggerFactory.getLogger(ContextImpl.class);
-        
-        private final BayeuxInitActionMockTestBase test;
-        
-        public ContextImpl() {
-            this(null);
-        }
-        public ContextImpl(BayeuxInitActionMockTestBase test) {
-            this.test = test;
-        }
-        @Override
-        public BayeuxInitActionMockTestBase.Context with(BayeuxInitActionMockTestBase test) {
-            return new ContextImpl(test);
-        }
         @Override
         public List getArgs(){
-            return Arrays.asList(new MembersServiceInMemoryCache());
+            return Arrays.asList(mock(MembersService.class), mock(SafeContentService.class));
         }
+
         @Override
-        public void onApplyMethodCalled(BayeuxServer server, List args) {
+        public void mockWhenApplyMethodIsCalled(BayeuxServer server, List args) {
             for(Object opt : args) {
+                LOG.debug("\nAdding option to BayeuxServer: {} = {}", 
+                        opt.getClass().getSimpleName(), opt);
                 server.setOption(opt.getClass().getSimpleName(), opt);
             }
         }
         @Override
         public void assertThatResultsAreValid(BayeuxServer server, List args) {
-            for(Object opt : args) {
-                assertThat(server.getOption(opt.getClass().getSimpleName()), is(opt));
-            }
+
+            final Set<String> expOptionNames = (Set<String>)args.stream()
+                    .map((obj) -> obj.getClass().getSimpleName())
+                    .collect(Collectors.toSet());
+            
+            LOG.debug("Option names.\nExpected: {}\n   Found: {}",
+                    expOptionNames, server.getOptionNames());
+            
+            assertThat(server.getOptionNames(), is(expOptionNames));
         }
     }
     
     public AddOptionsToBayeuxServerMockTest() { 
         super(new ContextImpl());
     }
-
-    @Override
-    public AddOptionsToBayeuxServer createBayeuxInitAction() {
-        final AddOptionsToBayeuxServer bayeuxInitAction = mock(AddOptionsToBayeuxServer.class);
-        return bayeuxInitAction;
-    }
+}
+/**
+ * 
     
     @Override
-    public BayeuxServer createBayeuxServer(List args) {
-        final BayeuxServer bayeuxServer = super.createBayeuxServer(args);
-        //@TODO remove lenient... Without lenient throws UnnecessaryStubbingException
+    public BayeuxServer mockBayeuxServer(BayeuxServer bayeuxServer, List args) {
+        
+//@TODO remove lenient... Without lenient throws UnnecessaryStubbingException
+        
+        final Set<String> expOptionNames = (Set<String>)args.stream()
+                .map((obj) -> obj.getClass().getSimpleName())
+                .collect(Collectors.toSet());
+        
+        lenient().when(bayeuxServer.getOptionNames()).thenReturn(expOptionNames);
+        
         for(Object opt : args) {
             lenient().when(bayeuxServer.getOption(opt.getClass().getSimpleName())).thenReturn(opt);
         }
+        
         return bayeuxServer;
     }
-}
+ * 
+ */

@@ -15,7 +15,6 @@
  */
 package com.looseboxes.cometd.chat.service.initializers;
 
-import com.looseboxes.cometd.chat.service.MembersServiceInMemoryCache;
 import java.util.Arrays;
 import java.util.List;
 import org.cometd.annotation.Configure;
@@ -24,40 +23,27 @@ import org.cometd.annotation.ServerAnnotationProcessor;
 import org.cometd.annotation.Service;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.ConfigurableServerChannel;
-import static org.mockito.Mockito.mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mock;
 
 /**
  * @author USER
  */
-public class ProcessAnnotatedServicesTest extends BayeuxInitActionMockTestBase{
+public class ProcessAnnotatedServicesTest extends ChatServerInitActionMockTestBase{
     
     private static final Logger LOG = LoggerFactory.getLogger(ProcessAnnotatedServicesTest.class);
     
-    private static final class ContextImpl implements BayeuxInitActionMockTestBase.Context{
-        private final BayeuxInitActionMockTestBase test;
-        public ContextImpl() {
-            this(null);
-        }
-        public ContextImpl(BayeuxInitActionMockTestBase test) {
-            this.test = test;
-        }
-        @Override
-        public BayeuxInitActionMockTestBase.Context with(BayeuxInitActionMockTestBase test) {
-            return new ContextImpl(test);
-        }
+    private static final class ContextImpl implements ChatServerInitActionMockTestBase.Context{
         @Override
         public List getArgs(){
-            return Arrays.asList(new MembersServiceInMemoryCache());
+            return Arrays.asList(new DummyAnnotatedService());
         }
         @Override
-        public void onApplyMethodCalled(BayeuxServer server, List args) {
+        public void mockWhenApplyMethodIsCalled(BayeuxServer server, List args) {
             final ServerAnnotationProcessor processor = new ServerAnnotationProcessor(server);
-            processor.process(new DummyAnnotatedService());
+            for(Object svc : args) {
+                processor.process(svc);
+            }
         }
         @Override
         public void assertThatResultsAreValid(BayeuxServer server, List args) { }
@@ -66,15 +52,12 @@ public class ProcessAnnotatedServicesTest extends BayeuxInitActionMockTestBase{
     public ProcessAnnotatedServicesTest() { 
         super(new ContextImpl());
     }
-
-    @Override
-    public ProcessAnnotatedServices createBayeuxInitAction() {
-        final ProcessAnnotatedServices bayeuxInitAction = mock(ProcessAnnotatedServices.class);
-        return bayeuxInitAction;
-    }
     
     @Service("DummyAnnotatedService")
-    private static final class DummyAnnotatedService{
+    /**
+     * Service classes must be public
+     */
+    public static final class DummyAnnotatedService{
         @Configure("/service/echo")
         private void configureActor(ConfigurableServerChannel channel) {
             LOG.info("Configuring: {}", channel);

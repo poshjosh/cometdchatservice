@@ -19,37 +19,21 @@ import java.util.Collections;
 import java.util.List;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.server.BayeuxServerImpl;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mock;
 
 /**
  * @author USER
  */
-public class DumpBayeuxServerStateTest extends BayeuxInitActionMockTestBase{
+public class DumpBayeuxServerStateTest extends ChatServerInitActionMockTestBase{
     
-    private static final String SAMPLE_DUMP = "Sample Dump";
+//    private static final String SAMPLE_DUMP = "Sample Dump";
        
-    private static final class ContextImpl implements BayeuxInitActionMockTestBase.Context{
-        private final BayeuxInitActionMockTestBase test;
-        public ContextImpl() {
-            this(null);
-        }
-        public ContextImpl(BayeuxInitActionMockTestBase test) {
-            this.test = test;
-        }
-        @Override
-        public BayeuxInitActionMockTestBase.Context with(BayeuxInitActionMockTestBase test) {
-            return new ContextImpl(test);
-        }
+    private static final class ContextImpl implements ChatServerInitActionMockTestBase.Context{
         @Override
         public List getArgs(){
             return Collections.EMPTY_LIST;
         }
         @Override
-        public void onApplyMethodCalled(BayeuxServer server, List args) {
+        public void mockWhenApplyMethodIsCalled(BayeuxServer server, List args) {
             if(server instanceof BayeuxServerImpl) {
                 ((BayeuxServerImpl)server).dump();
             }
@@ -61,19 +45,5 @@ public class DumpBayeuxServerStateTest extends BayeuxInitActionMockTestBase{
     public DumpBayeuxServerStateTest() { 
         super(new ContextImpl());
     }
-
-    @Override
-    public DumpBayeuxServerState createBayeuxInitAction() {
-        final DumpBayeuxServerState bayeuxInitAction = mock(DumpBayeuxServerState.class);
-        return bayeuxInitAction;
-    }
-    
-    @Override
-    public BayeuxServer createBayeuxServer(List args) {
-        final BayeuxServerImpl bayeuxServer = mock(BayeuxServerImpl.class);
-        //@TODO remove lenient... Without lenient throws UnnecessaryStubbingException
-        lenient().when(bayeuxServer.dump()).thenReturn(SAMPLE_DUMP);
-        return bayeuxServer;
-    } 
 }
 

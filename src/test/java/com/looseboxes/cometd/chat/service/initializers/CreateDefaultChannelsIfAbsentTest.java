@@ -15,68 +15,84 @@
  */
 package com.looseboxes.cometd.chat.service.initializers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.cometd.bayeux.ChannelId;
 import org.cometd.bayeux.MarkedReference;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.ConfigurableServerChannel;
+import org.cometd.bayeux.server.ServerChannel;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author USER
  */
-public class CreateDefaultChannelsIfAbsentTest extends BayeuxInitActionMockTestBase<String>{
+public class CreateDefaultChannelsIfAbsentTest extends ChatServerInitActionMockTestBase<String>{
 
-    private static final ConfigurableServerChannel.Initializer init = new ConfigurableServerChannel.Initializer.Persistent();
+    private static final Logger LOG = LoggerFactory
+            .getLogger(CreateDefaultChannelsIfAbsentTest.class);
     
-    private static final class ContextImpl implements BayeuxInitActionMockTestBase.Context<String>{
-        private final BayeuxInitActionMockTestBase test;
-        public ContextImpl() {
-            this(null);
-        }
-        public ContextImpl(BayeuxInitActionMockTestBase test) {
-            this.test = test;
-        }
-        @Override
-        public BayeuxInitActionMockTestBase.Context<String> with(BayeuxInitActionMockTestBase test) {
-            return new ContextImpl(test);
-        }
+    private static final ConfigurableServerChannel.Initializer CHANNEL_INIT = 
+            new ConfigurableServerChannel.Initializer.Persistent();
+    
+    private static final class ContextImpl 
+            implements ChatServerInitActionMockTestBase.Context<String>{
         @Override
         public List<String> getArgs(){
             return Arrays.asList("/service/privatechat");
         }
         @Override
-        public void onApplyMethodCalled(BayeuxServer server, List<String> args) {
+        public void mockWhenApplyMethodIsCalled(BayeuxServer server, List<String> args) {
             for(String channel : args) {
-                server.createChannelIfAbsent(channel, init);
+                LOG.debug("\nCreating channel if absent: {}", channel);
+                server.createChannelIfAbsent(channel, CHANNEL_INIT);
+                // Caused NullPointerException
+//                assertThat(server.getChannel(channel), isNotNull());
             }
         }
         @Override
-        public void assertThatResultsAreValid(BayeuxServer server, List<String> args) { }
+        public void assertThatResultsAreValid(BayeuxServer server, List<String> args) { 
+            final List<String> channelIds = (List<String>)server.getChannels().stream()
+                    .map((channel) -> channel.getId()).collect(Collectors.toList());
+            LOG.debug("Server channels\nExpected: {}\n   Found: {}", args, channelIds);
+            assertThat(channelIds, is(args));
+        }
     }
     
     public CreateDefaultChannelsIfAbsentTest() { 
         super(new ContextImpl());
     }
-
-    @Override
-    public CreateDefaultChannelsIfAbsent createBayeuxInitAction() {
-        final CreateDefaultChannelsIfAbsent bayeuxInitAction = mock(CreateDefaultChannelsIfAbsent.class);
-        return bayeuxInitAction;
-    }
+}
+/**
+ * 
     
     @Override
-    public BayeuxServer createBayeuxServer(List<String> args) {
-        final BayeuxServer bayeuxServer = super.createBayeuxServer(args);
+    public BayeuxServer mockBayeuxServer(BayeuxServer bayeuxServer, List<String> args) {
+        
+        final List<ServerChannel> channels = new ArrayList();
+        
         //@TODO remove lenient... Without lenient throws UnnecessaryStubbingException
-        for(String channel : args) {
-            lenient().when(bayeuxServer.createChannelIfAbsent(channel, init))
-                    .thenReturn(MarkedReference.empty());
+        for(String channelId : args) {
+            final ServerChannel channel = mock(ServerChannel.class);
+            channels.add(channel);
+            lenient().when(channel.getId()).thenReturn(channelId);
+            lenient().when(channel.getChannelId()).thenReturn(new ChannelId(channelId));
+            lenient().when(bayeuxServer.createChannelIfAbsent(channelId, CHANNEL_INIT))
+                    .thenReturn(new MarkedReference(channel, true));
+            lenient().when(bayeuxServer.getChannel(channelId))
+                    .thenReturn(channel);
         }
+        
+        lenient().when(bayeuxServer.getChannels()).thenReturn(channels);
+        
         return bayeuxServer;
     } 
-}
+ * 
+ */
