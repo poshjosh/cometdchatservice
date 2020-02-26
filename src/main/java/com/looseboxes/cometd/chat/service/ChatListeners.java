@@ -16,8 +16,6 @@
 package com.looseboxes.cometd.chat.service;
 
 import java.util.function.BiConsumer;
-import org.cometd.bayeux.Message;
-import org.cometd.bayeux.client.ClientSessionChannel;
 
 /**
  * @author USER
@@ -25,9 +23,6 @@ import org.cometd.bayeux.client.ClientSessionChannel;
 public interface ChatListeners {
 
     boolean addListener(ChatListener listener);
-
-    void fireEvent(ChatSession chatSession, ClientSessionChannel channel, 
-            Message message, BiConsumer<ChatListener, ChatListener.Event> action);
 
     void fireEvent(ChatListener.Event event, BiConsumer<ChatListener, ChatListener.Event> action);
 

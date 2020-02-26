@@ -325,14 +325,14 @@ public final class ChatSessionImpl implements ChatSession {
     private void metaHandshake(ClientSessionChannel channel, Message message) {
         this.update("metaHandshake(..)", channel, message, handshakeFuture);
 
-        this.listeners.fireEvent(this, channel, message, 
+        this.listeners.fireEvent(this.createEvent(this, channel, message), 
                 (listener, event) -> listener.onHandshake(event));
     }
     
     private void metaConnect(ClientSessionChannel channel, Message message) {
         this.trace("metaConnect(..)", message);
          
-        this.listeners.fireEvent(this, channel, message, 
+        this.listeners.fireEvent(this.createEvent(this, channel, message), 
                 (listener, event) -> listener.onConnect(event));
 
         if (this.status.isDisconnecting()) {
@@ -354,7 +354,7 @@ public final class ChatSessionImpl implements ChatSession {
         this.update("metaSubscribe(..)", channel, message, 
                 (csc, msg) -> this.updateSubscriptionStatus(msg, true));
         
-        this.listeners.fireEvent(this, channel, message, 
+        this.listeners.fireEvent(this.createEvent(this, channel, message), 
                 (listener, event) -> listener.onSubscribe(event));
     }
 
@@ -363,7 +363,7 @@ public final class ChatSessionImpl implements ChatSession {
         this.update("metaUnsubscribe(..)", channel, message, 
                 (csc, msg) -> this.updateSubscriptionStatus(msg, false));
 
-        this.listeners.fireEvent(this, channel, message, 
+        this.listeners.fireEvent(this.createEvent(this, channel, message), 
                 (listener, event) -> listener.onUnsubscribe(event));
     }
     
@@ -382,14 +382,14 @@ public final class ChatSessionImpl implements ChatSession {
 
         this.removeListeners();
         
-        this.listeners.fireEvent(this, channel, message, 
+        this.listeners.fireEvent(this.createEvent(this, channel, message), 
                 (listener, event) -> listener.onDisconnect(event));
     }
     
     private void chatReceived(ClientSessionChannel channel, Message message) {
         this.trace("chatReceived(..)", message);
 
-        this.listeners.fireEvent(this, channel, message, 
+        this.listeners.fireEvent(this.createEvent(this, channel, message), 
                 (listener, event) -> listener.onChatReceived(event));
     }
 
@@ -400,7 +400,7 @@ public final class ChatSessionImpl implements ChatSession {
 //        msg.put(Chat.CHAT, "Connection to Server Closed");
 //        receive(msg);
 
-        this.listeners.fireEvent(this, channel, message, 
+        this.listeners.fireEvent(this.createEvent(this, channel, message), 
                 (listener, event) -> listener.onConnectionClosed(event));
     }
 
@@ -408,7 +408,7 @@ public final class ChatSessionImpl implements ChatSession {
         this.trace("connectionBroken(..)", message);
 //        chatUtil.clearMemberListHtml();
 
-        this.listeners.fireEvent(this, channel, message, 
+        this.listeners.fireEvent(this.createEvent(this, channel, message), 
                 (listener, event) -> listener.onConnectionBroken(event));
     }
 
@@ -421,8 +421,14 @@ public final class ChatSessionImpl implements ChatSession {
         final Message msg = this.getUserRoomMessage(ch);
         channel.getSession().getChannel(ch).publish(msg);
         
-        this.listeners.fireEvent(this, channel, message, 
+        this.listeners.fireEvent(this.createEvent(this, channel, message), 
                 (listener, event) -> listener.onConnectionEstablished(event));
+    }
+    
+    private ChatListener.Event createEvent(ChatSession chatSession,
+            ClientSessionChannel channel, Message message) {
+
+        return new ChatEvent(chatSession, channel, message);
     }
     
     private void removeListeners(){
@@ -521,6 +527,32 @@ public final class ChatSessionImpl implements ChatSession {
     @Override
     public Status getStatus() {
         return this.status;
+    }
+    
+    private static final class ChatEvent implements ChatListener.Event{
+        
+        private final ChatSession chatSession;
+        private final ClientSessionChannel channel;
+        private final Message message;
+
+        public ChatEvent(ChatSession chatSession, ClientSessionChannel channel, Message message) {
+            this.chatSession = Objects.requireNonNull(chatSession);
+            this.channel = Objects.requireNonNull(channel);
+            this.message = Objects.requireNonNull(message);
+        }
+        
+        @Override
+        public ChatSession getSession() {
+            return chatSession;
+        }
+        @Override
+        public ClientSessionChannel getChannel() {
+            return channel;
+        }
+        @Override
+        public Message getMessage() {
+            return message;
+        }
     }
     
     private static final class StatusBean implements Status, Serializable{
