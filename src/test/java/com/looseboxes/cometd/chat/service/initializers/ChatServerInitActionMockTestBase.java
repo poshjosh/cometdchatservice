@@ -22,7 +22,6 @@ import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.server.BayeuxServerImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.Mockito.times;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.ArgumentMatchers.isA;
@@ -32,11 +31,6 @@ import org.slf4j.LoggerFactory;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author USER
@@ -139,16 +133,15 @@ public class ChatServerInitActionMockTestBase<T>{
 
         final BayeuxServer found = bayeuxInitAction.apply(bayeuxServer, args);
 
-        verifyActionWasInvokedOnce(bayeuxInitAction, bayeuxServer, found, args);
+        verifyInvocationCount(bayeuxInitAction, bayeuxServer, found, args);
 
         return found;
     }
     
-    public void verifyActionWasInvokedOnce(
+    public void verifyInvocationCount(
             ChatServerInitAction<T> bayeuxInitAction, 
-            BayeuxServer a, BayeuxServer b, List<T> args){
+            BayeuxServer pre, BayeuxServer post, List<T> args){
 
-        verify(bayeuxInitAction, times(1)).apply(a, args);
     }
     
     public ChatServerInitAction<T> getServerInitAction(BayeuxServer bayeuxServer, List<T> args) {

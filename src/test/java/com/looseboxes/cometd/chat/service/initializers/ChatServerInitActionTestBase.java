@@ -15,9 +15,6 @@
  */
 package com.looseboxes.cometd.chat.service.initializers;
 
-import java.util.List;
-import org.cometd.bayeux.server.BayeuxServer;
-
 /**
  * @author USER
  */
@@ -37,10 +34,5 @@ public class ChatServerInitActionTestBase<T> extends ChatServerInitActionMockTes
     @Override
     public ChatServerInitAction mockBayeuxInitAction(ChatServerInitAction bayeuxInitAction) { 
         return bayeuxInitAction;
-    }
-
-    @Override
-    public void verifyActionWasInvokedOnce(ChatServerInitAction<T> bayeuxInitAction, 
-            BayeuxServer expResult, BayeuxServer result, List<T> args) {
     }
 }
