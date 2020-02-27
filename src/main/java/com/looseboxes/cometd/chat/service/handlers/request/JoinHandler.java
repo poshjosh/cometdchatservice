@@ -59,8 +59,7 @@ public class JoinHandler extends AbstractRequestHandler{
 
         final Future<Message> joinFuture = chatSession.join();
         
-        final long timeout = ChatSession.BUG_001_FIXED ? 
-                cometdProps.getJoinTimeout() : cometdProps.getHandshakeTimeout();
+        final long timeout = cometdProps.getJoinTimeout();
         
         return this.awaitFutureThenBuildResponseFromResult(
                 "Join-chat", joinFuture, timeout, resBuilder);

@@ -192,11 +192,7 @@ public final class ChatSessionImpl implements ChatSession {
         
         return this.connect().thenComposeAsync(msg -> {
             if(msg.isSuccessful()) {
-                if(ChatSession.BUG_001_FIXED) {
-                    return subscribe();
-                }else{
-                    subscribe();
-                }
+                subscribe();
             }
             return CompletableFuture.completedFuture(msg);
         });
@@ -527,32 +523,6 @@ public final class ChatSessionImpl implements ChatSession {
     @Override
     public Status getStatus() {
         return this.status;
-    }
-    
-    private static final class ChatEvent implements ChatListener.Event{
-        
-        private final ChatSession chatSession;
-        private final ClientSessionChannel channel;
-        private final Message message;
-
-        public ChatEvent(ChatSession chatSession, ClientSessionChannel channel, Message message) {
-            this.chatSession = Objects.requireNonNull(chatSession);
-            this.channel = Objects.requireNonNull(channel);
-            this.message = Objects.requireNonNull(message);
-        }
-        
-        @Override
-        public ChatSession getSession() {
-            return chatSession;
-        }
-        @Override
-        public ClientSessionChannel getChannel() {
-            return channel;
-        }
-        @Override
-        public Message getMessage() {
-            return message;
-        }
     }
     
     private static final class StatusBean implements Status, Serializable{
