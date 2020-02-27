@@ -54,9 +54,6 @@ import org.cometd.bayeux.client.ClientSession;
  */
 public interface ChatSession {
     
-    /** Flag to indicate if issue #001 has been fixed */
-    boolean BUG_001_FIXED = false;
-
     interface Status{
         boolean isConnected();
         boolean isDisconnecting();
