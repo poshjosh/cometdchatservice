@@ -24,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author USER
@@ -43,7 +45,7 @@ public class CreateDefaultChannelsIfAbsentMockTest extends ChatServerInitActionM
             return Arrays.asList("/service/privatechat");
         }
         @Override
-        public void mockWhenApplyMethodIsCalled(BayeuxServer server, List<String> args) {
+        public void onApplyMethodCalled(BayeuxServer server, List<String> args) {
             for(String channel : args) {
                 LOG.debug("\nCreating channel if absent: {}", channel);
                 server.createChannelIfAbsent(channel, CHANNEL_INIT);

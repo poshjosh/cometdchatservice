@@ -48,7 +48,7 @@ public class AddOptionsToBayeuxServerMockTest extends ChatServerInitActionMockTe
         }
 
         @Override
-        public void mockWhenApplyMethodIsCalled(BayeuxServer server, List args) {
+        public void onApplyMethodCalled(BayeuxServer server, List args) {
             for(Object opt : args) {
                 LOG.debug("\nAdding option to BayeuxServer: {} = {}", 
                         opt.getClass().getSimpleName(), opt);

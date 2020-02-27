@@ -33,6 +33,10 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author USER
@@ -45,7 +49,7 @@ public class ChatServerInitActionMockTestBase<T>{
     
     public static interface Context<T>{
         List<T> getArgs();
-        void mockWhenApplyMethodIsCalled(BayeuxServer server, List<T> args);
+        void onApplyMethodCalled(BayeuxServer server, List<T> args);
         void assertThatResultsAreValid(BayeuxServer server, List<T> args);
     }
     
@@ -170,7 +174,7 @@ public class ChatServerInitActionMockTestBase<T>{
                 final List<T> listArg = (List<T>)iom.getArgument(1);
                 LOG.debug("\n   Args: {}", listArg);
                 Objects.requireNonNull(listArg);
-                context.mockWhenApplyMethodIsCalled(server, listArg);
+                context.onApplyMethodCalled(server, listArg);
                 return server;
             }
         );

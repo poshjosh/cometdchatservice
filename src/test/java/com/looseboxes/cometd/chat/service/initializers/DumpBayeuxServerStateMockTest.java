@@ -33,7 +33,7 @@ public class DumpBayeuxServerStateMockTest extends ChatServerInitActionMockTestB
             return Collections.EMPTY_LIST;
         }
         @Override
-        public void mockWhenApplyMethodIsCalled(BayeuxServer server, List args) {
+        public void onApplyMethodCalled(BayeuxServer server, List args) {
             if(server instanceof BayeuxServerImpl) {
                 ((BayeuxServerImpl)server).dump();
             }

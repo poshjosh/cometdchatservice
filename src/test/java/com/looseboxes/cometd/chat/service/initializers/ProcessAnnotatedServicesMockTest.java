@@ -39,7 +39,7 @@ public class ProcessAnnotatedServicesMockTest extends ChatServerInitActionMockTe
             return Arrays.asList(new DummyAnnotatedService());
         }
         @Override
-        public void mockWhenApplyMethodIsCalled(BayeuxServer server, List args) {
+        public void onApplyMethodCalled(BayeuxServer server, List args) {
             final ServerAnnotationProcessor processor = new ServerAnnotationProcessor(server);
             for(Object svc : args) {
                 processor.process(svc);

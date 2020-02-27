@@ -27,6 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author USER
@@ -48,7 +50,7 @@ public class AddExtensionsToChatServerMockTest
             return Arrays.asList(new TimesyncExtension(), new AcknowledgedMessagesExtension());
         }
         @Override
-        public void mockWhenApplyMethodIsCalled(BayeuxServer server, List<Extension> args) {
+        public void onApplyMethodCalled(BayeuxServer server, List<Extension> args) {
             for(Extension ext : args) {
                 LOG.debug("\nAdding to mock BayeuxServer: {}", ext);
                 server.addExtension(ext);
