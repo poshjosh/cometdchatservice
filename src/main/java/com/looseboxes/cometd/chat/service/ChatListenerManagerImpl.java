@@ -22,11 +22,11 @@ import java.util.List;
 /**
  * @author USER
  */
-public class ChatListenersImpl implements ChatListeners{
+public class ChatListenerManagerImpl implements ChatListenerManager{
     
     private final List<ChatListener> listeners;
     
-    public ChatListenersImpl() {
+    public ChatListenerManagerImpl() {
         this.listeners = Collections.synchronizedList(new ArrayList<>());
     }
 

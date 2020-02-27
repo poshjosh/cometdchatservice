@@ -20,7 +20,7 @@ import java.util.function.BiConsumer;
 /**
  * @author USER
  */
-public interface ChatListeners {
+public interface ChatListenerManager {
     
     interface EventHandler extends BiConsumer<ChatListener, ChatListener.Event>{
         
