@@ -25,6 +25,8 @@ public interface ChatListenerManager {
     interface EventHandler extends BiConsumer<ChatListener, ChatListener.Event>{
         
     }
+    
+    boolean containsListener(ChatListener listener);
 
     boolean addListener(ChatListener listener);
 

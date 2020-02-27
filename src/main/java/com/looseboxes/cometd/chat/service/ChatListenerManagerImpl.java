@@ -31,6 +31,11 @@ public class ChatListenerManagerImpl implements ChatListenerManager{
     }
 
     @Override
+    public boolean containsListener(ChatListener listener) {
+        return listeners.contains(listener);
+    }
+
+    @Override
     public int size() {
         return listeners.size();
     }
@@ -48,7 +53,7 @@ public class ChatListenerManagerImpl implements ChatListenerManager{
             return this.listeners.remove(listener);
         }
     }
-
+    
     @Override
     public void fireEvent(ChatListener.Event event, EventHandler eventHandler) {
         synchronized(listeners) {
