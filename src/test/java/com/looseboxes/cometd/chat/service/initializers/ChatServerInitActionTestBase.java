@@ -26,11 +26,6 @@ public class ChatServerInitActionTestBase<T> extends ChatServerInitActionMockTes
         super(context);
     }
 
-//    @Override
-//    public BayeuxServer mockBayeuxServer(BayeuxServer bayeuxServer, List<T> args) { 
-//        return bayeuxServer;
-//    }
-
     @Override
     public ChatServerInitAction mockBayeuxInitAction(ChatServerInitAction bayeuxInitAction) { 
         return bayeuxInitAction;
