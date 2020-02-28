@@ -15,8 +15,10 @@
  */
 package com.looseboxes.cometd.chat.service.initializers;
 
+import com.looseboxes.cometd.chat.service.BadWordFilter;
 import com.looseboxes.cometd.chat.service.MembersService;
 import com.looseboxes.cometd.chat.service.MembersServiceInMemoryCache;
+import com.looseboxes.cometd.chat.service.MessageListenerWithDataFilters;
 import com.looseboxes.cometd.chat.service.SafeContentService;
 import com.looseboxes.cometd.chat.service.SafeContentServiceImpl;
 import java.util.Collections;
@@ -31,6 +33,7 @@ import org.cometd.bayeux.server.ServerSession;
 import org.cometd.server.authorizer.GrantAuthorizer;
 import org.cometd.server.ext.AcknowledgedMessagesExtension;
 import org.cometd.server.ext.TimesyncExtension;
+import org.cometd.server.filter.NoMarkupFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,10 +58,14 @@ public class InitConfiguration {
             @Value("${cometd.defaultChannel}") String channel) {
         
         final ChatServerInitializer bayeuxInit = (bayeuxServer) -> {
+            
+            final SafeContentService safeContentService = 
+                    safeContentService(url, endpoint, timeout);
+            
             addExtensionsToBayeuxServer().apply(bayeuxServer, 
                     timesyncExtension(), acknowledgedMessagesExtension());
             addOptionsToBayeuxServer().apply(bayeuxServer, 
-                    membersService(), safeContentService(url, endpoint, timeout));
+                    membersService(), messageListenerWithDataFilters(safeContentService));
             createDefaultChannelsIfAbsent().apply(bayeuxServer, channel);
             processAnnotatedServices().apply(bayeuxServer, 
                     echoRPC(), monitor());
@@ -66,6 +73,20 @@ public class InitConfiguration {
         };
         
         return bayeuxInit;
+    }
+    
+    @Bean public MessageListenerWithDataFilters messageListenerWithDataFilters(
+            SafeContentService safeContentService) {
+        return new MessageListenerWithDataFilters(
+                noMarkupFilter(), badWordFilter(safeContentService));
+    }
+    
+    @Bean public BadWordFilter badWordFilter(SafeContentService safeContentService) {
+        return new BadWordFilter(safeContentService);
+    }
+    
+    @Bean public NoMarkupFilter noMarkupFilter() {
+        return new NoMarkupFilter();
     }
     
     @Bean public DumpChatServerState dumpBayeuxServerState() {
