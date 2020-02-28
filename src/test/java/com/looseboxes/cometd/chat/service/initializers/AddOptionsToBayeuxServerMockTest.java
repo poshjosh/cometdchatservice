@@ -15,6 +15,7 @@
  */
 package com.looseboxes.cometd.chat.service.initializers;
 
+import com.looseboxes.cometd.chat.service.ChatServerOptionNames;
 import com.looseboxes.cometd.chat.service.MembersService;
 import com.looseboxes.cometd.chat.service.SafeContentService;
 import java.util.Arrays;
@@ -52,14 +53,14 @@ public class AddOptionsToBayeuxServerMockTest extends ChatServerInitActionMockTe
             for(Object opt : args) {
                 LOG.debug("\nAdding option to BayeuxServer: {} = {}", 
                         opt.getClass().getSimpleName(), opt);
-                server.setOption(opt.getClass().getSimpleName(), opt);
+                server.setOption(ChatServerOptionNames.from(opt), opt);
             }
         }
         @Override
         public void assertThatResultsAreValid(BayeuxServer server, List args) {
 
             final Set<String> expOptionNames = (Set<String>)args.stream()
-                    .map((obj) -> obj.getClass().getSimpleName())
+                    .map((obj) -> ChatServerOptionNames.from(obj))
                     .collect(Collectors.toSet());
             
             LOG.debug("Option names.\nExpected: {}\n   Found: {}",
@@ -82,13 +83,13 @@ public class AddOptionsToBayeuxServerMockTest extends ChatServerInitActionMockTe
 //@TODO remove lenient... Without lenient throws UnnecessaryStubbingException
         
         final Set<String> expOptionNames = (Set<String>)args.stream()
-                .map((obj) -> obj.getClass().getSimpleName())
+                .map((obj) -> ChatServerOptionNames.from(obj))
                 .collect(Collectors.toSet());
         
         lenient().when(bayeuxServer.getOptionNames()).thenReturn(expOptionNames);
         
         for(Object opt : args) {
-            lenient().when(bayeuxServer.getOption(opt.getClass().getSimpleName())).thenReturn(opt);
+            lenient().when(bayeuxServer.getOption(ChatServerOptionNames.from(opt)).thenReturn(opt);
         }
         
         return bayeuxServer;

@@ -16,13 +16,10 @@
 package com.looseboxes.cometd.chat.service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 
 import javax.inject.Inject;
 
@@ -35,16 +32,11 @@ import org.cometd.bayeux.Promise;
 import org.cometd.bayeux.client.ClientSessionChannel;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.ConfigurableServerChannel;
-import org.cometd.bayeux.server.ServerChannel;
 import org.cometd.bayeux.server.ServerMessage;
 import org.cometd.bayeux.server.ServerSession;
 import org.cometd.server.authorizer.GrantAuthorizer;
-import org.cometd.server.filter.DataFilter;
-import org.cometd.server.filter.JSONDataFilter;
-import org.cometd.server.filter.NoMarkupFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.lang.Nullable;
 
 @Service("chat")
 public final class ChatService {
@@ -52,37 +44,42 @@ public final class ChatService {
     private static final Logger LOG = LoggerFactory.getLogger(ChatService.class);
     
     @Inject
-    private BayeuxServer _bayeux;
+    private BayeuxServer bayeuxServer;
     
     @Session
-    private ServerSession _session;
+    private ServerSession serverSession;
 
     @Configure({"/chat/**", "/members/**"})
     protected void configureChatStarStar(ConfigurableServerChannel channel) {
         if(LOG.isDebugEnabled()) {
-            LOG.debug("configureChatStarStar(ConfigurableServerChannel)");
+            LOG.debug("configureChatStarStar(ConfigurableServerChannel={})", channel);
         }
-        final MessageListenerForDataFilters filter = new MessageListenerForDataFilters(
-                new NoMarkupFilter(), new BadWordFilter(getSafeContentService()));
-        channel.addListener(filter);
+        Objects.requireNonNull(channel);
+        final ConfigurableServerChannel.ServerChannelListener listener =
+                getServerChannelListener();
+        channel.addListener(listener);
         channel.addAuthorizer(GrantAuthorizer.GRANT_ALL);
     }
 
     @Configure(Chat.MEMBERS_SERVICE_CHANNEL)
     protected void configureMembers(ConfigurableServerChannel channel) {
         if(LOG.isDebugEnabled()) {
-            LOG.debug("configureMembers(ConfigurableServerChannel)");
+            LOG.debug("configureMembers(ConfigurableServerChannel={})", channel);
         }
+        Objects.requireNonNull(channel);
         channel.addAuthorizer(GrantAuthorizer.GRANT_PUBLISH);
         channel.setPersistent(true);
     }
 
     @Listener(Chat.MEMBERS_SERVICE_CHANNEL)
-    public void handleMembership(ServerSession client, ServerMessage message) {
+    public void handleMembership(ServerSession session, ServerMessage message) {
         try{
             if(LOG.isDebugEnabled()) {
                 LOG.debug("handleMembership(ServerSession, ServerMessage={})", message);
             }
+            Objects.requireNonNull(session);
+            Objects.requireNonNull(message);
+
             final Map<String, Object> data = getData(message);
 
             final String room = data == null ? null : getRoom(data, null);
@@ -91,10 +88,10 @@ public final class ChatService {
             
             final String userName = (String)data.get(Chat.USER);
 
-            membersSvc.addMember(room, userName, client.getId());
+            membersSvc.addMember(room, userName, session.getId());
 
-            client.addListener((ServerSession.RemoveListener)(session, timeout) -> {
-                membersSvc.removeMemberByValue(room, session.getId());
+            session.addListener((ServerSession.RemoveListener)(sess, timeout) -> {
+                membersSvc.removeMemberByValue(room, sess.getId());
                 broadcastMembers(room);
             });
 
@@ -112,27 +109,31 @@ public final class ChatService {
         }
         final Set<String> users = roomMembers.keySet();
         // Broadcast the new members list
-        ClientSessionChannel channel = _session.getLocalSession().getChannel("/members/" + room);
+        ClientSessionChannel channel = this.getServerSession()
+                .getLocalSession().getChannel("/members/" + room);
         channel.publish(users);
         return true;
     }
 
     @Configure(ClientSessionChannel.SERVICE+"/privatechat")
     protected void configurePrivateChat(ConfigurableServerChannel channel) {
-        LOG.debug("configurePrivateChat(ConfigurableServerChannel)");
-        final MessageListenerForDataFilters noMarkup = new MessageListenerForDataFilters(
-                new NoMarkupFilter(), new BadWordFilter(getSafeContentService()));
+        LOG.debug("configurePrivateChat(ConfigurableServerChannel={})", channel);
+        Objects.requireNonNull(channel);
+        final ConfigurableServerChannel.ServerChannelListener listener =
+                getServerChannelListener();
         channel.setPersistent(true);
-        channel.addListener(noMarkup);
+        channel.addListener(listener);
         channel.addAuthorizer(GrantAuthorizer.GRANT_PUBLISH);
     }
 
     @Listener(ClientSessionChannel.SERVICE+"/privatechat")
-    public void privateChat(ServerSession client, ServerMessage message) {
+    public void privateChat(ServerSession session, ServerMessage message) {
         try{
             if(LOG.isTraceEnabled()) {
                 LOG.trace("privateChat(ServerSession, ServerMessage={})", message);
             }
+            Objects.requireNonNull(session);
+            Objects.requireNonNull(message);
             final Map<String, Object> data = getData(message);
 
             final String room = data == null ? null : getRoom(data, null);
@@ -142,6 +143,8 @@ public final class ChatService {
             final String[] peerNames = this.getPeerNames(data);
             final ArrayList<ServerSession> peers = new ArrayList<>(peerNames.length);
 
+            final BayeuxServer _bayeux = this.getBayeuxServer();
+            
             for (String peerName : peerNames) {
                 
                 final String peerId = membersSvc.getMembersValue(room, peerName);
@@ -173,13 +176,16 @@ public final class ChatService {
                 if(LOG.isTraceEnabled()) {
                     LOG.trace("Forwarding to {} peers, message:\n{}", peers.size(), forward);
                 }
+            
+                final ServerSession _session = this.getServerSession();
                 
                 for (ServerSession peer : peers) {
-                    if (peer != client) {
+                    if (peer != session) {
                         peer.deliver(_session, forward, Promise.noop());
                     }
                 }
-                client.deliver(_session, forward, Promise.noop());
+                
+                session.deliver(_session, forward, Promise.noop());
             }
         }catch(Exception e) {
             LOG.warn("Exception while handling private chat. ServerMessage: " + message, e);
@@ -206,115 +212,20 @@ public final class ChatService {
     }
     
     private MembersService getMembersService() {
-        return (MembersService)_bayeux.getOption(MembersService.class.getSimpleName());
-    }
-
-    private SafeContentService getSafeContentService() {
-        return (SafeContentService)_bayeux.getOption(SafeContentService.class.getSimpleName());
-    }
-
-    private static class BadWordFilter extends JSONDataFilter {
-        
-        private final SafeContentService safeContentService;
-
-        public BadWordFilter(SafeContentService safeContentService) {
-            this.safeContentService = Objects.requireNonNull(safeContentService);
-        }
-        
-        @Override
-        protected Object filterString(ServerSession session, ServerChannel channel, String string) {
-            
-            if(string == null || string.isEmpty()) {
-                return string;
-            }
-            
-            if(LOG.isTraceEnabled()) {
-                LOG.trace("Text to flag: {}", string);
-            }
-            
-            final String flags = safeContentService.flag(string);
-            
-            final boolean safe = flags == null || flags.isEmpty();
-            
-            if ( ! safe) {
-                throw new DataFilter.AbortException();
-            }
-            
-            return string;
-        }
+        return (MembersService)this.getBayeuxServer()
+                .getOption(ChatServerOptionNames.MEMBERS_SERVICE);
     }
     
-    /**
-     * This class fixes issue #002. 
-     * {@link org.cometd.server.filter.DataFilterMessageListener DataFilterMessageListener} 
-     * was sending only senders name for filtering. At this point we should be 
-     * filtering the chat message. This class is thus used in place of 
-     * {@link org.cometd.server.filter.DataFilterMessageListener DataFilterMessageListener}
-     * to achieve filtering of chat messages.
-     */
-    private static class MessageListenerForDataFilters implements ServerChannel.MessageListener {
-        
-        private final Logger _LOG = LoggerFactory.getLogger(MessageListenerForDataFilters.class);
-        
-        private static class MessageChatExtractor implements Function<ServerMessage.Mutable, Object>{
-            @Override
-            public Object apply(ServerMessage.Mutable message) {
-                return message.get(Chat.CHAT);
-            }
-        }
-        
-        @Nullable private final BayeuxServer bayeux;
-        
-        private final Function<ServerMessage.Mutable, Object> format;
-                
-        private final List<DataFilter> extractor;
+    private ConfigurableServerChannel.ServerChannelListener getServerChannelListener() {
+        return (ConfigurableServerChannel.ServerChannelListener)this.getBayeuxServer()
+                .getOption(ChatServerOptionNames.CHANNEL_MESSAGE_LISTENER);
+    }
 
-        public MessageListenerForDataFilters(DataFilter... filters) {
-            this(new MessageChatExtractor(), filters);
-        }
-        
-        public MessageListenerForDataFilters(Function<ServerMessage.Mutable, Object> extractor, DataFilter... filters) {
-            this(null, extractor, filters);
-        }
+    public final BayeuxServer getBayeuxServer() {
+        return bayeuxServer;
+    }
 
-        public MessageListenerForDataFilters(@Nullable BayeuxServer bayeux, 
-                Function<ServerMessage.Mutable, Object> extractor, DataFilter... filters) {
-            this.bayeux = bayeux;
-            this.format = Objects.requireNonNull(extractor);
-            this.extractor = Arrays.asList(filters);
-        }
-
-        @Override
-        public boolean onMessage(ServerSession from, 
-                ServerChannel channel, ServerMessage.Mutable message) {
-            try {
-                
-                Object data = this.format.apply(message);
-                
-                if(_LOG.isTraceEnabled()) {
-                    _LOG.trace("Extracted: {} from message: {}" + data, message);
-                }
-
-                final Object orig = data;
-                for (DataFilter filter : this.extractor) {
-                    data = filter.filter(from, channel, data);
-                    if (data == null) {
-                        return false;
-                    }
-                }
-                
-                if (data != orig) {
-                    message.setData(data);
-                }
-                
-                return true;
-                
-            } catch (DataFilter.AbortException a) {
-                if (_LOG.isDebugEnabled()) {
-                    _LOG.debug("Rejected by DataFilter, message: " + message, a);
-                }
-                return false;
-            }
-        }
+    public final ServerSession getServerSession() {
+        return serverSession;
     }
 }

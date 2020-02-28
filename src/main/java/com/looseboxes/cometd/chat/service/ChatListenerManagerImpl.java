@@ -18,6 +18,7 @@ package com.looseboxes.cometd.chat.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author USER
@@ -32,6 +33,7 @@ public class ChatListenerManagerImpl implements ChatListenerManager{
 
     @Override
     public boolean containsListener(ChatListener listener) {
+        Objects.requireNonNull(listener);
         return listeners.contains(listener);
     }
 
@@ -42,6 +44,7 @@ public class ChatListenerManagerImpl implements ChatListenerManager{
     
     @Override
     public boolean addListener(ChatListener listener) {
+        Objects.requireNonNull(listener);
         synchronized(listeners) {
             return this.listeners.add(listener);
         }    
@@ -49,6 +52,7 @@ public class ChatListenerManagerImpl implements ChatListenerManager{
     
     @Override
     public boolean removeListener(ChatListener listener) {
+        Objects.requireNonNull(listener);
         synchronized(listeners) {
             return this.listeners.remove(listener);
         }
@@ -56,6 +60,8 @@ public class ChatListenerManagerImpl implements ChatListenerManager{
     
     @Override
     public void fireEvent(ChatListener.Event event, EventHandler eventHandler) {
+        Objects.requireNonNull(event);
+        Objects.requireNonNull(eventHandler);
         synchronized(listeners) {
             for(ChatListener listener : listeners) {
                 eventHandler.accept(listener, event);

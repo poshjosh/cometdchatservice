@@ -15,6 +15,7 @@
  */
 package com.looseboxes.cometd.chat.service.handlers.request;
 
+import com.looseboxes.cometd.chat.service.ChatServerOptionNames;
 import com.looseboxes.cometd.chat.service.MembersService;
 import com.looseboxes.cometd.chat.service.ParamNames;
 import com.looseboxes.cometd.chat.service.controllers.Endpoints;
@@ -75,7 +76,7 @@ public final class MembersHandler extends AbstractRequestHandler{
                 .getAttribute(BayeuxServer.ATTRIBUTE);
         
         final MembersService membersService = (MembersService)bayeuxServer
-                .getOption(MembersService.class.getSimpleName());
+                .getOption(ChatServerOptionNames.MEMBERS_SERVICE);
         
         final Map result;
        

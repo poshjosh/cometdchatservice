@@ -15,6 +15,7 @@
  */
 package com.looseboxes.cometd.chat.service.initializers;
 
+import com.looseboxes.cometd.chat.service.ChatServerOptionNames;
 import java.util.List;
 import org.cometd.bayeux.server.BayeuxServer;
 
@@ -28,7 +29,7 @@ public final class AddOptionsToChatServer implements ChatServerInitAction<Object
     @Override
     public BayeuxServer apply(BayeuxServer bayeux, List options) {
         options.stream().forEach((option) -> {
-            bayeux.setOption(option.getClass().getSimpleName(), option);
+            bayeux.setOption(ChatServerOptionNames.from(option), option);
         });
         return bayeux;
     }
