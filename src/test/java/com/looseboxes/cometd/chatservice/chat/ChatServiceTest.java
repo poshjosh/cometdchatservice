@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice;
+package com.looseboxes.cometd.chatservice.chat;
 
-import com.looseboxes.cometd.chatservice.ChatService;
+import com.looseboxes.cometd.chatservice.chat.ChatService;
 import com.looseboxes.cometd.chatservice.test.TestChatObjects;
 import com.looseboxes.cometd.chatservice.test.TestConfig;
 import org.cometd.bayeux.server.ConfigurableServerChannel;

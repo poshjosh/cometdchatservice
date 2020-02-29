@@ -15,10 +15,10 @@
  */
 package com.looseboxes.cometd.chatservice.test;
 
-import com.looseboxes.cometd.chatservice.ChatConfig;
-import com.looseboxes.cometd.chatservice.ChatService;
-import com.looseboxes.cometd.chatservice.ChatSession;
-import com.looseboxes.cometd.chatservice.ChatSessionImpl;
+import com.looseboxes.cometd.chatservice.chat.ChatConfig;
+import com.looseboxes.cometd.chatservice.chat.ChatService;
+import com.looseboxes.cometd.chatservice.chat.ChatSession;
+import com.looseboxes.cometd.chatservice.chat.ChatSessionImpl;
 import java.util.Objects;
 import org.cometd.bayeux.ChannelId;
 import org.cometd.bayeux.client.ClientSession;

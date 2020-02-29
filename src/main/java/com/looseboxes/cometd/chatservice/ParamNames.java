@@ -15,6 +15,8 @@
  */
 package com.looseboxes.cometd.chatservice;
 
+import com.looseboxes.cometd.chatservice.chat.Chat;
+
 /**
  * @author USER
  */

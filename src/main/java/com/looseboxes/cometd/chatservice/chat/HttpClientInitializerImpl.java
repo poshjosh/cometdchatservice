@@ -13,23 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice;
+package com.looseboxes.cometd.chatservice.chat;
+
+import org.eclipse.jetty.client.HttpClient;
 
 /**
  * @author USER
  */
-public final class ChatServerOptionNames {
+public class HttpClientInitializerImpl implements HttpClientInitializer {
     
-    public static final String CHANNEL_MESSAGE_LISTENER = 
-            from(MessageListenerWithDataFilters.class);
-    
-    public static final String MEMBERS_SERVICE = from(MembersService.class);
-
-    public static final String from(Object instance) {
-        return from(instance.getClass());
-    }
-    
-    public static final String from(Class type) {
-        return type.getSimpleName();
+    @Override
+    public HttpClient init(HttpClient httpClient) 
+            throws HttpClientInitializer.ClientInitializationException{
+        try{
+            // Here set up Jetty's HttpClient.
+            // httpClient.setMaxConnectionsPerDestination(2);
+            httpClient.start();
+            return httpClient;
+        }catch(Exception e) {
+            throw new HttpClientInitializer.ClientInitializationException(e);
+        }
     }
 }

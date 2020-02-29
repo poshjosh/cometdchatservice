@@ -15,6 +15,8 @@
  */
 package com.looseboxes.cometd.chatservice;
 
+import com.looseboxes.cometd.chatservice.chat.ChatServletContextAttributeListener;
+import com.looseboxes.cometd.chatservice.chat.ChatService;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
 

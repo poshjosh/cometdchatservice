@@ -15,7 +15,7 @@
  */
 package com.looseboxes.cometd.chatservice.handlers;
 
-import com.looseboxes.cometd.chatservice.ChatSession;
+import com.looseboxes.cometd.chatservice.chat.ChatSession;
 import com.looseboxes.cometd.chatservice.handlers.response.Response;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

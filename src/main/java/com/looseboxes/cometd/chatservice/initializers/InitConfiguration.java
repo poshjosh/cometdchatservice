@@ -15,10 +15,10 @@
  */
 package com.looseboxes.cometd.chatservice.initializers;
 
-import com.looseboxes.cometd.chatservice.BadWordFilter;
-import com.looseboxes.cometd.chatservice.MembersService;
-import com.looseboxes.cometd.chatservice.MembersServiceInMemoryCache;
-import com.looseboxes.cometd.chatservice.MessageListenerWithDataFilters;
+import com.looseboxes.cometd.chatservice.chat.BadWordFilter;
+import com.looseboxes.cometd.chatservice.chat.MembersService;
+import com.looseboxes.cometd.chatservice.chat.MembersServiceInMemoryCache;
+import com.looseboxes.cometd.chatservice.chat.MessageListenerWithDataFilters;
 import com.looseboxes.cometd.chatservice.SafeContentService;
 import com.looseboxes.cometd.chatservice.SafeContentServiceImpl;
 import java.util.Collections;

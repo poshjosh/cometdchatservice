@@ -15,7 +15,7 @@
  */
 package com.looseboxes.cometd.chatservice.initializers;
 
-import com.looseboxes.cometd.chatservice.ChatServerOptionNames;
+import com.looseboxes.cometd.chatservice.chat.ChatServerOptionNames;
 import java.util.List;
 import org.cometd.bayeux.server.BayeuxServer;
 

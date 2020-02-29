@@ -15,8 +15,8 @@
  */
 package com.looseboxes.cometd.chatservice.initializers;
 
-import com.looseboxes.cometd.chatservice.ChatServerOptionNames;
-import com.looseboxes.cometd.chatservice.MembersService;
+import com.looseboxes.cometd.chatservice.chat.ChatServerOptionNames;
+import com.looseboxes.cometd.chatservice.chat.MembersService;
 import com.looseboxes.cometd.chatservice.SafeContentService;
 import java.util.Arrays;
 import java.util.List;

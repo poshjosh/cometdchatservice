@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice;
+package com.looseboxes.cometd.chatservice.chat;
 
-import com.looseboxes.cometd.chatservice.ChatSession;
+import com.looseboxes.cometd.chatservice.chat.ChatSession;
 import com.looseboxes.cometd.chatservice.test.TestConfig;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;

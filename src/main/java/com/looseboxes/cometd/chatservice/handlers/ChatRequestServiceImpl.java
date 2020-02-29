@@ -16,8 +16,8 @@
 package com.looseboxes.cometd.chatservice.handlers;
 
 import com.looseboxes.cometd.chatservice.AttributeNames;
-import com.looseboxes.cometd.chatservice.ChatConfig;
-import com.looseboxes.cometd.chatservice.ChatSession;
+import com.looseboxes.cometd.chatservice.chat.ChatConfig;
+import com.looseboxes.cometd.chatservice.chat.ChatSession;
 import com.looseboxes.cometd.chatservice.CometDProperties;
 import com.looseboxes.cometd.chatservice.ParamNames;
 import com.looseboxes.cometd.chatservice.controllers.Endpoints;

@@ -15,7 +15,7 @@
  */
 package com.looseboxes.cometd.chatservice.test;
 
-import com.looseboxes.cometd.chatservice.ChatSession;
+import com.looseboxes.cometd.chatservice.chat.ChatSession;
 import com.looseboxes.cometd.chatservice.handlers.response.ResponseBuilder;
 import com.looseboxes.cometd.chatservice.handlers.response.ResponseImpl;
 import java.util.Objects;

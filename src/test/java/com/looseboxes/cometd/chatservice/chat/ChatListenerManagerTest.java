@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice;
+package com.looseboxes.cometd.chatservice.chat;
 
-import com.looseboxes.cometd.chatservice.ChatListenerManagerImpl;
-import com.looseboxes.cometd.chatservice.ChatListenerManager;
-import com.looseboxes.cometd.chatservice.ChatListener;
+import com.looseboxes.cometd.chatservice.chat.ChatListenerManagerImpl;
+import com.looseboxes.cometd.chatservice.chat.ChatListenerManager;
+import com.looseboxes.cometd.chatservice.chat.ChatListener;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;

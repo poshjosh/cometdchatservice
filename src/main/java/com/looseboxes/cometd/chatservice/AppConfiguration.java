@@ -15,6 +15,11 @@
  */
 package com.looseboxes.cometd.chatservice;
 
+import com.looseboxes.cometd.chatservice.chat.ChatConfig;
+import com.looseboxes.cometd.chatservice.chat.HttpClientInitializer;
+import com.looseboxes.cometd.chatservice.chat.ChatSessionImpl;
+import com.looseboxes.cometd.chatservice.chat.HttpClientInitializerImpl;
+import com.looseboxes.cometd.chatservice.chat.ChatSession;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.looseboxes.cometd.chatservice.handlers.ServletUtil;
 import com.looseboxes.cometd.chatservice.handlers.ChatRequestService;

@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.WebApplicationContext;
-import com.looseboxes.cometd.chatservice.ChatSession;
+import com.looseboxes.cometd.chatservice.chat.ChatSession;
 import com.looseboxes.cometd.chatservice.handlers.ChatRequestService;
 import com.looseboxes.cometd.chatservice.handlers.response.ResponseBuilder;
 import java.util.concurrent.Future;
