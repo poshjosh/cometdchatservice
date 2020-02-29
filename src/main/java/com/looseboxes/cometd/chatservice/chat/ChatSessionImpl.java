@@ -19,7 +19,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -191,7 +190,7 @@ public final class ChatSessionImpl implements ChatSession {
      * @return 
      */
     @Override
-    public CompletableFuture<Message> join() {
+    public Future<Message> join() {
         
         LOG.debug("join(), user: {}", chatConfig.getUser());
         
@@ -218,7 +217,7 @@ public final class ChatSessionImpl implements ChatSession {
         template.put(Chat.WEBSOCKET_ENABLED, this.chatConfig.isWebsocketEnabled());
         template.put(Chat.LOG_LEVEL, this.chatConfig.getLogLevel());
 
-        clientSession.handshake(template, (Message msg) -> {
+        this.clientSession.handshake(template, (Message msg) -> {
             
             this.update("connect()", msg, handshakeFuture);
         });
@@ -227,23 +226,20 @@ public final class ChatSessionImpl implements ChatSession {
     }
     
     @Override
-    public CompletableFuture<Message> subscribe() {
+    public Future<Message> subscribe() {
         LOG.debug("subscribe(), user: {}", chatConfig.getUser());
         
         final CompletableFuture<Message> future = new CompletableFuture<>();
 
         clientSession.batch(() -> {
             
-            subscribe(chatConfig.getChannel(), chatConfig.getRoom(), 
-                    (csc, msg) -> this.status.setSubscribedToChat(true), future);
+            subscribe(chatConfig.getChannel(), future);
         });
         
         return future;
     }
     
-    private void subscribe(String channel, String room,
-            BiConsumer<ClientSessionChannel, Message> onSuccess, 
-            CompletableFuture<Message> future) {
+    private void subscribe(String channel, CompletableFuture<Message> future) {
         
         final String u = chatConfig.getUser();
         
@@ -251,12 +247,15 @@ public final class ChatSessionImpl implements ChatSession {
         
         final ClientSessionChannel channelObj = clientSession.getChannel(channel);
         
+        final BiConsumer setSubscribed = (csc, msg) -> 
+                this.status.setSubscribedToChat(true);
+        
         channelObj.subscribe(
             (csc, msg) -> {
-                update("subscribe()", csc, msg, onSuccess, future);
+                update("subscribe()", csc, msg, setSubscribed, future);
             }, 
             (msg) -> { 
-                update("subscribe()", channelObj, msg, onSuccess);
+                update("subscribe()", channelObj, msg, setSubscribed);
             }
         );
     }
@@ -276,23 +275,20 @@ public final class ChatSessionImpl implements ChatSession {
     }
     
     @Override
-    public CompletableFuture<Message> unsubscribe() {
+    public Future<Message> unsubscribe() {
         LOG.debug("unsubscribe(), user: {}", chatConfig.getUser());
         
         final CompletableFuture<Message> future = new CompletableFuture<>();
 
         clientSession.batch(() -> {
             
-            unsubscribe(chatConfig.getChannel(), chatConfig.getRoom(), 
-                    (csc, msg) -> this.status.setSubscribedToChat(false), future);
+            unsubscribe(chatConfig.getChannel(), future);
         });
         
         return future;
     }
     
-    private void unsubscribe(String channel, String room,
-            BiConsumer<ClientSessionChannel, Message> onSuccess, 
-            CompletableFuture<Message> future) {
+    private void unsubscribe(String channel, CompletableFuture<Message> future) {
         
         final String u = chatConfig.getUser();
         
@@ -300,23 +296,28 @@ public final class ChatSessionImpl implements ChatSession {
         
         final ClientSessionChannel channelObj = clientSession.getChannel(channel);
         
+        final BiConsumer setUnsubscribed = (csc, msg) -> this.status.setSubscribedToChat(false);
+    
         channelObj.subscribe(
             (csc, msg) -> {
-                update("unsubscribe()", csc, msg, onSuccess, future);
+                update("unsubscribe()", csc, msg, setUnsubscribed, future);
             }, 
             (msg) -> { 
-                update("unsubscribe()", channelObj, msg, onSuccess);
+                update("unsubscribe()", channelObj, msg, setUnsubscribed);
             }
         );
     }
     
     @Override
-    public CompletableFuture<Message> disconnect() {
+    public Future<Message> disconnect() {
         LOG.debug("disconnect(), user: {}", chatConfig.getUser());
         
         this.disconnectFuture = this.requireNullThenCreateNew(this.disconnectFuture, "disconnect()");
         
-        clientSession.disconnect();
+        this.clientSession.disconnect((Message msg) -> {
+            
+            this.update("diconnect()", msg, disconnectFuture);
+        });
 
         this.status.setDisconnecting(true);
 
@@ -473,19 +474,13 @@ public final class ChatSessionImpl implements ChatSession {
         
         debug(ID, msg);
         
+        if(future != null) {
+            LOG.debug("Completing {}, for user: {}", ID, chatConfig.getUser());
+            future.complete(msg);
+        }
+
         if(msg.isSuccessful()) {
-        
             onSuccess.accept(csc, msg);
-            
-            if(future != null) {
-                LOG.debug("Completing {}, for user: {}", ID, chatConfig.getUser());
-                future.complete(msg);
-            }
-        }else{
-            if(future != null) {
-                LOG.debug("Cancelling {}, for user: {}", ID, chatConfig.getUser());
-                future.completeExceptionally(newCancellationException(ID));
-            }
         }
     }
     private void debug(String ID, Message msg) {
@@ -503,11 +498,6 @@ public final class ChatSessionImpl implements ChatSession {
         }else{
             return new CompletableFuture();
         }
-    }
-    
-    private CancellationException newCancellationException(String ID) {
-        return new CancellationException("Cancelling: " + ID + 
-                "\n" + this.status + "\n" + this.chatConfig);
     }
 
     private void requireNonNullOrEmpty(String s) {
