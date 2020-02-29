@@ -23,6 +23,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import org.cometd.bayeux.Channel;
 import org.cometd.bayeux.Message;
 import org.cometd.bayeux.client.ClientSession;
@@ -33,6 +34,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Connect before subscribing. Un-subscribe before disconnecting.
+ * <p>{@link #join()} Calls {@link #connect()} then {@link #subscribe()}</p>
+ * <p>{@link #leave()} Calls {@link #disconnect()} then {@link #unsubscribe()}</p>
  * <code>
  * <pre>
  * String channel = "/service/privatechat";
@@ -136,8 +140,10 @@ public final class ChatSessionImpl implements ChatSession {
         final CompletableFuture<Message> future = new CompletableFuture<>();
         
         this.send(textMessage, peerUserName, (Message msg) -> {
+    
+            this.debug("send(..)",  msg);
             
-            this.update("send(..)",  msg, future);
+            future.complete(msg);
         });
         
         return future;
@@ -152,7 +158,8 @@ public final class ChatSessionImpl implements ChatSession {
     public void send(String textMessage, String peerUserName, 
             ClientSession.MessageListener messageListener) {
 
-        LOG.debug("send(\"{}\", \"{}\") sender: {}", textMessage, peerUserName, chatConfig.getUser());
+        LOG.debug("send(\"{}\", \"{}\") sender: {}", 
+                textMessage, peerUserName, chatConfig.getUser());
 
         requireNonNullOrEmpty(textMessage);
         requireNonNullOrEmpty(peerUserName);
@@ -163,11 +170,13 @@ public final class ChatSessionImpl implements ChatSession {
         msg.put(Chat.CHAT, textMessage);
         msg.put(Chat.PEER, peerUserName);
         
-        clientSession.getChannel(this.chatConfig.getChannel()).publish(msg, messageListener);
+        clientSession.getChannel(this.chatConfig.getChannel())
+                .publish(msg, messageListener);
     }
     
     /**
-     * Handshake with the server. When user logging into your system, you can call this method
+     * Handshake with the server. When user logging into your system, you can 
+     * call this method
      * to connect that user to cometd server.
      * Calls {@link #connect()} then {@link #subscribe()} asynchronously
      * @see #connect() 
@@ -195,24 +204,37 @@ public final class ChatSessionImpl implements ChatSession {
         LOG.debug("connect(), user: {}", u);
         
         this.handshakeFuture = this.requireNullThenCreateNew(this.handshakeFuture, "connect()");
-
-        this.status.setDisconnecting(false);
-
+        
         final Map<String, Object> template = new HashMap<>();
         template.put(Chat.WEBSOCKET_ENABLED, this.chatConfig.isWebsocketEnabled());
         template.put(Chat.LOG_LEVEL, this.chatConfig.getLogLevel());
 
         this.clientSession.handshake(template, (Message msg) -> {
-            
-            this.update("connect()", msg, handshakeFuture);
+
+            this.debug("connect()", msg);
+
+            this.status.onConnectResponse(msg.isSuccessful());
+
+            this.handshakeFuture.complete(msg);
         });
         
+        this.status.setConnecting(true);
+
         return handshakeFuture;
     }
     
+    /**
+     * Connect before subscribing. 
+     * <p>{@link #join()} Calls {@link #connect()} then {@link #subscribe()}</p>
+     * @return 
+     */
     @Override
     public Future<Message> subscribe() {
         LOG.debug("subscribe(), user: {}", chatConfig.getUser());
+        
+        if( ! this.status.isConnected()) {
+            throw new IllegalStateException("Not connected");
+        }
         
         final CompletableFuture<Message> future = new CompletableFuture<>();
 
@@ -232,17 +254,22 @@ public final class ChatSessionImpl implements ChatSession {
         
         final ClientSessionChannel channelObj = clientSession.getChannel(channel);
         
-        final BiConsumer setSubscribed = (csc, msg) -> 
-                this.status.setSubscribedToChat(true);
+        final Consumer<Message> onResponse = (msg) -> {
+            debug("subscribe()", msg);
+            this.status.onSubscribeResponse(msg.isSuccessful());
+            future.complete(msg);
+        };
         
         channelObj.subscribe(
             (csc, msg) -> {
-                update("subscribe()", csc, msg, setSubscribed, future);
+                onResponse.accept(msg);
             }, 
             (msg) -> { 
-                update("subscribe()", channelObj, msg, setSubscribed);
+                onResponse.accept(msg);
             }
         );
+        
+        this.status.setSubscribing(true);
     }
 
     /**
@@ -258,7 +285,7 @@ public final class ChatSessionImpl implements ChatSession {
 
         return this.disconnect();
     }
-    
+
     @Override
     public Future<Message> unsubscribe() {
         LOG.debug("unsubscribe(), user: {}", chatConfig.getUser());
@@ -281,27 +308,46 @@ public final class ChatSessionImpl implements ChatSession {
         
         final ClientSessionChannel channelObj = clientSession.getChannel(channel);
         
-        final BiConsumer setUnsubscribed = (csc, msg) -> this.status.setSubscribedToChat(false);
-    
-        channelObj.subscribe(
+        final Consumer<Message> onResponse = (msg) -> {
+            debug("unsubscribe()", msg);
+            this.status.onUnsubscribeResponse(msg.isSuccessful());
+            future.complete(msg);
+        };
+
+        channelObj.unsubscribe(
             (csc, msg) -> {
-                update("unsubscribe()", csc, msg, setUnsubscribed, future);
+                onResponse.accept(msg);
             }, 
             (msg) -> { 
-                update("unsubscribe()", channelObj, msg, setUnsubscribed);
+                onResponse.accept(msg);
             }
         );
+        
+        this.status.setUnsubscribing(true);
     }
     
+    /**
+     * Un-subscribe before disconnecting.
+     * <p>{@link #leave()} Calls {@link #disconnect()} then {@link #unsubscribe()}</p>
+     * @return 
+     */
     @Override
     public Future<Message> disconnect() {
         LOG.debug("disconnect(), user: {}", chatConfig.getUser());
-        
+
         this.disconnectFuture = this.requireNullThenCreateNew(this.disconnectFuture, "disconnect()");
         
+        if(this.status.isSubscribed()) {
+            throw new IllegalStateException("Subscribed");
+        }
+
         this.clientSession.disconnect((Message msg) -> {
             
-            this.update("diconnect()", msg, disconnectFuture);
+            debug("disconnect()", msg);
+            
+            this.status.onDisconnectResponse(msg.isSuccessful());
+
+            this.disconnectFuture.complete(msg);
         });
 
         this.status.setDisconnecting(true);
@@ -310,15 +356,23 @@ public final class ChatSessionImpl implements ChatSession {
     }
     
     private void metaHandshake(ClientSessionChannel channel, Message message) {
-        this.update("metaHandshake(..)", channel, message, handshakeFuture);
+        
+        this.debug("metaHandshake(..)", message); 
+        
+        handshakeFuture.complete(message);
 
         this.listenerManager.fireEvent(this.createEvent(this, channel, message), 
                 (listener, event) -> listener.onHandshake(event));
     }
     
     private void metaConnect(ClientSessionChannel channel, Message message) {
-        this.trace("metaConnect(..)", message);
          
+        this.trace("metaConnect(..)", message);
+
+        this.status.setConnecting(false);
+        
+        this.handshakeFuture.complete(message);
+
         this.listenerManager.fireEvent(this.createEvent(this, channel, message), 
                 (listener, event) -> listener.onConnect(event));
 
@@ -338,8 +392,9 @@ public final class ChatSessionImpl implements ChatSession {
     
     private void metaSubscribe(ClientSessionChannel channel, Message message) {
         
-        this.update("metaSubscribe(..)", channel, message, 
-                (csc, msg) -> this.updateSubscriptionStatus(msg, true));
+        this.debug("metaSubscribe(..)", message);
+
+        this.status.onSubscribeResponse(message.isSuccessful());
         
         this.listenerManager.fireEvent(this.createEvent(this, channel, message), 
                 (listener, event) -> listener.onSubscribe(event));
@@ -347,25 +402,26 @@ public final class ChatSessionImpl implements ChatSession {
 
     private void metaUnsubscribe(ClientSessionChannel channel, Message message) {
         
-        this.update("metaUnsubscribe(..)", channel, message, 
-                (csc, msg) -> this.updateSubscriptionStatus(msg, false));
+        this.debug("metaUnsubscribe(..)", message);
+
+        this.status.onUnsubscribeResponse(message.isSuccessful());
 
         this.listenerManager.fireEvent(this.createEvent(this, channel, message), 
                 (listener, event) -> listener.onUnsubscribe(event));
     }
     
-    private void updateSubscriptionStatus(Message msg, boolean flag) {
+    private boolean isChannelMessage(String channel, Message msg) {
         final String key = "subscription";
-        if(this.chatConfig.getChannel().equals(msg.get(key))){
-            this.status.setSubscribedToChat(flag);
-        }
+        return channel.equals(msg.get(key));
     }
 
     private void metaDisconnect(ClientSessionChannel channel, Message message) {
-        this.update("metaDisconnect(..)", channel, message, (csc, msg) -> {
-            this.status.setConnected(false);
-            this.status.setDisconnecting(false);
-        }, this.disconnectFuture);
+        
+        this.debug("metaDisconnect(..)", message);
+
+        this.status.onDisconnectResponse(message.isSuccessful());
+
+        this.disconnectFuture.complete(message);
 
         this.removeListeners();
         
@@ -501,7 +557,7 @@ public final class ChatSessionImpl implements ChatSession {
     }
 
     @Override
-    public Status getStatus() {
+    public State getState() {
         return this.status;
     }
 
@@ -510,48 +566,85 @@ public final class ChatSessionImpl implements ChatSession {
         return listenerManager;
     }
     
-    private static final class StatusBean implements Status, Serializable{
+    private static final class StatusBean implements State, Serializable{
         private final AtomicBoolean connected = new AtomicBoolean(false);
+        private final AtomicBoolean connecting = new AtomicBoolean(false);
         private final AtomicBoolean disconnecting = new AtomicBoolean(false);
-        private final AtomicBoolean subscribedToChat = new AtomicBoolean(false);
-        private final AtomicBoolean subscribedToMembers = new AtomicBoolean(false);
+        private final AtomicBoolean subscribed = new AtomicBoolean(false);
+        private final AtomicBoolean subscribing = new AtomicBoolean(false);
+        private final AtomicBoolean unsubscribing = new AtomicBoolean(false);
         private StatusBean() { }
-        public void setConnected(boolean flag) {
-            connected.compareAndSet(!flag, flag);
+        public void onConnectResponse(boolean success){
+            set(connecting, false);
+            set(connected, success);
+        }
+        public void onDisconnectResponse(boolean success){
+            set(disconnecting, false);
+            set(connected, ! success);
+        }
+        public void onSubscribeResponse(boolean success){
+            set(subscribing, false);
+            set(subscribed, success);
+        }
+        public void onUnsubscribeResponse(boolean success){
+            set(unsubscribing, false);
+            set(subscribed, ! success);
         }
         @Override
         public boolean isConnected() {
             return connected.get();
         }
-        public void setDisconnecting(boolean flag) {
-            disconnecting.compareAndSet(!flag, flag);
+        public void setConnected(boolean flag) {
+            set(connected, flag);
+        }
+        @Override
+        public boolean isConnecting() {
+            return connecting.get();
+        }
+        public void setConnecting(boolean flag) {
+            set(connecting, flag);
         }
         @Override
         public boolean isDisconnecting() {
             return disconnecting.get();
         }
-        public void setSubscribedToChat(boolean flag) {
-            subscribedToChat.compareAndSet(!flag, flag);
+        public void setDisconnecting(boolean flag) {
+            set(disconnecting, flag);
         }
         @Override
-        public boolean isSubscribedToChat() {
-            return subscribedToChat.get();
+        public boolean isSubscribed() {
+            return subscribed.get();
         }
-        public void setSubscribedToMembers(boolean flag) {
-            subscribedToMembers.compareAndSet(!flag, flag);
+        public void setSubscribied(boolean flag) {
+            set(subscribed, flag);
         }
         @Override
-        public boolean isSubscribedToMembers() {
-            return subscribedToMembers.get();
+        public boolean isSubscribing() {
+            return subscribing.get();
+        }
+        public void setSubscribing(boolean flag) {
+            set(subscribing, flag);
+        }
+        @Override
+        public boolean isUnsubscribing() {
+            return unsubscribing.get();
+        }
+        public void setUnsubscribing(boolean flag) {
+            set(unsubscribing, flag);
+        }
+        private void set(AtomicBoolean atomic, boolean flag) {
+            atomic.compareAndSet(!flag, flag);
         }
 
         @Override
         public int hashCode() {
             int hash = 3;
             hash = 13 * hash + Objects.hashCode(this.connected);
+            hash = 13 * hash + Objects.hashCode(this.connecting);
             hash = 13 * hash + Objects.hashCode(this.disconnecting);
-            hash = 13 * hash + Objects.hashCode(this.subscribedToChat);
-            hash = 13 * hash + Objects.hashCode(this.subscribedToMembers);
+            hash = 13 * hash + Objects.hashCode(this.subscribed);
+            hash = 13 * hash + Objects.hashCode(this.subscribing);
+            hash = 13 * hash + Objects.hashCode(this.unsubscribing);
             return hash;
         }
 
@@ -570,13 +663,19 @@ public final class ChatSessionImpl implements ChatSession {
             if (!Objects.equals(this.connected, other.connected)) {
                 return false;
             }
+            if (!Objects.equals(this.connecting, other.connecting)) {
+                return false;
+            }
             if (!Objects.equals(this.disconnecting, other.disconnecting)) {
                 return false;
             }
-            if (!Objects.equals(this.subscribedToChat, other.subscribedToChat)) {
+            if (!Objects.equals(this.subscribed, other.subscribed)) {
                 return false;
             }
-            if (!Objects.equals(this.subscribedToMembers, other.subscribedToMembers)) {
+            if (!Objects.equals(this.subscribing, other.subscribing)) {
+                return false;
+            }
+            if (!Objects.equals(this.unsubscribing, other.unsubscribing)) {
                 return false;
             }
             return true;
@@ -584,13 +683,19 @@ public final class ChatSessionImpl implements ChatSession {
 
         @Override
         public String toString() {
-            return "ServiceStatus{" + "connected=" + connected + ", disconnecting=" + disconnecting + ", subscribedToChat=" + subscribedToChat + ", subscribedToMembers=" + subscribedToMembers + '}';
+            return "ServiceStatus{" + "connected=" + connected + 
+                    ", connecting=" + connecting + 
+                    ", disconnecting=" + disconnecting + 
+                    ", subscribed=" + subscribed + 
+                    ", subscribing=" + subscribing + 
+                    ", unsubscribing=" + unsubscribing +'}';
         }
     }
 
     @Override
     public String toString() {
-        return "ChatSessionImpl{" + "Listeners=" + listenerManager.size() + ", clientSession=" + clientSession +  
+        return "ChatSessionImpl{" + "Listeners=" + listenerManager.size() + 
+                ", clientSession=" + clientSession +  
                 "\n" + chatConfig + "\n" + status + "\n}";
     }
 }
