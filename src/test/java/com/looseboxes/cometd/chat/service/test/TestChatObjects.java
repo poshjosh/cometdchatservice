@@ -15,7 +15,10 @@
  */
 package com.looseboxes.cometd.chat.service.test;
 
+import com.looseboxes.cometd.chat.service.ChatConfig;
 import com.looseboxes.cometd.chat.service.ChatService;
+import com.looseboxes.cometd.chat.service.ChatSession;
+import com.looseboxes.cometd.chat.service.ChatSessionImpl;
 import java.util.Objects;
 import org.cometd.bayeux.ChannelId;
 import org.cometd.bayeux.client.ClientSession;
@@ -43,6 +46,25 @@ public class TestChatObjects {
         return new ChatService();
     }
     
+    public ChatConfig getChatConfig() {
+        final ChatConfig chatConfig = new ChatConfig(
+                "/chat/privatechat", "test_room", "test_user");
+        return chatConfig;
+    }
+
+    public ChatSession getChatSession(ClientSession client) {
+        return new ChatSessionImpl(client, this.getChatConfig());
+    }
+    
+    public ChatSession getChatSession(ClientSession client, ChatConfig chatConfig) {
+        return new ChatSessionImpl(client, chatConfig);
+    }
+
+    public ChatSession getChatSession(int port) {
+        return this.testConfig.appConfig().chatSession(
+                this.testConfig.testUrl().getChatUrl(port), this.getChatConfig());
+    }
+
     public ConfigurableServerChannel getConfigurableServerChannel(String id) {
         return new ServerChannelImpl(this.getBayeuxServer(), new ChannelId(id)){
         
