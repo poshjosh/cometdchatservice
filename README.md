@@ -96,7 +96,7 @@ maryLeave.get(timeout, TimeUnit.MILLISECONDS);
 
 // Add listeners to a chat session
 ```java
-johnSession.addListener(new ChatListener(){
+johnSession.listeners().addListener(new ChatListener(){
     @Override
     public void onUnsubscribe(ChatListener.Event event) { }
     @Override
