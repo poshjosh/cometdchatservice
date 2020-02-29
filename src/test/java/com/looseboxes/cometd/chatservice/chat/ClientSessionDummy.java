@@ -51,6 +51,12 @@ public class ClientSessionDummy extends AbstractClientSession{
     }
 
     @Override
+    public void batch(Runnable batch) {
+        LOG.debug("#batch(Runnable)");
+        batch.run();
+    }
+
+    @Override
     protected ChannelId newChannelId(String string) {
         return new ChannelId(string);
     }
@@ -66,10 +72,14 @@ public class ClientSessionDummy extends AbstractClientSession{
     }
 
     @Override
-    protected void sendBatch() { }
+    protected void sendBatch() { 
+        LOG.debug("#sendBatch()");
+    }
 
     @Override
-    protected void send(Message.Mutable mtbl) {  }
+    protected void send(Message.Mutable mtbl) {  
+        LOG.debug("#send(Message.Mutable)");
+    }
 
     @Override
     public void handshake(Map<String, Object> map, MessageListener ml) { 
@@ -97,12 +107,14 @@ public class ClientSessionDummy extends AbstractClientSession{
     }
     
     protected Message createMessage(boolean success) {
-        final Message m = new HashMapMessage();
-        m.put("id", Long.toHexString(System.currentTimeMillis()));
-        m.put("clientId", this.id);
-        m.put("meta", true);
-        m.put("successful", success);
-        return m;
+        final Message msg = new HashMapMessage();
+        msg.put("id", Long.toHexString(System.currentTimeMillis()));
+        msg.put("clientId", this.id);
+        msg.put("meta", true);
+        msg.put("successful", success);
+//        msg.put("empty", empty);
+        msg.put("publishReply", false);
+        return msg;
     }
 
     @Override
