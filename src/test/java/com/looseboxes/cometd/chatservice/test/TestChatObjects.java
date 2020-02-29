@@ -19,23 +19,29 @@ import com.looseboxes.cometd.chatservice.chat.ChatConfig;
 import com.looseboxes.cometd.chatservice.chat.ChatService;
 import com.looseboxes.cometd.chatservice.chat.ChatSession;
 import com.looseboxes.cometd.chatservice.chat.ChatSessionImpl;
-import com.looseboxes.cometd.chatservice.chat.ClientSessionDummy;
+import com.looseboxes.cometd.chatservice.chat.ClientSessionImpl;
 import java.util.Objects;
 import org.cometd.bayeux.ChannelId;
+import org.cometd.bayeux.Message;
 import org.cometd.bayeux.client.ClientSession;
 import org.cometd.bayeux.server.ConfigurableServerChannel;
 import org.cometd.bayeux.server.ServerMessage;
 import org.cometd.bayeux.server.ServerSession;
+import org.cometd.common.HashMapMessage;
 import org.cometd.server.BayeuxServerImpl;
 import org.cometd.server.LocalSessionImpl;
 import org.cometd.server.ServerChannelImpl;
 import org.cometd.server.ServerMessageImpl;
 import org.cometd.server.ServerSessionImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author USER
  */
 public class TestChatObjects {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(TestChatObjects.class);
     
     private final TestConfig testConfig;
 
@@ -43,12 +49,42 @@ public class TestChatObjects {
         this.testConfig = Objects.requireNonNull(testConfig);
     }
     
+    public Message.Mutable sendSuccessMessage(String clientId, ClientSession.MessageListener ml) { 
+        return sendSuccessMessage(clientId, null, ml);
+    }
+
+    public Message.Mutable sendSuccessMessage(String clientId, Object data, ClientSession.MessageListener ml) { 
+        LOG.trace("Sending success message");
+        final Message.Mutable message = this.createSuccessMessage(clientId, data);
+        ml.onMessage(message);
+        LOG.trace("Done sending message: {}", message);
+        return message;
+    }
+    
+    public Message.Mutable createSuccessMessage(String clientId, Object data) {
+        return this.createMessage(true, clientId, data);
+    }
+    
+    public Message.Mutable createMessage(boolean success, String clientId, Object data) {
+        final Message.Mutable msg = new HashMapMessage();
+        msg.put("id", Long.toHexString(System.currentTimeMillis()));
+        msg.put("clientId", clientId);
+        msg.put("meta", true);
+        msg.put("successful", success);
+        if(data != null) {
+            msg.put("data", data);
+        }
+        msg.put("empty", data == null);
+        msg.put("publishReply", false);
+        return msg;
+    }
+    
     public ChatService getChatService() {
         return new ChatService();
     }
     
-    public ChatSession getChatSession() {
-        return getChatSession(this.getClientSession(), this.getChatConfig());
+    public ChatSession getChatSession(String user) {
+        return getChatSession(this.getClientSession(), this.getChatConfig().forUser(user));
     }
     
     public ChatSession getChatSession(ClientSession client, ChatConfig chatConfig) {
@@ -63,7 +99,7 @@ public class TestChatObjects {
     }
 
     public ClientSession getClientSession() {
-        return new ClientSessionDummy();
+        return new ClientSessionImpl(this);
     }
     
     public ChatConfig getChatConfig() {

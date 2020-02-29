@@ -18,8 +18,12 @@ package com.looseboxes.cometd.chatservice.chat;
 import java.util.concurrent.Future;
 import org.cometd.bayeux.Message;
 import org.cometd.bayeux.client.ClientSession;
+import org.cometd.bayeux.client.ClientSessionChannel;
 
 /**
+ * Connect before subscribing. Un-subscribe before disconnecting.
+ * <p>{@link #join()} Calls {@link #connect()} then {@link #subscribe()}</p>
+ * <p>{@link #leave()} Calls {@link #disconnect()} then {@link #unsubscribe()}</p>
  * <code>
  * <pre>
  * String channel = "/service/privatechat";
@@ -54,11 +58,13 @@ import org.cometd.bayeux.client.ClientSession;
  */
 public interface ChatSession {
     
-    interface Status{
+    interface State{
         boolean isConnected();
+        boolean isConnecting();
         boolean isDisconnecting();
-        boolean isSubscribedToChat();
-        boolean isSubscribedToMembers();
+        boolean isSubscribing();
+        boolean isUnsubscribing();
+        boolean isSubscribed();
     }
     
     default ChatListenerManager listeners() {
@@ -69,19 +75,25 @@ public interface ChatSession {
     
     Future<Message> connect();
     
+    /**
+     * Un-subscribe before disconnecting.
+     * <p>{@link #leave()} Calls {@link #disconnect()} then {@link #unsubscribe()}</p>
+     * @return 
+     */
     Future<Message> disconnect();
     
-    Status getStatus();
+    State getState();
 
     /**
      * Handshake with the server. When user logging into your system, you can call this method
      * to connect that user to cometd server.
-     * Calls {@link #connect()} then {@link #subscribe()} asynchronously
+     * Calls {@link #connect()} then 
+     * {@link #subscribe(ClientSessionChannel.MessageListener) subscribe(.)} asynchronously
      * @see #connect() 
      * @see #subscribe() 
      * @return 
      */
-    Future<Message> join();
+    Future<Message> join(ClientSessionChannel.MessageListener listener);
 
     /**
      * This method can be invoked to disconnect from the chat server.
@@ -110,7 +122,13 @@ public interface ChatSession {
      */
     void send(String textMessage, String toUser, ClientSession.MessageListener messageListener);
 
-    Future<Message> subscribe();
+    /**
+     * Connect before subscribing. 
+     * <p>{@link #join()} Calls {@link #connect()} then 
+     * {@link #subscribe(ClientSessionChannel.MessageListener) subscrible(.)}</p>
+     * @return 
+     */
+    Future<Message> subscribe(ClientSessionChannel.MessageListener listener);
 
     Future<Message> unsubscribe();
 }

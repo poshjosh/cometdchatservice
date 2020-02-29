@@ -83,7 +83,7 @@ public class ChatRequestServiceImpl implements ChatRequestService {
         
         final ChatSession chatSession = this.getChatSession(req, false);
         
-        return chatSession == null ? false : chatSession.getStatus().isConnected();
+        return chatSession == null ? false : chatSession.getState().isConnected();
     }
     
     @Override

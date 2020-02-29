@@ -52,7 +52,11 @@ johnConfig.setLogLevel(Chat.LOG_LEVEL_VALUES.DEBUG);
 
 final ChatSession johnSession = new ChatSessionImpl(johnClient, johnConfig);
 
-final Future<Message> johnJoin = johnSession.join();
+final ClientSessionChannel.MessageListener johnListener = (channel, message) -> {
+    // Each time john receives a message, this is invoked
+};
+
+final Future<Message> johnJoin = johnSession.join(johnListener);
 
 final Message johnConnMsg = johnJoin.get(timeout, TimeUnit.MILLISECONDS);
 System.out.println("ReadMe:: Response to " + JOHN + "'s join: "+johnConnMsg);
@@ -64,7 +68,11 @@ final ChatConfig maryConfig = johnConfig.forUser(MARY);
 
 final ChatSession marySession = new ChatSessionImpl(maryClient, maryConfig);
 
-final Future<Message> maryJoin = marySession.join();
+final ClientSessionChannel.MessageListener maryListener = (channel, message) -> {
+    // Each time mary receives a message this is invoked
+};
+
+final Future<Message> maryJoin = marySession.join(maryListener);
 
 final Message maryConnMsg = maryJoin.get(timeout, TimeUnit.MILLISECONDS);
 System.out.println("ReadMe:: Response to " + MARY + "'s join: "+maryConnMsg);
