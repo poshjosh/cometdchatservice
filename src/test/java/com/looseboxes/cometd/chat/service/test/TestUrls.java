@@ -15,6 +15,7 @@
  */
 package com.looseboxes.cometd.chat.service.test;
 
+import com.looseboxes.cometd.chat.service.controllers.Endpoints;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
@@ -57,6 +58,10 @@ public class TestUrls{
         return validate(url);
     }
 
+    public String getChatUrl(int port) {
+        return this.getEndpointUrl(port, Endpoints.COMETD);
+    }
+    
     public String getEndpointUrl(int port, String endpoint) {
         final String url = this.getContextUrl(port) + endpoint;
         return validate(url);
