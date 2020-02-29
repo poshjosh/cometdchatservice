@@ -130,6 +130,11 @@ public final class ChatSessionImpl implements ChatSession {
     public boolean addListener(ChatListener listener) {
         return this.chatListenerManager.addListener(listener);
     }
+
+    @Override
+    public boolean containsListener(ChatListener listener) {
+        return this.chatListenerManager.containsListener(listener);
+    }
     
     @Override
     public boolean removeListener(ChatListener listener) {

@@ -63,6 +63,8 @@ public interface ChatSession {
     
     boolean addListener(ChatListener listener);
     
+    boolean containsListener(ChatListener listener);
+
     boolean removeListener(ChatListener listener);
     
     Future<Message> connect();
