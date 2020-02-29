@@ -61,11 +61,7 @@ public interface ChatSession {
         boolean isSubscribedToMembers();
     }
     
-    boolean addListener(ChatListener listener);
-    
-    boolean containsListener(ChatListener listener);
-
-    boolean removeListener(ChatListener listener);
+    ChatListenerManager getListenerManager();
     
     Future<Message> connect();
     
