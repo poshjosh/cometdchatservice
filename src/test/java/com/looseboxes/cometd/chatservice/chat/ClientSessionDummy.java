@@ -67,7 +67,6 @@ public class ClientSessionDummy extends AbstractClientSession{
 
     @Override
     public void handshake(Map<String, Object> map, MessageListener ml) { 
-        this.handshake(map);
         connected = true;
         LOG.debug("Handshaken: {}", connected);
         this.sendSuccessMessage(ml);
@@ -75,14 +74,16 @@ public class ClientSessionDummy extends AbstractClientSession{
 
     @Override
     public void disconnect(MessageListener ml) { 
+        LOG.trace("Disconnecting");
         this.disconnect();
         this.sendSuccessMessage(ml);
     }
     
     protected void sendSuccessMessage(MessageListener ml) { 
+        LOG.trace("Sending success message");
         final Message message = this.createSuccessMessage();
         ml.onMessage(message);
-        LOG.debug("Done sending message: {}", message);
+        LOG.trace("Done sending message: {}", message);
     }
     
     protected Message createSuccessMessage() {
