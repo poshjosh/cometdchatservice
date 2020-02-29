@@ -57,7 +57,7 @@ public class TestChatObjects {
     }
 
     public ChatSession getChatSession(int port) {
-        return this.testConfig.appConfig().chatSession(
+        return this.testConfig.chatConfig().chatSession(
                 this.testConfig.testUrl().getChatUrl(port), this.getChatConfig());
     }
 
@@ -74,7 +74,7 @@ public class TestChatObjects {
     }
     
     public ClientSession getClientSession(int port){
-        return this.testConfig.appConfig().clientSession(
+        return this.testConfig.chatConfig().clientSession(
                 this.testConfig.testUrl().getChatUrl(port));
     }
     
