@@ -15,15 +15,11 @@
  */
 package com.looseboxes.cometd.chat.service;
 
-import org.cometd.bayeux.ChannelId;
+import com.looseboxes.cometd.chat.service.test.TestChatObjects;
+import com.looseboxes.cometd.chat.service.test.TestConfig;
 import org.cometd.bayeux.server.ConfigurableServerChannel;
 import org.cometd.bayeux.server.ServerMessage;
 import org.cometd.bayeux.server.ServerSession;
-import org.cometd.server.BayeuxServerImpl;
-import org.cometd.server.LocalSessionImpl;
-import org.cometd.server.ServerChannelImpl;
-import org.cometd.server.ServerMessageImpl;
-import org.cometd.server.ServerSessionImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.function.Executable;
@@ -175,35 +171,24 @@ public class ChatServiceTest {
         return chatService;
     }
     
-    public ChatService getChatService() {
-        return new ChatService();
+    protected ChatService getChatService() {
+        return this.getTestChatObjects().getChatService();
     }
     
-    public ConfigurableServerChannel getConfigurableServerChannel(String id) {
-        return new ServerChannelImpl(this.getBayeuxServer(), new ChannelId(id)){
-        
-        };
-    }
-    
-    public ServerSession getServerSession(){
-        return new ServerSessionImpl(
-                this.getBayeuxServer(), this.getLocalSession(), this.getUniqueId());
-    }
-    
-    public LocalSessionImpl getLocalSession(){
-        return new LocalSessionImpl(this.getBayeuxServer(), this.getUniqueId());
-    }
-    
-    public String getUniqueId() {
-        return Long.toHexString(System.currentTimeMillis());
+    protected ServerSession getServerSession() {
+        return this.getTestChatObjects().getServerSession();
     }
 
-    public BayeuxServerImpl getBayeuxServer() {
-        return new BayeuxServerImpl();
+    protected ServerMessage getServerMessage() {
+        return this.getTestChatObjects().getServerMessage();
     }
     
-    public ServerMessage getServerMessage() {
-        return new ServerMessageImpl();
+    protected TestChatObjects getTestChatObjects() {
+        return this.getTestConfig().testChatObjects();
+    }
+
+    protected TestConfig getTestConfig() {
+        return new TestConfig();
     }
 }
 /**
