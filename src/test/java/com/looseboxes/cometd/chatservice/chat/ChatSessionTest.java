@@ -15,21 +15,20 @@
  */
 package com.looseboxes.cometd.chatservice.chat;
 
-import com.looseboxes.cometd.chatservice.chat.ChatSession;
 import com.looseboxes.cometd.chatservice.test.TestConfig;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import static org.assertj.core.api.Assertions.fail;
 import org.cometd.bayeux.Message;
-import org.cometd.bayeux.client.ClientSession;
+import org.cometd.bayeux.client.ClientSessionChannel;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
@@ -42,29 +41,119 @@ public class ChatSessionTest {
     private final boolean logStackTrace = false;
     
     public ChatSessionTest() { }
+    
+    @Test
+    public void send_shouldReturnValidFuture() {
+
+        final String user1name = "test_recipient";
+        
+        final ChatSession user1 = this.getChatSession(user1name);
+        
+        final Function<ChatSession, Future<Message>> action = (user0) -> {
+            
+            try{
+                
+                user0.join(this.getChannelMessageListener()).get();
+
+                user1.join(this.getChannelMessageListener()).get();
+
+                return user0.send("Hi " + user1name, user1name);
+                
+            }catch(InterruptedException | ExecutionException e) {
+            
+                throw new RuntimeException(e);
+            }    
+        };  
+        
+        this.chatSessionAction_shouldReturnValidFuture("send", action);
+    }
 
     @Test
-    public void connect_shouldReturnValidFuture() {
-        final Function<ChatSession, Future<Message>> action = (cs) -> cs.connect();
-        final ChatSession chatSession = this.getChatSession();
-        this.action_shouldReturnValidFuture("connect_shouldReturnValidFuture()", 
-                chatSession, action);
-        verify(chatSession).connect();
+    public void join_shouldReturnValidFuture() {
+        final Function<ChatSession, Future<Message>> action = (cs) -> 
+                cs.join(this.getChannelMessageListener());
+        this.chatSessionAction_shouldReturnValidFuture("join", action);
     } 
     
     @Test
-    public void disconnect_shouldReturnValidFuture() {
-        final Function<ChatSession, Future<Message>> action = (cs) -> cs.disconnect();
-        final ChatSession chatSession = this.getChatSession();
-        this.action_shouldReturnValidFuture("disconnect_shouldReturnValidFuture()", 
-                chatSession, action);
-        verify(chatSession).disconnect();
+    public void connect_shouldReturnValidFuture() {
+        final Function<ChatSession, Future<Message>> action = (cs) -> cs.connect();
+        this.chatSessionAction_shouldReturnValidFuture("connect", action);
     } 
+
+    @Test
+    public void subscribe_shouldReturnValidFuture() {
+        this.chatSessionAction_shouldReturnValidFuture("subscribe", 
+                this.connectThenSubscribeAction());
+    } 
+
+    @Test
+    public void subscribe_whenNotConneced_shouldThrowRuntimeException() {
+        final RuntimeException thrown = Assertions.assertThrows(
+                RuntimeException.class, 
+                () -> getChatSession().subscribe(this.getChannelMessageListener()));
+        if(logStackTrace) {
+            thrown.printStackTrace();
+        }        
+    } 
+
+    @Test
+    public void unsubscribe_shouldReturnValidFuture() {
+        final Function<ChatSession, Future<Message>> action = (cs) -> {
+            this.connectThenSubscribeAction().apply(cs);
+            return cs.unsubscribe();
+        };        
+        this.chatSessionAction_shouldReturnValidFuture("unsubscribe", action);
+    } 
+
+    @Test
+    public void disconnect_shouldReturnValidFuture() {
+        final Function<ChatSession, Future<Message>> action = (cs) -> {
+            cs.connect();
+            return cs.disconnect();
+        };        
+        this.chatSessionAction_shouldReturnValidFuture("disconnect", action);
+    } 
+
+    @Test
+    @Disabled("This is not guaranteed to happen. See issue #001 or is it #002?")
+    public void disconnect_whenSubscribed_shouldThrowRuntimeException() {
+        final ChatSession chatSession = this.getChatSession();
+
+        try{
+            this.connectThenSubscribeAction().apply(chatSession).get();
+        }catch(InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+
+        final RuntimeException thrown = Assertions.assertThrows(
+                RuntimeException.class, 
+                () -> chatSession.disconnect());
+        if(logStackTrace) {
+            thrown.printStackTrace();
+        }        
+    } 
+
+    @Test
+    public void leave_shouldReturnValidFuture() {
+        final Function<ChatSession, Future<Message>> action = (cs) -> {
+            cs.join(this.getChannelMessageListener());
+            return cs.leave();
+        };    
+        this.chatSessionAction_shouldReturnValidFuture("leave", action);
+    } 
+
+    protected Future<Message> chatSessionAction_shouldReturnValidFuture(
+            String methodName, Function<ChatSession, Future<Message>> action) {
+        final ChatSession chatSession = this.getChatSession();
+        return this.action_shouldReturnValidFuture(methodName, chatSession, action);
+    }
 
     protected Future<Message> action_shouldReturnValidFuture(String methodName, 
             ChatSession chatSession, Function<ChatSession, Future<Message>> action) {
         
-        final String description = this.getDescription(methodName);
+        final String description = this.getDescription(
+                methodName + "_shouldReturnValidFuture()");
         
         System.out.println(description);
         
@@ -84,6 +173,113 @@ public class ChatSessionTest {
         }
     }
 
+    @Test
+    public void join_shouldResultToValidState() {
+        final Function<ChatSession, Future<Message>> action = (cs) -> 
+                cs.join(this.getChannelMessageListener());
+        this.chatSessionAction_shouldResultToValidState(
+                "join", action, (state) -> {
+                    // Join doesn't wait for subscribe so this may not work
+//                    assertThat(state.isSubscribing() || state.isSubscribed(), is(true));
+                    assertThat(state.isConnected(), is(true));
+                }
+        );
+    } 
+    
+    @Test
+    public void connect_shouldResultToValidState() {
+        final Function<ChatSession, Future<Message>> action = (cs) -> cs.connect();
+        this.chatSessionAction_shouldResultToValidState(
+                "connect", action, 
+                (state) -> assertThat(state.isConnected(), is(true)));
+    } 
+
+    @Test
+    public void subscribe_shouldResultToValidState() {
+        this.chatSessionAction_shouldResultToValidState(
+                "subscribe", this.connectThenSubscribeAction(), 
+                (state) -> assertThat(state.isSubscribing() || state.isSubscribed(), is(true)));
+    } 
+
+    @Test
+    public void unsubscribe_shouldResultToValidState() {
+        final Function<ChatSession, Future<Message>> action = (cs) -> {
+            this.connectThenSubscribeAction().apply(cs);
+            return cs.unsubscribe();
+        };        
+        this.chatSessionAction_shouldResultToValidState(
+                "unsubscribe", action, 
+                (state) -> assertThat(state.isUnsubscribing() || ! state.isSubscribed(), is(true)));
+    } 
+
+    @Test
+    public void disconnect_shouldResultToValidState() {
+        final Function<ChatSession, Future<Message>> action = (cs) -> {
+            cs.connect();
+            return cs.disconnect();
+        };        
+        this.chatSessionAction_shouldResultToValidState(
+                "disconnect", action, 
+                (state) -> assertThat(state.isConnected(), is(false)));
+    } 
+
+    @Test
+    public void leave_shouldResultToValidState() {
+        final Function<ChatSession, Future<Message>> action = (cs) -> {
+            cs.join(this.getChannelMessageListener());
+            return cs.leave();
+        };    
+        this.chatSessionAction_shouldResultToValidState(
+                "leave", action, (state) -> {
+                    assertThat(state.isUnsubscribing() || ! state.isSubscribed(), is(true));
+                    assertThat(state.isConnected(), is(false));
+                }
+        );
+    }
+    
+    protected Function<ChatSession, Future<Message>> connectThenSubscribeAction() {
+        final Function<ChatSession, Future<Message>> action = (cs) -> {
+            final Future<Message> ret = cs.connect();
+            final ClientSessionChannel.MessageListener listener = 
+                    getChannelMessageListener();
+            cs.subscribe(listener);
+            return ret;
+        };        
+        return action;
+    }
+
+    protected Future<Message> chatSessionAction_shouldResultToValidState(
+            String methodName, 
+            Function<ChatSession, Future<Message>> action,
+            Consumer<ChatSession.State> statusValidator) {
+
+        return this.action_shouldResultToValidState(
+                methodName, this.getChatSession(), action, statusValidator);
+    }
+    
+    protected Future<Message> action_shouldResultToValidState(
+            String methodName, 
+            ChatSession chatSession, 
+            Function<ChatSession, Future<Message>> action,
+            Consumer<ChatSession.State> statusValidator) {
+        
+        final String description = this.getDescription(
+                methodName + "_shouldResultToValidState()");
+        
+        System.out.println(description);
+        
+        final Future<Message> result = action.apply(chatSession);
+        
+        validateChatSessionStatus(chatSession, statusValidator);
+        
+        return result;
+    }
+    
+    protected void validateChatSessionStatus(ChatSession chatSession, 
+            Consumer<ChatSession.State> statusValidator) {
+        statusValidator.accept(chatSession.getState());
+    }
+
     protected void action_shouldThrowException(String methodName, 
             ChatSession chatSession, Function<ChatSession, Future<Message>> action) {
         
@@ -98,19 +294,19 @@ public class ChatSessionTest {
             thrown.printStackTrace();
         }
     }
+    
+    protected ClientSessionChannel.MessageListener getChannelMessageListener() {
+        return (channel, message) -> {};
+    }
 
     protected ChatSession getChatSession() {
-        try{
-        final ClientSession client = this.getClientSession();
-        return this.getTestConfig().testChatObjects().getChatSession(client);
-        }catch(RuntimeException e) { e.printStackTrace(); throw e; }
+        return this.getChatSession("test_sender");
     }
-    
-    protected ClientSession getClientSession() {
-        final ClientSession mock = mock(ClientSession.class);
-        return mock;
+
+    protected ChatSession getChatSession(String user) {
+        return this.getTestConfig().testChatObjects().getChatSession(user);
     }
-    
+
     protected String getDescription(String testMethodName) {
         return getTestConfig().testUtil().getDescription(this.getClass(), testMethodName);
     }
@@ -121,99 +317,6 @@ public class ChatSessionTest {
 }
 /**
  * 
-
-    @Test
-    public void testAddListener() {
-        System.out.println("addListener");
-        ChatListener listener = null;
-        final ChatSession chatSession = getChatSession();
-        boolean expResult = false;
-        boolean result = chatSession.addListener(listener);
-        
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    @Test
-    public void testRemoveListener() {
-        System.out.println("removeListener");
-        ChatListener listener = null;
-        final ChatSession chatSession = getChatSession();
-        boolean expResult = false;
-        boolean result = chatSession.addListener(listener);
-        
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    @Test
-    public void testContainsListener() {
-        System.out.println("containsListener");
-        ChatListener listener = null;
-        final ChatSession chatSession = getChatSession();
-        boolean expResult = false;
-        boolean result = chatSession.containsListener(listener);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    @Test
-    public void testConnect() {
-        System.out.println("connect");
-        final ChatSession chatSession = getChatSession();
-        Future<Message> expResult = null;
-        Future<Message> result = chatSession.connect();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    @Test
-    public void testDisconnect() {
-        System.out.println("disconnect");
-        final ChatSession chatSession = getChatSession();
-        Future<Message> expResult = null;
-        Future<Message> result = chatSession.disconnect();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    @Test
-    public void testGetStatus() {
-        System.out.println("getStatus");
-        final ChatSession chatSession = getChatSession();
-        ChatSession.Status expResult = null;
-        ChatSession.Status result = chatSession.getStatus();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    @Test
-    public void testJoin() {
-        System.out.println("join");
-        final ChatSession chatSession = getChatSession();
-        Future<Message> expResult = null;
-        Future<Message> result = chatSession.join();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    @Test
-    public void testLeave() {
-        System.out.println("leave");
-        final ChatSession chatSession = getChatSession();
-        Future<Message> expResult = null;
-        Future<Message> result = chatSession.leave();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
 
     @Test
     public void testSend_String_String() {
@@ -239,28 +342,5 @@ public class ChatSessionTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
-
-    @Test
-    public void testSubscribe() {
-        System.out.println("subscribe");
-        final ChatSession chatSession = getChatSession();
-        Future<Message> expResult = null;
-        Future<Message> result = chatSession.subscribe();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    @Test
-    public void testUnsubscribe() {
-        System.out.println("unsubscribe");
-        final ChatSession chatSession = getChatSession();
-        Future<Message> expResult = null;
-        Future<Message> result = chatSession.unsubscribe();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-    
  * 
  */
