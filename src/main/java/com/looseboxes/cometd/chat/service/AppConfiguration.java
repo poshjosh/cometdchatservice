@@ -61,7 +61,8 @@ public class AppConfiguration {
         return new ChatRequestServiceImpl(this.servletUtil());
     }
 
-    @Bean @Scope("prototype") public ChatSession chatSession(String url, String channel, String room, String user) {
+    @Bean @Scope("prototype") public ChatSession chatSession(
+            String url, String channel, String room, String user) {
         // Do not use an unmodifiable map
         return this.createChatSession(url, new HashMap<>(), this.chatConfig(channel, room, user));
     }
@@ -112,7 +113,8 @@ public class AppConfiguration {
      * @param transportOptions The transport options. <b>Do not use an unmodifiable map</b>
      * @return 
      */
-    @Bean @Scope("prototype") public ClientTransport clientTransport(Map<String, Object> transportOptions) {
+    @Bean @Scope("prototype") public ClientTransport clientTransport(
+            Map<String, Object> transportOptions) {
         return this.createClientTransport(transportOptions);
     }
 
