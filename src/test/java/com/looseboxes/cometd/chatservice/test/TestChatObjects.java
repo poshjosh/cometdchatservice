@@ -19,6 +19,7 @@ import com.looseboxes.cometd.chatservice.chat.ChatConfig;
 import com.looseboxes.cometd.chatservice.chat.ChatService;
 import com.looseboxes.cometd.chatservice.chat.ChatSession;
 import com.looseboxes.cometd.chatservice.chat.ChatSessionImpl;
+import com.looseboxes.cometd.chatservice.chat.ClientSessionDummy;
 import java.util.Objects;
 import org.cometd.bayeux.ChannelId;
 import org.cometd.bayeux.client.ClientSession;
@@ -46,8 +47,8 @@ public class TestChatObjects {
         return new ChatService();
     }
     
-    public ChatSession getChatSession(ClientSession client) {
-        return getChatSession(client, this.getChatConfig());
+    public ChatSession getChatSession() {
+        return getChatSession(this.getClientSession(), this.getChatConfig());
     }
     
     public ChatSession getChatSession(ClientSession client, ChatConfig chatConfig) {
@@ -61,6 +62,10 @@ public class TestChatObjects {
                 this.testConfig.testUrl().getChatUrl(port), this.getChatConfig());
     }
 
+    public ClientSession getClientSession() {
+        return new ClientSessionDummy();
+    }
+    
     public ChatConfig getChatConfig() {
         final ChatConfig chatConfig = new ChatConfig(
                 "/chat/privatechat", "test_room", "test_user");
