@@ -61,6 +61,10 @@ public interface ChatSession {
         boolean isSubscribedToMembers();
     }
     
+    default ChatListenerManager listeners() {
+        return this.getListenerManager();
+    }
+    
     ChatListenerManager getListenerManager();
     
     Future<Message> connect();
