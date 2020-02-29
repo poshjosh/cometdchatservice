@@ -15,8 +15,8 @@
  */
 
 
-import com.looseboxes.cometd.chat.service.ChatConfig;
-import com.looseboxes.cometd.chat.service.ChatSessionImpl;
+import com.looseboxes.cometd.chatservice.ChatConfig;
+import com.looseboxes.cometd.chatservice.ChatSessionImpl;
 import java.util.HashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -24,9 +24,9 @@ import org.cometd.bayeux.Message;
 import org.cometd.client.BayeuxClient;
 import org.cometd.client.transport.LongPollingTransport;
 import org.eclipse.jetty.client.HttpClient;
-import com.looseboxes.cometd.chat.service.Chat;
-import com.looseboxes.cometd.chat.service.ChatListener;
-import com.looseboxes.cometd.chat.service.ChatSession;
+import com.looseboxes.cometd.chatservice.Chat;
+import com.looseboxes.cometd.chatservice.ChatListener;
+import com.looseboxes.cometd.chatservice.ChatSession;
 
 /**
  * To run this successfully, make sure the jetty server is started on the 
