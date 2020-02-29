@@ -45,6 +45,12 @@ public class ClientSessionDummy extends AbstractClientSession{
     }
 
     @Override
+    public void remoteCall(String target, Object data, MessageListener callback) {
+        LOG.debug("Dummy remote call to: {}, with: {}", target, data);
+        this.sendSuccessMessage(callback);
+    }
+
+    @Override
     protected ChannelId newChannelId(String string) {
         return new ChannelId(string);
     }
