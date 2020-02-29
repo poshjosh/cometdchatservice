@@ -46,23 +46,25 @@ public class TestChatObjects {
         return new ChatService();
     }
     
-    public ChatConfig getChatConfig() {
-        final ChatConfig chatConfig = new ChatConfig(
-                "/chat/privatechat", "test_room", "test_user");
-        return chatConfig;
-    }
-
     public ChatSession getChatSession(ClientSession client) {
-        return new ChatSessionImpl(client, this.getChatConfig());
+        return getChatSession(client, this.getChatConfig());
     }
     
     public ChatSession getChatSession(ClientSession client, ChatConfig chatConfig) {
+        Objects.requireNonNull(client);
+        Objects.requireNonNull(chatConfig);
         return new ChatSessionImpl(client, chatConfig);
     }
 
     public ChatSession getChatSession(int port) {
         return this.testConfig.appConfig().chatSession(
                 this.testConfig.testUrl().getChatUrl(port), this.getChatConfig());
+    }
+
+    public ChatConfig getChatConfig() {
+        final ChatConfig chatConfig = new ChatConfig(
+                "/chat/privatechat", "test_room", "test_user");
+        return chatConfig;
     }
 
     public ConfigurableServerChannel getConfigurableServerChannel(String id) {
