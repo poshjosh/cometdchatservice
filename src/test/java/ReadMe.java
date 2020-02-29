@@ -96,7 +96,7 @@ public class ReadMe {
             maryLeave.get(timeout, TimeUnit.MILLISECONDS);
             
             // Add listeners if need
-            johnSession.addListener(new ChatListener(){
+            johnSession.getListenerManager().addListener(new ChatListener(){
                 @Override
                 public void onUnsubscribe(ChatListener.Event event) { }
                 @Override
