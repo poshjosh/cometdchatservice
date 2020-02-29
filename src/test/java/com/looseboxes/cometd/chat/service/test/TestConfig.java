@@ -42,6 +42,10 @@ public class TestConfig {
         this.contextPath = Objects.requireNonNull(contextPath);
     }
     
+    @Bean public TestChatObjects chatObjects() {
+        return new TestChatObjects(this);
+    }
+    
     @Bean public TestData testData() {
         return new TestData();
     }
