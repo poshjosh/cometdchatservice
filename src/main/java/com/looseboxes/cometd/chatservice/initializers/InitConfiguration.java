@@ -15,6 +15,8 @@
  */
 package com.looseboxes.cometd.chatservice.initializers;
 
+import com.looseboxes.cometd.chatservice.RestTemplateForGet;
+import com.looseboxes.cometd.chatservice.RestTemplateForGetImpl;
 import com.looseboxes.cometd.chatservice.chat.BadWordFilter;
 import com.looseboxes.cometd.chatservice.chat.MembersService;
 import com.looseboxes.cometd.chatservice.chat.MembersServiceInMemoryCache;
@@ -103,7 +105,11 @@ public class InitConfiguration {
             @Value("${services.safecontent.endpoint.flag.timeout}") long timeout) {
         LOG.debug("${services.safecontent} .url={}, .endpoint.flag={}, .endpoint.flag.timeout={}", 
                 url, endpoint, timeout);
-        return new SafeContentServiceImpl(this.restTemplate(), url, endpoint, timeout);
+        return new SafeContentServiceImpl(this.restTemplateForGet(), url, endpoint, timeout);
+    }
+    
+    @Bean public RestTemplateForGet restTemplateForGet() {
+        return new RestTemplateForGetImpl(this.restTemplate());
     }
 
     @LoadBalanced @Bean public RestTemplate restTemplate() {

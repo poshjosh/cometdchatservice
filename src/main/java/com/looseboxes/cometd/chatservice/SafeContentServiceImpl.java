@@ -15,6 +15,7 @@
  */
 package com.looseboxes.cometd.chatservice;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -22,10 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * @author USER
@@ -34,7 +32,7 @@ public class SafeContentServiceImpl implements SafeContentService {
 
     private static final Logger LOG = LoggerFactory.getLogger(SafeContentServiceImpl.class);
 
-    private final RestTemplate restTemplate; 
+    private final RestTemplateForGet restTemplate; 
 
     private final String serviceUrl;
     
@@ -42,7 +40,7 @@ public class SafeContentServiceImpl implements SafeContentService {
     
     private final long timeout;
 
-    public SafeContentServiceImpl(RestTemplate restTemplate, 
+    public SafeContentServiceImpl(RestTemplateForGet restTemplate, 
             String serviceUrl, String endpoint, long timeout) {
         this.restTemplate = Objects.requireNonNull(restTemplate);
         this.serviceUrl = serviceUrl.startsWith("http") ?
@@ -58,7 +56,7 @@ public class SafeContentServiceImpl implements SafeContentService {
      * <b>Reason: <code>sync</code> may not be used together with <code>unless</code></b>
      * @see https://github.com/spring-projects/spring-framework/issues/20956
      * @see https://docs.spring.io/spring-framework/docs/5.0.0.RELEASE/javadoc-api/org/springframework/cache/annotation/Cacheable.html#sync--
-     * @param text The content to flag
+     * @param text The content to flag 
      * @return The flags, if the content is flagged as unsafe. E.g of flags = 
      * <code>adult,violence,racy,graphic,medical,spoof</code>; empty text if the 
      * content is flagged as safe or <code>null</code> if the safety or otherwise
@@ -69,14 +67,21 @@ public class SafeContentServiceImpl implements SafeContentService {
     public String flag(String text) {
         
         if(text == null || text.isEmpty()) {
-            return null;
+            return "";
         }
         
         final String url = serviceUrl + endpoint;
         
         LOG.debug("URL: {}", url);
         
-        final HttpEntity<Map> res = this.get(url, text, this.timeout);
+        final HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
+        
+        final Map<String, Object> params = new HashMap<>(4, 0.75f);
+        params.put("text", text);
+        params.put("timeout", timeout);
+        
+        final HttpEntity<Map> res = restTemplate.get(url, headers, params, Map.class);
         
         final Map body = res == null ? null : res.getBody();
         
@@ -87,31 +92,5 @@ public class SafeContentServiceImpl implements SafeContentService {
         final String flags = value == null ? null : value.toString();
         
         return flags;
-    }
-
-    private HttpEntity get(String url, String text, long timeout){
-        try{
-            
-            final HttpHeaders headers = new HttpHeaders();
-            headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
-
-            //@TODO make these properties
-            final UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
-                    .queryParam("text", text)
-                    .queryParam("timeout", timeout);
-
-            final HttpEntity<?> entity = new HttpEntity<>(headers);
-
-            url = builder.toUriString();
-            LOG.debug("URL: {}", url);
-
-            return restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);    
-            
-        }catch(RuntimeException e) {
-            
-            LOG.warn("Exception accessing service at: " + url, e);
-        
-            return HttpEntity.EMPTY;
-        }
     }
 }
