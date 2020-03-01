@@ -45,29 +45,11 @@ public class ChatSessionTest {
     @Test
     public void send_shouldReturnValidFuture() {
 
-        final String user1name = "test_recipient";
-        
-        final ChatSession user1 = this.getChatSession(user1name);
-        
-        final Function<ChatSession, Future<Message>> action = (user0) -> {
-            
-            try{
-                
-                user0.join(this.getChannelMessageListener()).get();
-
-                user1.join(this.getChannelMessageListener()).get();
-
-                return user0.send("Hi " + user1name, user1name);
-                
-            }catch(InterruptedException | ExecutionException e) {
-            
-                throw new RuntimeException(e);
-            }    
-        };  
+        final Function<ChatSession, Future<Message>> action = this.sendAction();
         
         this.chatSessionAction_shouldReturnValidFuture("send", action);
     }
-
+    
     @Test
     public void join_shouldReturnValidFuture() {
         final Function<ChatSession, Future<Message>> action = (cs) -> 
@@ -142,6 +124,31 @@ public class ChatSessionTest {
         };    
         this.chatSessionAction_shouldReturnValidFuture("leave", action);
     } 
+
+    protected Function<ChatSession, Future<Message>> sendAction() {
+    
+        final String user1 = "test_recipient";
+        
+        final ChatSession user1session = this.getChatSession(user1);
+        
+        final Function<ChatSession, Future<Message>> action = (user0session) -> {
+            
+            try{
+                
+                user0session.join(this.getChannelMessageListener()).get();
+
+                user1session.join(this.getChannelMessageListener()).get();
+
+                return user0session.send("Hi " + user1, user1);
+                
+            }catch(InterruptedException | ExecutionException e) {
+            
+                throw new RuntimeException(e);
+            }    
+        };  
+        
+        return action;
+    }
 
     protected Future<Message> chatSessionAction_shouldReturnValidFuture(
             String methodName, Function<ChatSession, Future<Message>> action) {
