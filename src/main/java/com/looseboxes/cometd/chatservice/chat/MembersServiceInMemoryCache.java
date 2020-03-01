@@ -17,6 +17,7 @@ package com.looseboxes.cometd.chatservice.chat;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
@@ -44,6 +45,7 @@ public class MembersServiceInMemoryCache implements MembersService{
      */
     @Override
     public Map<String, String> getMembers(String room) {
+        Objects.requireNonNull(room);
         final Map<String, String> roomMembers = members.get(room);
         LOG.debug("Room: {}, room members: {}", room, roomMembers);
         return roomMembers == null ? Collections.EMPTY_MAP : 
@@ -61,6 +63,9 @@ public class MembersServiceInMemoryCache implements MembersService{
      */
     @Override
     public String addMember(String room, String user, String value) {
+        Objects.requireNonNull(room);
+        Objects.requireNonNull(user);
+        Objects.requireNonNull(value);
         Map<String, String> roomMembers = this.members.get(room);
         if(roomMembers == null) {
             roomMembers = new ConcurrentHashMap<>();
@@ -80,6 +85,8 @@ public class MembersServiceInMemoryCache implements MembersService{
      */
     @Override
     public String removeMember(String room, String user) {
+        Objects.requireNonNull(room);
+        Objects.requireNonNull(user);
         final Map<String, String> roomMembers = this.members.get(room);
         final String value = roomMembers == null || roomMembers.isEmpty() ? null : roomMembers.remove(user);
         LOG.debug("Member: {}, value: {}, room: {}, room members: {}", 
@@ -95,6 +102,8 @@ public class MembersServiceInMemoryCache implements MembersService{
      */
     @Override
     public String getMembersValue(String room, String user) {
+        Objects.requireNonNull(room);
+        Objects.requireNonNull(user);
         final Map<String, String> roomMembers = this.members.get(room);
         final String value = roomMembers == null || roomMembers.isEmpty() ? 
                 null : roomMembers.get(user);
@@ -111,6 +120,8 @@ public class MembersServiceInMemoryCache implements MembersService{
      */
     @Override
     public String removeMemberByValue(String room, String value) {
+        Objects.requireNonNull(room);
+        Objects.requireNonNull(value);
         final Map<String, String> roomMembers = this.members.get(room);
         String member = null;
         if(roomMembers != null && !roomMembers.isEmpty()) {
