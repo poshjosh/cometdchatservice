@@ -29,7 +29,8 @@ import com.looseboxes.cometd.chatservice.initializers.ChatServerInitializer;
  */
 public final class ChatServletContextAttributeListener implements ServletContextAttributeListener {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ChatServletContextAttributeListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(
+            ChatServletContextAttributeListener.class);
     
     @Override
     public void attributeAdded(ServletContextAttributeEvent event) {
@@ -41,10 +42,6 @@ public final class ChatServletContextAttributeListener implements ServletContext
             LOG.debug("Servlet context attribute added: {} = {}", BayeuxServer.ATTRIBUTE, bayeux);
 
             final ServletContext servletContext = event.getServletContext();
-//            final BayeuxServer bayeux = (BayeuxServer)servletContext.getAttribute(BayeuxServer.ATTRIBUTE);
-//            if (bayeux == null) {
-//                throw new UnavailableException("CometD BayeuxServer unavailable!");
-//            }
             
             WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext)
                     .getBean(ChatServerInitializer.class).init(bayeux);
