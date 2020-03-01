@@ -28,6 +28,8 @@ import org.springframework.context.annotation.Bean;
  */
 public class TestConfig {
     
+    public static final boolean LOG_STACKTRACE = false;
+    
     private static final AppConfiguration appConfig = new AppConfiguration();
     private static final ChatConfiguration chatConfig = new ChatConfiguration();
     private static final RequestConfiguration requestConfig = new RequestConfiguration();

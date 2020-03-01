@@ -30,7 +30,7 @@ import org.junit.jupiter.api.function.Executable;
  */
 public class ChatServiceTest {
     
-    private final boolean logStackTrace = false;
+    private final boolean logStackTrace = TestConfig.LOG_STACKTRACE;
     
     public ChatServiceTest() { }
     

@@ -15,9 +15,7 @@
  */
 package com.looseboxes.cometd.chatservice.chat;
 
-import com.looseboxes.cometd.chatservice.chat.ChatListenerManagerImpl;
-import com.looseboxes.cometd.chatservice.chat.ChatListenerManager;
-import com.looseboxes.cometd.chatservice.chat.ChatListener;
+import com.looseboxes.cometd.chatservice.test.TestConfig;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +26,7 @@ import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author USER
@@ -36,7 +35,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class ChatListenerManagerTest {
     
-    private final boolean logStackTrace = false;
+    private final boolean logStackTrace = TestConfig.LOG_STACKTRACE;
     
     @Test
     public void containsListener_whenListenerRemoved_doesNotContainRemovedListener() {
