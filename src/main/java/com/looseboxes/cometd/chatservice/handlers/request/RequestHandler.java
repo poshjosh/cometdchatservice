@@ -25,7 +25,9 @@ import javax.servlet.ServletResponse;
  */
 public interface RequestHandler<T>{
     
-    T process(ServletRequest req, ServletResponse res) throws ProcessingRequestException;
+    T process(ServletRequest req, ServletResponse res) 
+            throws ProcessingRequestException;
 
-    void process(ServletRequest req, ServletResponse res, ResponseHandler<T> callback) throws ProcessingRequestException;
+    void process(ServletRequest req, ServletResponse res, ResponseHandler<T> callback) 
+            throws ProcessingRequestException;
 }

@@ -23,7 +23,13 @@ import javax.servlet.ServletResponse;
  * @author USER
  */
 public interface ResponseHandler<T> {
-    void onSuccess(ServletRequest req, ServletResponse res, T responseData) throws ProcessingRequestException;
-    void onFailure(ServletRequest req, ServletResponse res, T responseData) throws ProcessingRequestException;
-    void onAlways(ServletRequest req, ServletResponse res, T responseData) throws ProcessingRequestException;
+    
+    void onSuccess(ServletRequest req, ServletResponse res, T responseData) 
+            throws ProcessingRequestException;
+    
+    void onFailure(ServletRequest req, ServletResponse res, T responseData) 
+            throws ProcessingRequestException;
+    
+    void onAlways(ServletRequest req, ServletResponse res, T responseData) 
+            throws ProcessingRequestException;
 }
