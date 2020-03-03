@@ -24,10 +24,9 @@ import java.util.Objects;
 import org.cometd.bayeux.ChannelId;
 import org.cometd.bayeux.Message;
 import org.cometd.bayeux.client.ClientSession;
-import org.cometd.bayeux.server.ConfigurableServerChannel;
+import org.cometd.bayeux.server.ServerChannel;
 import org.cometd.bayeux.server.ServerMessage;
 import org.cometd.bayeux.server.ServerSession;
-import org.cometd.common.HashMapMessage;
 import org.cometd.server.BayeuxServerImpl;
 import org.cometd.server.LocalSessionImpl;
 import org.cometd.server.ServerChannelImpl;
@@ -61,24 +60,33 @@ public class TestChatObjects {
         return message;
     }
     
-    public Message.Mutable createSuccessMessage(String clientId, Object data) {
+    public ServerMessage.Mutable createSuccessMessage(String clientId, Object data) {
         return this.createMessage(true, clientId, data);
     }
     
-    public Message.Mutable createMessage(boolean success, String clientId, Object data) {
-        final Message.Mutable msg = new HashMapMessage();
+    public ServerMessage.Mutable createSuccessMessage(String clientId, String key, Object value) {
+        return this.createMessage(true, clientId, key, value);
+    }
+
+    public ServerMessage.Mutable createMessage(boolean success, String clientId, Object data) {
+        return createMessage(success, clientId, "data", data);
+    }
+    
+    public ServerMessage.Mutable createMessage(boolean success, 
+            String clientId, String key, Object value) {
+        final ServerMessage.Mutable msg = new ServerMessageImpl();
         msg.put("id", Long.toHexString(System.currentTimeMillis()));
         msg.put("clientId", clientId);
         msg.put("meta", true);
         msg.put("successful", success);
-        if(data != null) {
-            msg.put("data", data);
+        if(value != null) {
+            msg.put(key, value);
         }
-        msg.put("empty", data == null);
+        msg.put("empty", value == null);
         msg.put("publishReply", false);
         return msg;
     }
-    
+
     public ChatService getChatService() {
         return new ChatService();
     }
@@ -108,7 +116,7 @@ public class TestChatObjects {
         return chatConfig;
     }
 
-    public ConfigurableServerChannel getConfigurableServerChannel(String id) {
+    public ServerChannel getServerChannel(String id) {
         return new ServerChannelImpl(this.getBayeuxServer(), new ChannelId(id)){
         
         };
