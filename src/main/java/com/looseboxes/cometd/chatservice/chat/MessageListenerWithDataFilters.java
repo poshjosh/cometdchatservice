@@ -17,6 +17,7 @@ package com.looseboxes.cometd.chatservice.chat;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import org.cometd.bayeux.server.BayeuxServer;
@@ -39,12 +40,17 @@ import org.springframework.lang.Nullable;
  */
 public final class MessageListenerWithDataFilters implements ServerChannel.MessageListener {
 
-    private final Logger _LOG = LoggerFactory.getLogger(MessageListenerWithDataFilters.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MessageListenerWithDataFilters.class);
 
     private static class MessageChatExtractor implements Function<ServerMessage.Mutable, Object>{
         @Override
         public Object apply(ServerMessage.Mutable message) {
-            return message.get(Chat.CHAT);
+            Object chat = message.get(Chat.CHAT);
+            if(chat == null) {
+                final Map<String, Object> data = message.getDataAsMap();
+                chat = data == null ? null : data.get(Chat.CHAT);
+            }
+            return chat;
         }
     }
 
@@ -76,8 +82,8 @@ public final class MessageListenerWithDataFilters implements ServerChannel.Messa
 
             Object data = this.format.apply(message);
 
-            if(_LOG.isTraceEnabled()) {
-                _LOG.trace("Extracted: {} from message: {}" + data, message);
+            if(LOG.isTraceEnabled()) {
+                LOG.trace("Extracted: {} from message: {}", data, message);
             }
 
             final Object orig = data;
@@ -95,8 +101,8 @@ public final class MessageListenerWithDataFilters implements ServerChannel.Messa
             return true;
 
         } catch (DataFilter.AbortException a) {
-            if (_LOG.isDebugEnabled()) {
-                _LOG.debug("Rejected by DataFilter, message: " + message, a);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Rejected by DataFilter, message: " + message, a);
             }
             return false;
         }
