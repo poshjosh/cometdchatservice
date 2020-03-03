@@ -38,7 +38,7 @@ public class JoinHandler extends AbstractRequestHandler{
     public JoinHandler() { }
     
     @Override
-    public Response doProcess(HttpServletRequest req, HttpServletResponse res) {
+    protected Response doProcess(HttpServletRequest req, HttpServletResponse res) {
         
         final WebApplicationContext webAppCtx = getWebAppContext(req);
         

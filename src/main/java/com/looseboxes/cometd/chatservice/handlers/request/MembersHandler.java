@@ -41,7 +41,7 @@ public final class MembersHandler extends AbstractRequestHandler{
     public MembersHandler() { }
     
     @Override
-    public Response doProcess(HttpServletRequest req, HttpServletResponse res) {
+    protected Response doProcess(HttpServletRequest req, HttpServletResponse res) {
 
         final boolean error;
         final String message;

@@ -44,20 +44,25 @@ public abstract class AbstractRequestHandler implements RequestHandler<Response>
     
     public AbstractRequestHandler() { }
 
-    public abstract Response doProcess(HttpServletRequest req, HttpServletResponse res) throws ProcessingRequestException;
+    protected abstract Response doProcess(HttpServletRequest req, HttpServletResponse res) 
+            throws ProcessingRequestException;
     
     @Override
     public void process(ServletRequest req, ServletResponse res, ResponseHandler<Response> callback) {
         
-        final Response data = this.process(req, res);
-        
-        if(data.isSuccess()) {
-            callback.onSuccess(req, res, data);
-        }else{
-            callback.onFailure(req, res, data);
+        Response data = null;
+        try{
+            
+            data = this.process(req, res);
+
+            if(data.isSuccess()) {
+                callback.onSuccess(req, res, data);
+            }else{
+                callback.onFailure(req, res, data);
+            }
+        }finally{
+            callback.onAlways(req, res, data);
         }
-        
-        callback.onAlways(req, res, data);
     }
 
     @Override
