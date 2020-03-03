@@ -35,10 +35,16 @@ public class TestData {
     }
     
     public Response createSuccessResponse() {
+        return this.createResponse(successCode, false, "success", null);
+    }
+
+    public Response createResponse(int code,
+            boolean error, String message, Object data) {
         final ResponseImpl res = new ResponseImpl();
-        res.setCode(successCode);
-        res.setSuccess(true);
-        res.setMessage("success");
+        res.setCode(code);
+        res.setMessage(message);
+        res.setData(data);
+        res.setSuccess( ! error);
         return res;
     }
 }
