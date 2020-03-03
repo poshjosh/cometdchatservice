@@ -15,6 +15,7 @@
  */
 package com.looseboxes.cometd.chatservice.handlers.request;
 
+import com.looseboxes.cometd.chatservice.handlers.ServletUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,8 +25,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RequestConfiguration {
     
-    @Bean public RequestHandlerFactory requestHandlerFactory() {
-        return new RequestHandlerFactoryImpl();
+    @Bean public ControllerServiceContextProvider controllerServiceContextProvider(){
+        return new ControllerServiceContextProviderImpl(servletUtil());
+    }
+    
+    @Bean public ServletUtil servletUtil() {
+        return new ServletUtil();
     }
 }
 /**
