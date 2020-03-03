@@ -15,22 +15,8 @@
  */
 package com.looseboxes.cometd.chatservice;
 
-import com.looseboxes.cometd.chatservice.chat.ChatConfig;
-import com.looseboxes.cometd.chatservice.chat.HttpClientInitializer;
-import com.looseboxes.cometd.chatservice.chat.ChatSessionImpl;
-import com.looseboxes.cometd.chatservice.chat.HttpClientInitializerImpl;
-import com.looseboxes.cometd.chatservice.chat.ChatSession;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.looseboxes.cometd.chatservice.handlers.ServletUtil;
-import com.looseboxes.cometd.chatservice.handlers.ChatRequestService;
-import com.looseboxes.cometd.chatservice.handlers.ChatRequestServiceImpl;
-import java.util.HashMap;
-import java.util.Map;
-import org.cometd.bayeux.client.ClientSession;
-import org.cometd.client.BayeuxClient;
-import org.cometd.client.transport.ClientTransport;
-import org.cometd.client.transport.LongPollingTransport;
-import org.eclipse.jetty.client.HttpClient;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.ehcache.EhCacheCacheManager;
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
@@ -60,10 +46,6 @@ public class AppConfiguration {
         factory.setConfigLocation(new ClassPathResource("ehcache.xml"));
         factory.setShared(true);
         return factory;
-    }
-    
-    @Bean public ChatRequestService chatRequestService() {
-        return new ChatRequestServiceImpl(this.servletUtil());
     }
 
     @Bean @Scope("prototype") public ObjectMapper objectMapper() {
