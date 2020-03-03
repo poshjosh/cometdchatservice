@@ -15,11 +15,13 @@
  */
 package com.looseboxes.cometd.chatservice.controllers;
 
-import com.looseboxes.cometd.chatservice.handlers.request.MembersHandler;
+import com.looseboxes.cometd.chatservice.handlers.request.RequestHandler;
+import com.looseboxes.cometd.chatservice.handlers.request.RequestHandlerQualifiers;
 import com.looseboxes.cometd.chatservice.handlers.response.Response;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,7 +31,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MembersController {
     
-    @Autowired private MembersHandler membersHandler;
+    @Qualifier(RequestHandlerQualifiers.MEMBERS_HANDLER)
+    @Autowired private RequestHandler<Response> membersHandler;
     
     @RequestMapping(Endpoints.MEMBERS)
     public Response members(ServletRequest req, ServletResponse res) {

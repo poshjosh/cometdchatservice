@@ -15,6 +15,7 @@
  */
 package com.looseboxes.cometd.chatservice.handlers.request;
 
+import com.looseboxes.cometd.chatservice.handlers.response.Response;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -25,15 +26,18 @@ import org.springframework.context.annotation.Scope;
 @Configuration
 public class RequestConfiguration {
     
-    @Bean @Scope("prototype") public MembersHandler membersHandler() {
+    @Bean(RequestHandlerQualifiers.MEMBERS_HANDLER) 
+    @Scope("prototype") public RequestHandler<Response> membersHandler() {
         return new MembersHandler();
     }
 
-    @Bean @Scope("prototype") public ChatHandler chatHandler() {
+    @Bean(RequestHandlerQualifiers.CHAT_HANDLER) 
+    @Scope("prototype") public RequestHandler<Response> chatHandler() {
         return new ChatHandler();
     }
 
-    @Bean @Scope("prototype") public JoinHandler joinHandler() {
+    @Bean(RequestHandlerQualifiers.JOIN_HANDLER) 
+    @Scope("prototype") public RequestHandler<Response> joinHandler() {
         return new JoinHandler();
     }
 
