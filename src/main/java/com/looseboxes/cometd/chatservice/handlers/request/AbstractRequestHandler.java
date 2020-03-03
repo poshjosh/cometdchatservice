@@ -47,6 +47,13 @@ public abstract class AbstractRequestHandler implements RequestHandler<Response>
     protected abstract Response doProcess(HttpServletRequest req, HttpServletResponse res) 
             throws ProcessingRequestException;
     
+    public ResponseBuilder getResponseBuilder(ServletRequest req) {
+
+        final WebApplicationContext webAppCtx = getWebAppContext(req);
+
+        return webAppCtx.getBean(ResponseBuilder.class);
+    }
+    
     @Override
     public void process(ServletRequest req, ServletResponse res, ResponseHandler<Response> callback) {
         
@@ -83,9 +90,7 @@ public abstract class AbstractRequestHandler implements RequestHandler<Response>
             
             LOG.warn("Unexpected Exception", e);
         
-            final WebApplicationContext webAppCtx = getWebAppContext(req);
-
-            return webAppCtx.getBean(ResponseBuilder.class).buildErrorResponse(e);
+            return this.getResponseBuilder(req).buildErrorResponse(e);
         }
     }
     
