@@ -22,6 +22,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,11 +33,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class JoinController {
     
     @Qualifier(RequestHandlerQualifiers.JOIN_HANDLER)
-    @Autowired private RequestHandler<Response> joinHandler;
+    @Autowired private RequestHandler<Response> requestHandler;
     
     @RequestMapping(Endpoints.JOIN)
-    public Response join(ServletRequest req, ServletResponse res) {
+    public ResponseEntity join(ServletRequest req, ServletResponse res) {
         
-        return joinHandler.process(req, res);
+        final Response response = requestHandler.process(req, res);
+        
+        return ResponseEntity.status(response.getCode()).body(response);
     }
 }

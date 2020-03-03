@@ -22,6 +22,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,11 +33,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class MembersController {
     
     @Qualifier(RequestHandlerQualifiers.MEMBERS_HANDLER)
-    @Autowired private RequestHandler<Response> membersHandler;
+    @Autowired private RequestHandler<Response> requestHandler;
     
     @RequestMapping(Endpoints.MEMBERS)
-    public Response members(ServletRequest req, ServletResponse res) {
-    
-        return membersHandler.process(req, res);
+    public ResponseEntity members(ServletRequest req, ServletResponse res) {
+        
+        final Response response = requestHandler.process(req, res);
+        
+        return ResponseEntity.status(response.getCode()).body(response);
     }
 }

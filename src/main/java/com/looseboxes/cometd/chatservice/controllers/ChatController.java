@@ -22,6 +22,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ChatController {
     
     @Qualifier(RequestHandlerQualifiers.CHAT_HANDLER)
-    @Autowired private RequestHandler<Response> chatHandler;
+    @Autowired private RequestHandler<Response> requestHandler;
     
     /**
      * <p>Send a chat message to a specified chat user</p>
@@ -44,9 +45,11 @@ public class ChatController {
      * @return 
      */
     @RequestMapping(Endpoints.CHAT)
-    public Response chat(ServletRequest req, ServletResponse res) {
+    public ResponseEntity chat(ServletRequest req, ServletResponse res) {
         
-        return chatHandler.process(req, res);
+        final Response response = requestHandler.process(req, res);
+        
+        return ResponseEntity.status(response.getCode()).body(response);
     }
 }
 /**
