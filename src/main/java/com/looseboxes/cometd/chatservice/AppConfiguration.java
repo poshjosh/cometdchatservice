@@ -16,7 +16,6 @@
 package com.looseboxes.cometd.chatservice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.looseboxes.cometd.chatservice.handlers.ServletUtil;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.ehcache.EhCacheCacheManager;
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
@@ -50,10 +49,6 @@ public class AppConfiguration {
 
     @Bean @Scope("prototype") public ObjectMapper objectMapper() {
         return new ObjectMapper();
-    }
-    
-    @Bean public ServletUtil servletUtil() {
-        return new ServletUtil();
     }
 
     @Bean public TerminateBean terminateBean() {
