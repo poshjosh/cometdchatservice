@@ -15,19 +15,14 @@
  */
 package com.looseboxes.cometd.chatservice.handlers.request;
 
-import com.looseboxes.cometd.chatservice.handlers.response.ResponseHandler;
-import com.looseboxes.cometd.chatservice.handlers.exceptions.ProcessingRequestException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-
 /**
  * @author USER
  */
-public interface RequestHandler<T>{
-    
-    T process(ServletRequest req, ServletResponse res) 
-            throws ProcessingRequestException;
+public interface ControllerServiceQualifiers {
 
-    void process(ServletRequest req, ServletResponse res, ResponseHandler<T> callback) 
-            throws ProcessingRequestException;
+    String CHAT_SERVICE = "chatService";
+
+    String JOIN_SERVICE = "joinService";
+
+    String MEMBERS_SERVICE = "membersService";
 }

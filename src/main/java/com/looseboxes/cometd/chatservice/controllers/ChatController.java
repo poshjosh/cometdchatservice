@@ -15,16 +15,17 @@
  */
 package com.looseboxes.cometd.chatservice.controllers;
 
-import com.looseboxes.cometd.chatservice.handlers.request.RequestHandler;
-import com.looseboxes.cometd.chatservice.handlers.request.RequestHandlerQualifiers;
+import com.looseboxes.cometd.chatservice.handlers.request.ChatControllerService;
 import com.looseboxes.cometd.chatservice.handlers.response.Response;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.looseboxes.cometd.chatservice.handlers.request.ControllerService;
+import com.looseboxes.cometd.chatservice.handlers.request.ControllerServiceContextProvider;
+import java.util.Objects;
 
 /**
  * @author USER
@@ -32,9 +33,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ChatController {
     
-    @Qualifier(RequestHandlerQualifiers.CHAT_HANDLER)
-    @Autowired private RequestHandler<Response> requestHandler;
-    
+    private final ControllerServiceContextProvider serviceContextProvider;
+    private final ControllerService controllerService;
+
+    public ChatController(
+            @Autowired ControllerServiceContextProvider serviceContextProvider, 
+            @Autowired ChatControllerService controllerService) {
+        this.serviceContextProvider = Objects.requireNonNull(serviceContextProvider);
+        this.controllerService = Objects.requireNonNull(controllerService);
+    }
+
     /**
      * <p>Send a chat message to a specified chat user</p>
      * May trigger a call to <code>/join</code> endpoint, if the user has not
@@ -45,9 +53,12 @@ public class ChatController {
      * @return 
      */
     @RequestMapping(Endpoints.CHAT)
-    public ResponseEntity chat(ServletRequest req, ServletResponse res) {
+    public ResponseEntity chat(HttpServletRequest req, HttpServletResponse res) {
         
-        final Response response = requestHandler.process(req, res);
+        final ControllerService.ServiceContext serviceContext = 
+                this.serviceContextProvider.from(req);
+        
+        final Response response = this.controllerService.process(serviceContext);
         
         return ResponseEntity.status(response.getCode()).body(response);
     }

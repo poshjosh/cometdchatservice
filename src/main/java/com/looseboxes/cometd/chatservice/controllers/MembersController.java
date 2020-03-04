@@ -15,16 +15,17 @@
  */
 package com.looseboxes.cometd.chatservice.controllers;
 
-import com.looseboxes.cometd.chatservice.handlers.request.RequestHandler;
-import com.looseboxes.cometd.chatservice.handlers.request.RequestHandlerQualifiers;
+import com.looseboxes.cometd.chatservice.handlers.request.ControllerService;
+import com.looseboxes.cometd.chatservice.handlers.request.ControllerServiceContextProvider;
 import com.looseboxes.cometd.chatservice.handlers.response.Response;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.looseboxes.cometd.chatservice.handlers.request.MembersControllerService;
+import java.util.Objects;
 
 /**
  * @author USER
@@ -32,13 +33,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MembersController {
     
-    @Qualifier(RequestHandlerQualifiers.MEMBERS_HANDLER)
-    @Autowired private RequestHandler<Response> requestHandler;
+    private final ControllerServiceContextProvider serviceContextProvider;
     
+    private final ControllerService controllerService;
+
+    public MembersController(
+            @Autowired ControllerServiceContextProvider serviceContextProvider, 
+            @Autowired MembersControllerService controllerService) {
+        this.serviceContextProvider = Objects.requireNonNull(serviceContextProvider);
+        this.controllerService = Objects.requireNonNull(controllerService);
+    }
+
     @RequestMapping(Endpoints.MEMBERS)
-    public ResponseEntity members(ServletRequest req, ServletResponse res) {
+    public ResponseEntity members(HttpServletRequest req, HttpServletResponse res) {
         
-        final Response response = requestHandler.process(req, res);
+        final ControllerService.ServiceContext serviceContext = 
+                this.serviceContextProvider.from(req);
+        
+        final Response response = this.controllerService.process(serviceContext);
         
         return ResponseEntity.status(response.getCode()).body(response);
     }

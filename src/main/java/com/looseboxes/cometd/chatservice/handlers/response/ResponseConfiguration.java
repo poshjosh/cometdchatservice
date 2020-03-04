@@ -40,8 +40,14 @@ public class ResponseConfiguration {
         }
     }
 
+    @Bean public MessageResponseBuilder messageResponseBuilder() {
+        return new MessageResponseBuilderImpl(
+                this.responseSupplier(), this.responseCodeProvider());
+    }
+
     @Bean public ResponseBuilder responseBuilder() {
-        return new ResponseBuilderImpl(this.responseSupplier(), this.responseCodeProvider());
+        return new ResponseBuilderImpl(
+                this.responseSupplier(), this.responseCodeProvider());
     }
     
     @Bean public ResponseSupplier responseSupplier() {

@@ -16,44 +16,44 @@
 package com.looseboxes.cometd.chatservice.handlers.request;
 
 import com.looseboxes.cometd.chatservice.chat.ChatServerOptionNames;
-import com.looseboxes.cometd.chatservice.chat.MembersService;
 import com.looseboxes.cometd.chatservice.ParamNames;
 import com.looseboxes.cometd.chatservice.controllers.Endpoints;
-import com.looseboxes.cometd.chatservice.handlers.ChatRequestService;
+import com.looseboxes.cometd.chatservice.handlers.response.MessageResponseBuilder;
 import com.looseboxes.cometd.chatservice.handlers.response.Response;
-import com.looseboxes.cometd.chatservice.handlers.response.ResponseBuilder;
 import java.util.Collections;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.Objects;
 import org.cometd.bayeux.server.BayeuxServer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author USER
  */
-public final class MembersHandler extends AbstractRequestHandler{
+@Service
+public class MembersControllerService implements ControllerService{
 
-    private static final Logger LOG = LoggerFactory.getLogger(MembersHandler.class);
+    private final MessageResponseBuilder msgResBuilder;
 
-    public MembersHandler() { }
-    
+    public MembersControllerService(@Autowired MessageResponseBuilder msgResBuilder) {
+        this.msgResBuilder = Objects.requireNonNull(msgResBuilder);
+    }
+
     @Override
-    protected Response doProcess(HttpServletRequest req, HttpServletResponse res) {
+    public Response process(ControllerService.ServiceContext serviceContext) {
 
         final boolean error;
         final String message;
         final Map outputData;
         
-        final WebApplicationContext webAppCtx = this.getWebAppContext(req);
+        if(serviceContext.isJoinedToChat()) {
         
-        final ChatRequestService svc = webAppCtx.getBean(ChatRequestService.class);
-        
-        if(svc.isJoinedToChat(req)) {
-        
-            final Map roomMembers = this.getMembers(req);
+            final Map<String, Object> params = serviceContext.getParameters();
+            
+            final String room = (String)params.get(ParamNames.ROOM);
+
+            final Map roomMembers = this.getMembers(
+                    serviceContext.getBayeuxServer(), room);
 
             error = false;
             outputData = Collections.singletonMap(Endpoints.MEMBERS.substring(1), roomMembers);
@@ -66,21 +66,17 @@ public final class MembersHandler extends AbstractRequestHandler{
             outputData = Collections.EMPTY_MAP;
         }
 
-        return webAppCtx.getBean(ResponseBuilder.class)
-                .buildResponse(message, outputData, error);
+        return msgResBuilder.buildResponse(message, outputData, error);
     }
     
-    private Map getMembers(HttpServletRequest req) {
+    private Map getMembers(BayeuxServer bayeuxServer, String room) {
         
-        final BayeuxServer bayeuxServer = (BayeuxServer)req.getServletContext()
-                .getAttribute(BayeuxServer.ATTRIBUTE);
-        
-        final MembersService membersService = (MembersService)bayeuxServer
+        final com.looseboxes.cometd.chatservice.chat.MembersService membersService = 
+                (com.looseboxes.cometd.chatservice.chat.MembersService)bayeuxServer
                 .getOption(ChatServerOptionNames.MEMBERS_SERVICE);
         
         final Map result;
        
-        final String room = req.getParameter(ParamNames.ROOM);
         if(room == null || room.isEmpty()) {
             result = membersService.getMembers();
         }else{

@@ -16,6 +16,13 @@
 package com.looseboxes.cometd.chatservice.handlers;
 
 import com.looseboxes.cometd.chatservice.handlers.exceptions.InvalidRequestParameterException;
+import com.looseboxes.cometd.chatservice.handlers.exceptions.ProcessingRequestException;
+import com.looseboxes.cometd.chatservice.handlers.exceptions.ProcessingRequestInterruptedException;
+import com.looseboxes.cometd.chatservice.handlers.exceptions.ProcessingRequestTimeoutException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -27,7 +34,24 @@ import org.slf4j.LoggerFactory;
 public final class ServletUtil {
     
     private static final Logger LOG = LoggerFactory.getLogger(ServletUtil.class);
-    
+
+    public <T> T waitForFuture(Future<T> future, long timeoutMillis) {
+        
+        LOG.trace("Will wait at most {} millis for future to return.", timeoutMillis);
+        
+        try{
+            
+            return future.get(timeoutMillis, TimeUnit.MILLISECONDS);
+            
+        }catch(ExecutionException e) {
+            throw new ProcessingRequestException(e);
+        }catch(TimeoutException e) {    
+            throw new ProcessingRequestTimeoutException(e);
+        }catch(InterruptedException e) {
+            throw new ProcessingRequestInterruptedException(e);
+        }
+    }
+
     public String requireNonNullOrEmpty(ServletRequest req, String paramName) {
         final String paramValue = req.getParameter(paramName);
         if(paramValue == null || paramValue.isEmpty()) {

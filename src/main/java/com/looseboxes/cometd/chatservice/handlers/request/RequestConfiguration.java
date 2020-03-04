@@ -35,18 +35,18 @@ public class RequestConfiguration {
 }
 /**
  * 
-    @Bean(RequestHandlerQualifiers.MEMBERS_HANDLER) 
-    @Scope("prototype") public RequestHandler<Response> membersHandler() {
+    @Bean(ControllerServiceQualifiers.MEMBERS_SERVICE) 
+    @Scope("prototype") public ControllerService membersHandler() {
         return new MembersHandler();
     }
 
-    @Bean(RequestHandlerQualifiers.CHAT_HANDLER) 
-    @Scope("prototype") public RequestHandler<Response> chatHandler() {
+    @Bean(ControllerServiceQualifiers.CHAT_SERVICE) 
+    @Scope("prototype") public ControllerService chatHandler() {
         return new ChatHandler();
     }
 
-    @Bean(RequestHandlerQualifiers.JOIN_HANDLER) 
-    @Scope("prototype") public RequestHandler<Response> joinHandler() {
+    @Bean(ControllerServiceQualifiers.JOIN_SERVICE) 
+    @Scope("prototype") public ControllerService joinHandler() {
         return new JoinHandler();
     }
  * 

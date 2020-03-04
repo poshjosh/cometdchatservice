@@ -13,23 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice.handlers;
+package com.looseboxes.cometd.chatservice.handlers.request;
 
 import com.looseboxes.cometd.chatservice.AttributeNames;
-import com.looseboxes.cometd.chatservice.chat.ChatConfig;
-import com.looseboxes.cometd.chatservice.chat.ChatSession;
 import com.looseboxes.cometd.chatservice.CometDProperties;
 import com.looseboxes.cometd.chatservice.ParamNames;
+import com.looseboxes.cometd.chatservice.chat.ChatConfig;
+import com.looseboxes.cometd.chatservice.chat.ChatSession;
 import com.looseboxes.cometd.chatservice.controllers.Endpoints;
-import com.looseboxes.cometd.chatservice.handlers.request.JoinHandler;
-import com.looseboxes.cometd.chatservice.handlers.response.Response;
-import com.looseboxes.cometd.chatservice.handlers.response.ResponseBuilder;
+import com.looseboxes.cometd.chatservice.handlers.ServletUtil;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.cometd.bayeux.server.BayeuxServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.WebApplicationContext;
@@ -38,55 +37,44 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 /**
  * @author USER
  */
-public class ChatRequestServiceImpl implements ChatRequestService {
+public class ControllerServiceContextProviderImpl implements ControllerServiceContextProvider{
     
-    private static final Logger LOG = LoggerFactory.getLogger(ChatRequestServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ControllerServiceContextProviderImpl.class);
     
     private final ServletUtil servletUtil;
 
-    public ChatRequestServiceImpl(ServletUtil servletUtil) {
+    public ControllerServiceContextProviderImpl(ServletUtil servletUtil) {
         this.servletUtil = Objects.requireNonNull(servletUtil);
     }
     
-    /**
-     * @param req
-     * @param res
-     * @return {@link com.looseboxes.cometd.chatservice.handlers.response.Response Response} 
-     * object with success set to true if previously joined to chat or
-     * successfully joined to chat during this methods execution, otherwise 
-     * return false.
-     */
     @Override
-    public Response joinChatIfNotAlready(HttpServletRequest req, HttpServletResponse res) {
+    public ControllerService.ServiceContext from(HttpServletRequest req){
+    
+        final ChatSession chatSession = getChatSession(req, true);
         
-        final WebApplicationContext webAppCtx = getWebAppContext(req);
+        final BayeuxServer bayeuxServer = (BayeuxServer)req.getServletContext()
+                .getAttribute(BayeuxServer.ATTRIBUTE);
         
-        final boolean joinedToChat = this.isJoinedToChat(req);
+        final ControllerServiceContext bean = new ControllerServiceContext();
         
-        if( ! joinedToChat) {
-        
-            final JoinHandler jh = webAppCtx.getBean(JoinHandler.class);
-
-            final Response jhr = jh.process(req, res);
-
-            if(!jhr.isSuccess()) {
-
-                return jhr;
+        final Map<String, Object> params = new HashMap();
+        req.getParameterMap().forEach((k, v) -> {
+            if(v != null) {
+                if(v.length == 0) {
+                    params.put(k, v[0]);
+                }else{
+                    params.put(k, v);
+                }
             }
-        }
+        });
         
-        return webAppCtx.getBean(ResponseBuilder.class).buildSuccessResponse();
-    }
-
-    @Override
-    public boolean isJoinedToChat(HttpServletRequest req) {
+        bean.setBayeuxServer(bayeuxServer);
+        bean.setChatSession(chatSession);
+        bean.setParameters(Collections.unmodifiableMap(params));
         
-        final ChatSession chatSession = this.getChatSession(req, false);
-        
-        return chatSession == null ? false : chatSession.getState().isConnected();
+        return bean;
     }
     
-    @Override
     public ChatSession getChatSession(HttpServletRequest req, boolean createIfNone) {
         
         final ChatSession chatSession;

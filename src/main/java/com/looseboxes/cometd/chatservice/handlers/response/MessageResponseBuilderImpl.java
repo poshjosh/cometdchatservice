@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice.handlers.request;
+package com.looseboxes.cometd.chatservice.handlers.response;
+
+import java.util.function.Supplier;
 
 /**
  * @author USER
  */
-public interface RequestHandlerQualifiers {
+public final class MessageResponseBuilderImpl extends ResponseBuilderImpl
+        implements MessageResponseBuilder{
 
-    String CHAT_HANDLER = "chatHandler";
-
-    String JOIN_HANDLER = "joinHandler";
-
-    String MEMBERS_HANDLER = "membersHandler";
+    public MessageResponseBuilderImpl(
+            Supplier<ResponseImpl> responseSupplier, 
+            ResponseCodeProvider responseCodeProvider) {
+        super(responseSupplier, responseCodeProvider);
+    }
 }
