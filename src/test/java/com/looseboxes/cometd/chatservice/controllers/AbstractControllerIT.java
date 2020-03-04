@@ -15,7 +15,8 @@
  */
 package com.looseboxes.cometd.chatservice.controllers;
 
-import com.looseboxes.cometd.chatservice.handlers.request.RequestHandler;
+import com.looseboxes.cometd.chatservice.handlers.request.ControllerService;
+import com.looseboxes.cometd.chatservice.handlers.request.ControllerService.ServiceContext;
 import com.looseboxes.cometd.chatservice.handlers.response.Response;
 import com.looseboxes.cometd.chatservice.handlers.response.ResponseBuilder;
 import com.looseboxes.cometd.chatservice.test.EndpointRequestBuilders;
@@ -25,8 +26,6 @@ import com.looseboxes.cometd.chatservice.test.TestConfig;
 import com.looseboxes.cometd.chatservice.test.TestData;
 import java.util.Collections;
 import java.util.Map;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.invocation.InvocationOnMock;
@@ -75,7 +74,7 @@ public abstract class AbstractControllerIT {
 
     @Autowired private MockMvc mockMvc;
     
-    protected abstract RequestHandler<Response> getRequestHandler();
+    protected abstract ControllerService getControllerService();
 
     public void requestToEndpoint_whenParamsValid_shouldReturnSuccessfully(
             String endpoint) {
@@ -115,8 +114,7 @@ public abstract class AbstractControllerIT {
             String endpoint, int code, boolean error, 
             String message, Object data, Map<String, String> params) {
 
-        final Verifier verifier = this.whenMethodProcessIsCalled(
-                getRequestHandler(), code, error, message, data);
+        final Verifier verifier = this.whenMethodProcessIsCalled(getControllerService(), code, error, message, data);
         try{
             
             this.mockMvc.perform(endpointReqBuilders.builder(endpoint, params))
@@ -137,17 +135,15 @@ public abstract class AbstractControllerIT {
         verifier.verify();
     }
 
-    public Verifier whenMethodProcessIsCalled(RequestHandler<Response> reqHandler,
+    public Verifier whenMethodProcessIsCalled(ControllerService reqHandler,
             int code, boolean error, String message, Object data) {
         
         final Response response = testData.createResponse(code, error, message, data);
         
-        when(reqHandler.process(
-                isA(ServletRequest.class), isA(ServletResponse.class)))
-                .thenReturn(response);
+        when(reqHandler.process(isA(ServiceContext.class))).thenReturn(response);
         
         final Verifier verifier = () -> verify(reqHandler)
-                .process(isA(ServletRequest.class), isA(ServletResponse.class));
+                .process(isA(ServiceContext.class));
         
         return verifier;
     }

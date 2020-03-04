@@ -15,14 +15,12 @@
  */
 package com.looseboxes.cometd.chatservice.controllers;
 
-import com.looseboxes.cometd.chatservice.handlers.request.RequestHandler;
-import com.looseboxes.cometd.chatservice.handlers.request.RequestHandlerQualifiers;
-import com.looseboxes.cometd.chatservice.handlers.response.Response;
+import com.looseboxes.cometd.chatservice.handlers.request.ControllerService;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import com.looseboxes.cometd.chatservice.handlers.request.JoinControllerService;
 
 /**
  * @author USER
@@ -31,8 +29,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 public class JoinControllerIT extends AbstractControllerIT{
     
     /** Required by the Controller being tested */
-    @Qualifier(RequestHandlerQualifiers.JOIN_HANDLER)
-    @MockBean private RequestHandler<Response> requestHandler;
+    @MockBean private JoinControllerService controllerService;
     
     @Test
     public void requestToJoinEndpoint_whenParamsValid_shouldReturnSuccessfully() {
@@ -46,7 +43,7 @@ public class JoinControllerIT extends AbstractControllerIT{
     }
     
     @Override
-    public RequestHandler<Response> getRequestHandler() {
-        return requestHandler;
+    public ControllerService getControllerService() {
+        return controllerService;
     }
 }
