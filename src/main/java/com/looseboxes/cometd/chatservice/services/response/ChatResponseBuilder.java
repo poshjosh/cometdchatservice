@@ -30,6 +30,11 @@ public final class ChatResponseBuilder<T> extends ResponseBuilderImpl<T>{
     }
 
     @Override
+    public Builder<T> newInstance() {
+        return new ChatResponseBuilder(this.getResponseCodeProvider());
+    }
+    
+    @Override
     public Response.Builder<T> message(Object message) {
         final String sval;
         if(message instanceof ChatSession) {

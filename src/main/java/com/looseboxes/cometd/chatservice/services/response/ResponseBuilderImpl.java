@@ -73,6 +73,11 @@ public class ResponseBuilderImpl<T> implements Response<T>, Response.Builder<T>{
     }
 
     @Override
+    public Builder<T> newInstance() {
+        return new ResponseBuilderImpl(this.responseCodeProvider);
+    }
+
+    @Override
     public boolean isBuildAttempted() {
         return this.buildAttempted.get();
     }
@@ -129,6 +134,10 @@ public class ResponseBuilderImpl<T> implements Response<T>, Response.Builder<T>{
     public Response.Builder success(boolean success) {
         this.success = success ? 1 : 0;
         return this;
+    }
+
+    public ResponseCodeProvider getResponseCodeProvider() {
+        return responseCodeProvider;
     }
 
     @Override

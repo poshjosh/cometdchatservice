@@ -35,6 +35,8 @@ public interface Response<T> {
     long getTimestamp();
 
     public interface Builder<T> {
+        
+        Builder<T> newInstance();
 
         Response<T> build();
 
