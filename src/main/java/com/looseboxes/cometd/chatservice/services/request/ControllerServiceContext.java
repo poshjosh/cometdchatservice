@@ -17,6 +17,7 @@ package com.looseboxes.cometd.chatservice.services.request;
 
 import com.looseboxes.cometd.chatservice.chat.ChatSession;
 import java.util.Map;
+import java.util.Objects;
 import org.cometd.bayeux.server.BayeuxServer;
 
 /**
@@ -57,6 +58,39 @@ public class ControllerServiceContext implements ControllerService.ServiceContex
 
     public void setParameters(Map<String, Object> parameters) {
         this.parameters = parameters;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 47 * hash + Objects.hashCode(this.bayeuxServer);
+        hash = 47 * hash + Objects.hashCode(this.chatSession);
+        hash = 47 * hash + Objects.hashCode(this.parameters);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ControllerServiceContext other = (ControllerServiceContext) obj;
+        if (!Objects.equals(this.bayeuxServer, other.bayeuxServer)) {
+            return false;
+        }
+        if (!Objects.equals(this.chatSession, other.chatSession)) {
+            return false;
+        }
+        if (!Objects.equals(this.parameters, other.parameters)) {
+            return false;
+        }
+        return true;
     }
 }
 /**
