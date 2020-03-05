@@ -17,8 +17,8 @@ package com.looseboxes.cometd.chatservice.test;
 
 import com.looseboxes.cometd.chatservice.AppConfiguration;
 import com.looseboxes.cometd.chatservice.chat.ChatConfiguration;
-import com.looseboxes.cometd.chatservice.handlers.request.RequestConfiguration;
-import com.looseboxes.cometd.chatservice.handlers.response.ResponseConfiguration;
+import com.looseboxes.cometd.chatservice.services.request.RequestConfiguration;
+import com.looseboxes.cometd.chatservice.services.response.ResponseConfiguration;
 import com.looseboxes.cometd.chatservice.initializers.InitConfiguration;
 import java.util.Objects;
 import org.springframework.context.annotation.Bean;

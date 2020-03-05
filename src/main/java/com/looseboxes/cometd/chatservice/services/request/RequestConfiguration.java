@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice.handlers.request;
+package com.looseboxes.cometd.chatservice.services.request;
 
-import com.looseboxes.cometd.chatservice.handlers.ServletUtil;
+import com.looseboxes.cometd.chatservice.services.ServletUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

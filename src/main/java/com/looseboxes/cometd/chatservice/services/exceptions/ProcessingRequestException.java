@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice.handlers.exceptions;
+package com.looseboxes.cometd.chatservice.services.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -21,26 +21,25 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 /**
  * @author USER
  */
-@ResponseStatus(HttpStatus.BAD_REQUEST)
-public class InvalidRequestParameterException extends ProcessingRequestException{
+@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+public class ProcessingRequestException extends RuntimeException{
 
-    public InvalidRequestParameterException() {
+    public ProcessingRequestException() {
     }
 
-    public InvalidRequestParameterException(String message) {
+    public ProcessingRequestException(String message) {
         super(message);
     }
 
-    public InvalidRequestParameterException(String message, Throwable cause) {
+    public ProcessingRequestException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public InvalidRequestParameterException(Throwable cause) {
+    public ProcessingRequestException(Throwable cause) {
         super(cause);
     }
 
-    public InvalidRequestParameterException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public ProcessingRequestException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
-    
 }

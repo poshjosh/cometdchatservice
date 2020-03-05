@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice.handlers.response;
+package com.looseboxes.cometd.chatservice.services.response;
 
 import java.util.function.Supplier;
 

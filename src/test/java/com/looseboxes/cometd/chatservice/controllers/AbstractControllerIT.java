@@ -15,10 +15,10 @@
  */
 package com.looseboxes.cometd.chatservice.controllers;
 
-import com.looseboxes.cometd.chatservice.handlers.request.ControllerService;
-import com.looseboxes.cometd.chatservice.handlers.request.ControllerService.ServiceContext;
-import com.looseboxes.cometd.chatservice.handlers.response.Response;
-import com.looseboxes.cometd.chatservice.handlers.response.ResponseBuilder;
+import com.looseboxes.cometd.chatservice.services.request.ControllerService;
+import com.looseboxes.cometd.chatservice.services.request.ControllerService.ServiceContext;
+import com.looseboxes.cometd.chatservice.services.response.Response;
+import com.looseboxes.cometd.chatservice.services.response.ResponseBuilder;
 import com.looseboxes.cometd.chatservice.test.EndpointRequestBuilders;
 import com.looseboxes.cometd.chatservice.test.EndpointRequestParams;
 import com.looseboxes.cometd.chatservice.test.MyTestConfiguration;

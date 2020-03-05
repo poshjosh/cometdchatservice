@@ -15,8 +15,8 @@
  */
 package com.looseboxes.cometd.chatservice.test;
 
-import com.looseboxes.cometd.chatservice.handlers.response.Response;
-import com.looseboxes.cometd.chatservice.handlers.response.ResponseImpl;
+import com.looseboxes.cometd.chatservice.services.response.Response;
+import com.looseboxes.cometd.chatservice.services.response.ResponseImpl;
 import javax.servlet.http.HttpServletResponse;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;

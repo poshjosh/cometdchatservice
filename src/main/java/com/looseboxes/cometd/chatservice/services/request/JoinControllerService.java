@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice.handlers.request;
+package com.looseboxes.cometd.chatservice.services.request;
 
 import com.looseboxes.cometd.chatservice.CometDProperties;
-import com.looseboxes.cometd.chatservice.handlers.response.Response;
+import com.looseboxes.cometd.chatservice.services.response.Response;
 import java.util.concurrent.Future;
 import org.cometd.bayeux.Message;
 import com.looseboxes.cometd.chatservice.chat.ChatSession;
-import com.looseboxes.cometd.chatservice.handlers.ServletUtil;
-import com.looseboxes.cometd.chatservice.handlers.response.MessageResponseBuilder;
+import com.looseboxes.cometd.chatservice.services.ServletUtil;
+import com.looseboxes.cometd.chatservice.services.response.MessageResponseBuilder;
 import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.looseboxes.cometd.chatservice.handlers.response;
+package com.looseboxes.cometd.chatservice.services.response;
 
 import java.util.Objects;
 import java.util.function.Supplier;

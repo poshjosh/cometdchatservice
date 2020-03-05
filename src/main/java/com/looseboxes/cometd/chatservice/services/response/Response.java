@@ -13,14 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice.handlers.request;
-
-import javax.servlet.http.HttpServletRequest;
+package com.looseboxes.cometd.chatservice.services.response;
 
 /**
  * @author USER
  */
-public interface ControllerServiceContextProvider {
+public interface Response<T> {
 
-    ControllerService.ServiceContext from(HttpServletRequest req);
+    int getCode();
+
+    T getData();
+
+    String getMessage();
+
+    boolean isSuccess();
+    
+    long getTimestamp();
 }

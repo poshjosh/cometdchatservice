@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice.handlers.request;
+package com.looseboxes.cometd.chatservice.services.request;
 
 import com.looseboxes.cometd.chatservice.chat.ChatSession;
-import com.looseboxes.cometd.chatservice.handlers.exceptions.InvalidRequestParameterException;
-import com.looseboxes.cometd.chatservice.handlers.response.Response;
+import com.looseboxes.cometd.chatservice.services.exceptions.InvalidRequestParameterException;
+import com.looseboxes.cometd.chatservice.services.response.Response;
 import java.util.Map;
 import org.cometd.bayeux.server.BayeuxServer;
 

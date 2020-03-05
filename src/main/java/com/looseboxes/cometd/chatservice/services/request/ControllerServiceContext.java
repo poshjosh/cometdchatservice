@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice.handlers.request;
+package com.looseboxes.cometd.chatservice.services.request;
 
 import com.looseboxes.cometd.chatservice.chat.ChatSession;
 import java.util.Map;

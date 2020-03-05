@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice.handlers.request;
+package com.looseboxes.cometd.chatservice.services.request;
 
 import com.looseboxes.cometd.chatservice.chat.ChatServerOptionNames;
 import com.looseboxes.cometd.chatservice.ParamNames;
 import com.looseboxes.cometd.chatservice.controllers.Endpoints;
-import com.looseboxes.cometd.chatservice.handlers.response.MessageResponseBuilder;
-import com.looseboxes.cometd.chatservice.handlers.response.Response;
+import com.looseboxes.cometd.chatservice.services.response.MessageResponseBuilder;
+import com.looseboxes.cometd.chatservice.services.response.Response;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;

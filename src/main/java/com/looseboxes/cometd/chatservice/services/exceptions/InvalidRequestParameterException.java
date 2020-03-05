@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice.handlers.exceptions;
+package com.looseboxes.cometd.chatservice.services.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -21,26 +21,26 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 /**
  * @author USER
  */
-@ResponseStatus(HttpStatus.NOT_FOUND)
-public class RequestHandlerNotFoundException extends ProcessingRequestException {
+@ResponseStatus(HttpStatus.BAD_REQUEST)
+public class InvalidRequestParameterException extends ProcessingRequestException{
 
-    public RequestHandlerNotFoundException() {
+    public InvalidRequestParameterException() {
     }
 
-    public RequestHandlerNotFoundException(String message) {
+    public InvalidRequestParameterException(String message) {
         super(message);
     }
 
-    public RequestHandlerNotFoundException(String message, Throwable cause) {
+    public InvalidRequestParameterException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public RequestHandlerNotFoundException(Throwable cause) {
+    public InvalidRequestParameterException(Throwable cause) {
         super(cause);
     }
 
-    public RequestHandlerNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public InvalidRequestParameterException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
-
+    
 }

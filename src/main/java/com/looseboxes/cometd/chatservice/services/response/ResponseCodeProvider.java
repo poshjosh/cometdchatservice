@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice.handlers.request;
+package com.looseboxes.cometd.chatservice.services.response;
 
 /**
  * @author USER
  */
-public interface ControllerServiceQualifiers {
+public interface ResponseCodeProvider {
 
-    String CHAT_SERVICE = "chatService";
-
-    String JOIN_SERVICE = "joinService";
-
-    String MEMBERS_SERVICE = "membersService";
+    int from(Object o, int resultIfNone);
 }

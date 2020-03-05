@@ -13,23 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice.handlers.response;
+package com.looseboxes.cometd.chatservice.services.response;
 
-import com.looseboxes.cometd.chatservice.handlers.exceptions.ProcessingRequestException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import com.looseboxes.cometd.chatservice.chat.ChatSession;
+import org.cometd.bayeux.Message;
 
 /**
  * @author USER
  */
-public interface ResponseHandler<T> {
+public interface MessageResponseBuilder extends ResponseBuilder{
     
-    void onSuccess(ServletRequest req, ServletResponse res, T responseData) 
-            throws ProcessingRequestException;
-    
-    void onFailure(ServletRequest req, ServletResponse res, T responseData) 
-            throws ProcessingRequestException;
-    
-    void onAlways(ServletRequest req, ServletResponse res, T responseData) 
-            throws ProcessingRequestException;
+    default Response buildResponse(ChatSession chatSession, Message message){
+        
+        final boolean success = message.isSuccessful();
+        
+        return buildResponse(
+                chatSession.getState().toString(), message, ! success);
+    }
 }

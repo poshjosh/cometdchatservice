@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice.handlers;
+package com.looseboxes.cometd.chatservice.services;
 
-import com.looseboxes.cometd.chatservice.handlers.exceptions.InvalidRequestParameterException;
-import com.looseboxes.cometd.chatservice.handlers.exceptions.ProcessingRequestException;
-import com.looseboxes.cometd.chatservice.handlers.exceptions.ProcessingRequestInterruptedException;
-import com.looseboxes.cometd.chatservice.handlers.exceptions.ProcessingRequestTimeoutException;
+import com.looseboxes.cometd.chatservice.services.exceptions.InvalidRequestParameterException;
+import com.looseboxes.cometd.chatservice.services.exceptions.ProcessingRequestException;
+import com.looseboxes.cometd.chatservice.services.exceptions.ProcessingRequestInterruptedException;
+import com.looseboxes.cometd.chatservice.services.exceptions.ProcessingRequestTimeoutException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;

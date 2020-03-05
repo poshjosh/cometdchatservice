@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice.handlers.request;
+package com.looseboxes.cometd.chatservice.services.request;
 
 import com.looseboxes.cometd.chatservice.ParamNames;
 import com.looseboxes.cometd.chatservice.chat.ChatSession;
-import com.looseboxes.cometd.chatservice.handlers.response.Response;
-import com.looseboxes.cometd.chatservice.handlers.ServletUtil;
-import com.looseboxes.cometd.chatservice.handlers.response.MessageResponseBuilder;
+import com.looseboxes.cometd.chatservice.services.response.Response;
+import com.looseboxes.cometd.chatservice.services.ServletUtil;
+import com.looseboxes.cometd.chatservice.services.response.MessageResponseBuilder;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Future;
@@ -97,7 +97,7 @@ public class ChatControllerService implements ControllerService{
 
     /**
      * @param serviceContext
-     * @return {@link com.looseboxes.cometd.chatservice.handlers.response.Response Response} 
+     * @return {@link com.looseboxes.cometd.chatservice.services.response.Response Response} 
      * object with success set to true if previously joined to chat or
      * successfully joined to chat during this methods execution, otherwise 
      * return false.

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice.handlers.exceptions;
+package com.looseboxes.cometd.chatservice.services.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -21,25 +21,25 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 /**
  * @author USER
  */
-@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-public class ProcessingRequestException extends RuntimeException{
+@ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
+public class ProcessingRequestTimeoutException extends ProcessingRequestException {
 
-    public ProcessingRequestException() {
+    public ProcessingRequestTimeoutException() {
     }
 
-    public ProcessingRequestException(String message) {
+    public ProcessingRequestTimeoutException(String message) {
         super(message);
     }
 
-    public ProcessingRequestException(String message, Throwable cause) {
+    public ProcessingRequestTimeoutException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public ProcessingRequestException(Throwable cause) {
+    public ProcessingRequestTimeoutException(Throwable cause) {
         super(cause);
     }
 
-    public ProcessingRequestException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public ProcessingRequestTimeoutException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }
