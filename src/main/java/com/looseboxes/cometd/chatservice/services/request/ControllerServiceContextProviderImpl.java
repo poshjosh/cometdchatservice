@@ -16,11 +16,11 @@
 package com.looseboxes.cometd.chatservice.services.request;
 
 import com.looseboxes.cometd.chatservice.AttributeNames;
-import com.looseboxes.cometd.chatservice.CometDProperties;
 import com.looseboxes.cometd.chatservice.ParamNames;
 import com.looseboxes.cometd.chatservice.chat.ChatConfig;
 import com.looseboxes.cometd.chatservice.chat.ChatSession;
 import com.looseboxes.cometd.chatservice.controllers.Endpoints;
+import com.looseboxes.cometd.chatservice.services.RequestUrl;
 import com.looseboxes.cometd.chatservice.services.ServletUtil;
 import java.util.Collections;
 import java.util.HashMap;
@@ -55,7 +55,9 @@ public class ControllerServiceContextProviderImpl implements ControllerServiceCo
         final BayeuxServer bayeuxServer = (BayeuxServer)req.getServletContext()
                 .getAttribute(BayeuxServer.ATTRIBUTE);
         
-        final ControllerServiceContext bean = new ControllerServiceContext();
+        final WebApplicationContext webAppCtx = getWebAppContext(req);
+
+        final ControllerServiceContext bean = webAppCtx.getBean(ControllerServiceContext.class);
         
         final Map<String, Object> params = new HashMap();
         req.getParameterMap().forEach((k, v) -> {
@@ -90,6 +92,9 @@ public class ControllerServiceContextProviderImpl implements ControllerServiceCo
             
             chatSession = this.createChatSession(req);
             
+            req.getSession().setAttribute(
+                    AttributeNames.Session.COMETD_CHAT_SESSION, chatSession);
+
         }else{
         
             chatSession = null;
@@ -101,24 +106,26 @@ public class ControllerServiceContextProviderImpl implements ControllerServiceCo
     public ChatSession createChatSession(HttpServletRequest req) {
         
         final WebApplicationContext webAppCtx = getWebAppContext(req);
-
-        final CometDProperties cometdProps = webAppCtx.getBean(CometDProperties.class);
+        
+        final RequestUrl reqUrl = webAppCtx.getBean(RequestUrl.class, req);
 
 // Servlet path may have an asterix e.g /cometd/*  therefore we use the literal endpoint i.e /cometd
 //            final String cometdPath = webAppCtx.getBean(CometDProperties.class).getServletPath();
-        final String url = servletUtil.getEndpointUrl(req, Endpoints.COMETD);
+        final String url = reqUrl.getEndpointUrl(Endpoints.COMETD);
         final String room = servletUtil.requireNonNullOrEmpty(req, ParamNames.ROOM);
         final String user = servletUtil.requireNonNullOrEmpty(req, ParamNames.USER);
         LOG.debug("URL: {}, room: {}, user: {}", url, room, user);
 
-        final ChatConfig chatConfig = webAppCtx.getBean(ChatConfig.class, 
-                cometdProps.getDefaultChannel(), room, user);
+        final ChatConfig.Builder chatCfgBuilder = webAppCtx
+                .getBean(ChatConfig.Builder.class);
+        
+        final ChatConfig chatConfig = chatCfgBuilder
+                .room(room).user(user).build();
 
         final Map<String, Object> transportOptions = new HashMap<>();
 
-        final ChatSession chatSession = webAppCtx.getBean(ChatSession.class, url, transportOptions, chatConfig);
-        
-        req.getSession().setAttribute(AttributeNames.Session.COMETD_CHAT_SESSION, chatSession);
+        final ChatSession chatSession = webAppCtx.getBean(
+                ChatSession.class, url, transportOptions, chatConfig);
         
         return chatSession;
     }
