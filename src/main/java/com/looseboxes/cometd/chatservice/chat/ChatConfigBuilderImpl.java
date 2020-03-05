@@ -44,19 +44,6 @@ public class ChatConfigBuilderImpl implements ChatConfig, ChatConfig.Builder{
 
     public ChatConfigBuilderImpl() { }
     
-    public ChatConfigBuilderImpl(String channel, String room, String user) {
-        this(channel, room, user, Chat.LOG_LEVEL_VALUES.INFO, false);
-    }
-    
-    public ChatConfigBuilderImpl(String channel, String room, String user, 
-            String logLevel, boolean websocketEnabled) {
-        this.channel = this.requireNonNullOrEmpty(channel);
-        this.room = this.requireNonNullOrEmpty(room);
-        this.user = this.requireNonNullOrEmpty(user);
-        this.logLevel = this.requireNonNullOrEmpty(logLevel);
-        this.websocketEnabled = websocketEnabled;
-    }
-    
     @Override
     public ChatConfig build() {
         
@@ -69,14 +56,23 @@ public class ChatConfigBuilderImpl implements ChatConfig, ChatConfig.Builder{
     }
 
     @Override
+    public Builder newInstance() {
+        return new ChatConfigBuilderImpl();
+    }
+
+    @Override
     public boolean isBuildAttempted() {
         return this.buildAttempted.get();
     }
 
     @Override
     public ChatConfig forUser(String user) {
-        return new ChatConfigBuilderImpl(this.channel, this.room, 
-                user, this.logLevel, this.websocketEnabled);
+        return this.newInstance()
+                .channel(this.channel)
+                .room(this.room)
+                .user(user)
+                .logLevel(this.logLevel)
+                .websocketEnabled(this.websocketEnabled).build();
     }
 
     @Override

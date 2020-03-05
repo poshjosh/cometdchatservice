@@ -25,6 +25,8 @@ public interface ChatConfig {
     }
     
     public interface Builder {
+        
+        Builder newInstance();
 
         ChatConfig build();
 
