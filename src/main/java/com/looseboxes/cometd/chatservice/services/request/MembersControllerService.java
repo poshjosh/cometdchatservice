@@ -74,6 +74,7 @@ public class MembersControllerService implements ControllerService{
         final com.looseboxes.cometd.chatservice.chat.MembersService membersService = 
                 (com.looseboxes.cometd.chatservice.chat.MembersService)bayeuxServer
                 .getOption(ChatServerOptionNames.MEMBERS_SERVICE);
+        Objects.requireNonNull(membersService);
         
         final Map result;
        
