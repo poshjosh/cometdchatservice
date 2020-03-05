@@ -16,6 +16,7 @@
 package com.looseboxes.cometd.chatservice.chat;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author USER
@@ -39,6 +40,8 @@ public class ChatConfigBuilderImpl implements ChatConfig, ChatConfig.Builder{
      */
     private boolean websocketEnabled = false;
 
+    private final AtomicBoolean buildAttempted = new AtomicBoolean(false);
+
     public ChatConfigBuilderImpl() { }
     
     public ChatConfigBuilderImpl(String channel, String room, String user) {
@@ -56,7 +59,18 @@ public class ChatConfigBuilderImpl implements ChatConfig, ChatConfig.Builder{
     
     @Override
     public ChatConfig build() {
+        
+        if(this.isBuildAttempted()) {
+            throw new IllegalStateException("Method build() may only be called once");
+        }
+        buildAttempted.compareAndSet(false, true);
+        
         return this;
+    }
+
+    @Override
+    public boolean isBuildAttempted() {
+        return this.buildAttempted.get();
     }
 
     @Override

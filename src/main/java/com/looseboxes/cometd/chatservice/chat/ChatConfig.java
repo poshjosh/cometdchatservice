@@ -29,6 +29,8 @@ public interface ChatConfig {
         ChatConfig build();
 
         ChatConfig.Builder channel(String channel);
+        
+        boolean isBuildAttempted();
 
         ChatConfig.Builder logLevel(String logLevel);
 
