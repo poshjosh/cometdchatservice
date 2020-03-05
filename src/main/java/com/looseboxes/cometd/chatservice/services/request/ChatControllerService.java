@@ -37,7 +37,7 @@ public class ChatControllerService implements ControllerService{
     
     private final ServletUtil servletUtil; 
     
-    private final Response.Builder msgResBuilder;
+    private final Response.Builder responseBuilder;
 
     public ChatControllerService(
             @Autowired JoinControllerService joinService,
@@ -45,7 +45,7 @@ public class ChatControllerService implements ControllerService{
             @Autowired Response.Builder responseBuilder) {
         this.joinService = Objects.requireNonNull(joinService);
         this.servletUtil = Objects.requireNonNull(servletUtil);
-        this.msgResBuilder = Objects.requireNonNull(responseBuilder);
+        this.responseBuilder = Objects.requireNonNull(responseBuilder);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class ChatControllerService implements ControllerService{
 
             final Message message = servletUtil.waitForFuture(chatFuture, timeout);
             
-            response = msgResBuilder.message(chatSession.getState()).data(message).build();
+            response = responseBuilder.message(chatSession.getState()).data(message).build();
         }
         
         return response;
@@ -120,7 +120,13 @@ public class ChatControllerService implements ControllerService{
     }
     
     public Response<String> buildSuccessResponse(){
-        return msgResBuilder.code(HttpServletResponse.SC_OK).message("Success").build();
+        return getResponseBuilder()
+                .code(HttpServletResponse.SC_OK)
+                .message("Success").build();
+    }
+
+    public Response.Builder getResponseBuilder() {
+        return responseBuilder.newInstance();
     }
 }
 
