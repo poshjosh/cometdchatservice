@@ -55,7 +55,7 @@ public class ChatConfiguration {
     }
 
     @Bean @Scope("prototype") public ChatConfig chatConfig(String channel, String room, String user) {
-        return new ChatConfig(channel, room, user);
+        return new ChatConfigBean(channel, room, user);
     }
 
     @Bean @Scope("prototype") public ClientSession clientSession(String url) {
