@@ -119,7 +119,7 @@ public class ChatControllerService implements ControllerService{
         return buildSuccessResponse();
     }
     
-    public Response<String> buildSuccessResponse(){
+    public Response buildSuccessResponse(){
         return getResponseBuilder()
                 .code(HttpServletResponse.SC_OK)
                 .message("Success").build();

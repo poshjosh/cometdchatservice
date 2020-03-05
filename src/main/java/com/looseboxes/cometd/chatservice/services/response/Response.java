@@ -34,19 +34,18 @@ public interface Response<T> {
     
     long getTimestamp();
 
-    public interface Builder<T> {
+    public interface Builder<T> extends com.looseboxes.cometd.chatservice.Builder<Response<T>>{
+
+        @Override
+        Response<T> build();
         
         Builder<T> newInstance();
-
-        Response<T> build();
 
         Response.Builder<T> code(int code);
 
         Response.Builder<T> data(T data);
 
         Response.Builder<T> error(boolean error);
-
-        boolean isBuildAttempted();
 
         default Response.Builder<T> message(Object message){
             return this.message(message.toString());

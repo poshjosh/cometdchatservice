@@ -24,16 +24,12 @@ public interface ChatConfig {
         return new ChatConfigBuilderImpl();
     }
     
-    public interface Builder {
+    public interface Builder extends com.looseboxes.cometd.chatservice.Builder<ChatConfig>{
         
-        Builder newInstance();
-
-        ChatConfig build();
+        ChatConfig.Builder newInstance();
 
         ChatConfig.Builder channel(String channel);
         
-        boolean isBuildAttempted();
-
         ChatConfig.Builder logLevel(String logLevel);
 
         ChatConfig.Builder room(String room);
