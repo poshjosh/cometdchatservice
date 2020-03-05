@@ -40,44 +40,10 @@ public class TestData {
     public <T> Response<T> createResponse(int code,
             boolean error, String message, T data) {
         final ResponseImpl res = new ResponseImpl();
-        res.code = code;
-        res.message = message;
-        res.data = data;
-        res.success = ! error;
+        res.setCode(code);
+        res.setMessage(message);
+        res.setData(data);
+        res.setSuccess( ! error);
         return res;
-    }
-    
-    private static class ResponseImpl<T> implements Response<T>{
-        
-        private int code;
-        private String message;
-        private T data;
-        private boolean success;
-        private final long timestamp = System.currentTimeMillis();
-
-        @Override
-        public int getCode() {
-            return code;
-        }
-
-        @Override
-        public T getData() {
-            return data;
-        }
-
-        @Override
-        public String getMessage() {
-            return message;
-        }
-
-        @Override
-        public boolean isSuccess() {
-            return success;
-        }
-
-        @Override
-        public long getTimestamp() {
-            return timestamp;
-        }
     }
 }
