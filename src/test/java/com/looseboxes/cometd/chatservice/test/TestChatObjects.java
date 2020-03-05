@@ -15,6 +15,7 @@
  */
 package com.looseboxes.cometd.chatservice.test;
 
+import com.looseboxes.cometd.chatservice.chat.Chat;
 import com.looseboxes.cometd.chatservice.chat.ChatConfig;
 import com.looseboxes.cometd.chatservice.chat.ChatService;
 import com.looseboxes.cometd.chatservice.chat.ChatSession;
@@ -111,9 +112,11 @@ public class TestChatObjects {
     }
     
     public ChatConfig getChatConfig() {
-        final ChatConfig chatConfig = new ChatConfig(
-                "/chat/privatechat", "test_room", "test_user");
-        return chatConfig;
+        return ChatConfig.builder()
+                .logLevel(Chat.LOG_LEVEL_VALUES.DEBUG)
+                .channel("/chat/privatechat")
+                .room("test_room")
+                .user("test_user").build();
     }
 
     public ServerChannel getServerChannel(String id) {
