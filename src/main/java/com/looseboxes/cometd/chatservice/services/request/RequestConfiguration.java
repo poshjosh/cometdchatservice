@@ -15,15 +15,27 @@
  */
 package com.looseboxes.cometd.chatservice.services.request;
 
+import com.looseboxes.cometd.chatservice.services.RequestUrl;
+import com.looseboxes.cometd.chatservice.services.RequestUrlImpl;
 import com.looseboxes.cometd.chatservice.services.ServletUtil;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 
 /**
  * @author USER
  */
 @Configuration
 public class RequestConfiguration {
+    
+    @Bean @Scope("prototype") public RequestUrl requestUrl(HttpServletRequest request){
+        return new RequestUrlImpl(request);
+    }
+    
+    @Bean @Scope("prototype") public ControllerServiceContext controllerServiceContext() {
+        return new ControllerServiceContext();
+    }
     
     @Bean public ControllerServiceContextProvider controllerServiceContextProvider(){
         return new ControllerServiceContextProviderImpl(servletUtil());
