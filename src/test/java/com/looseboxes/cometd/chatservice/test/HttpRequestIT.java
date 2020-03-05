@@ -16,7 +16,7 @@
 package com.looseboxes.cometd.chatservice.test;
 
 import com.looseboxes.cometd.chatservice.controllers.Endpoints;
-import com.looseboxes.cometd.chatservice.services.response.ResponseImpl;
+import com.looseboxes.cometd.chatservice.services.response.Response;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;

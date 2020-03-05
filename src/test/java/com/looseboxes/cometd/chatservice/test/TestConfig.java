@@ -79,15 +79,15 @@ public class TestConfig {
         return chatConfig;
     }
 
-    public RequestConfiguration getRequestConfig() {
+    public RequestConfiguration requestConfig() {
         return requestConfig;
     }
 
-    public ResponseConfiguration getResponseConfig() {
+    public ResponseConfiguration responseConfig() {
         return responseConfig;
     }
 
-    public InitConfiguration getInitConfig() {
+    public InitConfiguration initConfig() {
         return initConfig;
     }
 }

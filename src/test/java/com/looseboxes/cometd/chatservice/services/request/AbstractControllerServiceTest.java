@@ -15,86 +15,111 @@
  */
 package com.looseboxes.cometd.chatservice.services.request;
 
-import com.looseboxes.cometd.chatservice.services.request.ControllerService;
-import com.looseboxes.cometd.chatservice.chat.Chat;
+import com.looseboxes.cometd.chatservice.ParamNames;
+import com.looseboxes.cometd.chatservice.chat.ChatServerOptionNames;
 import com.looseboxes.cometd.chatservice.chat.ChatSession;
+import com.looseboxes.cometd.chatservice.controllers.Endpoints;
+import com.looseboxes.cometd.chatservice.services.ServletUtil;
 import com.looseboxes.cometd.chatservice.services.response.Response;
-import com.looseboxes.cometd.chatservice.test.TestChatObjects;
 import com.looseboxes.cometd.chatservice.test.TestConfig;
+import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 import org.cometd.bayeux.server.BayeuxServer;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ParameterContext;
-import org.junit.jupiter.api.extension.ParameterResolutionException;
-import org.junit.jupiter.api.extension.ParameterResolver;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.hamcrest.Matcher;
 
 /**
  * @author USER
  */
 public abstract class AbstractControllerServiceTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractControllerServiceTest.class);
     
     private final boolean logStackTrace = TestConfig.LOG_STACKTRACE;
     
-    private static class ServiceContextImpl 
+    public static class ServiceContextImpl 
             implements ControllerService.ServiceContext{
-        private final TestChatObjects testChatObjects;
+        
+        private final BayeuxServer bayeuxServer;
+        private final ChatSession chatSession;
         private final Map params;
+        
         public ServiceContextImpl(String endpoint) {
             this(new TestConfig(), endpoint);
         }
         public ServiceContextImpl(TestConfig testConfig, String endpoint) {
-            testChatObjects = testConfig.testChatObjects();
+            bayeuxServer = testConfig.testChatObjects().getBayeuxServer();
             params = testConfig.endpointRequestParams().forEndpoint(endpoint);
+            String user = (String)params.get(ParamNames.USER);
+            user = user == null ? "test_user" : user;
+            chatSession = testConfig.testChatObjects().getChatSession(user);
         }
+        
         @Override
         public BayeuxServer getBayeuxServer() {
-            return testChatObjects.getBayeuxServer();
+            return bayeuxServer;
         }
         @Override
         public ChatSession getChatSession() {
-            return testChatObjects.getChatSession(getUser());
-        }
-        public String getUser() {
-            final String user = (String)this.getParameters().get(Chat.USER);
-            return user == null ? "test_user" : user;
+            return chatSession;
         }
         @Override
         public Map<String, Object> getParameters() {
             return (Map)params;
         }
     }
+
+    public static class ValidServiceContext extends ServiceContextImpl{
+        public ValidServiceContext(String endpoint) {
+            this(new TestConfig(), endpoint);
+        }
+        public ValidServiceContext(TestConfig testConfig, String endpoint) {
+            super(testConfig, endpoint);
+            if(Endpoints.MEMBERS.equals(endpoint)) {
+        
+                final Object option = testConfig.initConfig().membersService();
+                getBayeuxServer().setOption(ChatServerOptionNames.MEMBERS_SERVICE, option);
+                
+                getChatSession().join((csc, msg) -> {});
+            }
+        }
+    }
     
-    public static class ServiceContextParameterResolver 
-            implements ParameterResolver{
-        private final String endpoint;
-        public ServiceContextParameterResolver(String endpoint) {
-            this.endpoint = Objects.requireNonNull(endpoint);
+    public static class InvalidServiceContext extends ServiceContextImpl{
+        public InvalidServiceContext(String endpoint) {
+            super(endpoint);
+        }
+        public InvalidServiceContext(TestConfig testConfig, String endpoint) {
+            super(testConfig, endpoint);
         }
         @Override
-        public boolean supportsParameter(ParameterContext pc, ExtensionContext ec) 
-                throws ParameterResolutionException {
-            return pc.getParameter().getType()
-                    .equals(ControllerService.ServiceContext.class);
-        }
-        @Override
-        public Object resolveParameter(ParameterContext pc, ExtensionContext ec) 
-                throws ParameterResolutionException {
-            return new ServiceContextImpl(endpoint);
+        public Map<String, Object> getParameters() {
+            return Collections.EMPTY_MAP;
         }
     }
     
     public abstract ControllerService getControllerService();
+    
+    public abstract String getEndpoint();
 
     @Test
     public void process_whenNullArgumentGiven_shouldThrowRuntimeException() {
         this.process_whenArgumentGiven_shouldThrowRuntimeException(null);
     }
-    
+
+    @Test
+    @DisplayName("When method process is called with valid argument, return successfully")
+    public void proces_whenValidArg_shouldReturnSuccessfully() {
+        this.process_whenArgumentGiven_shouldReturnSuccessfully(
+                getValidArgument());
+    }
+
     public void process_whenArgumentGiven_shouldThrowRuntimeException(
             ControllerService.ServiceContext serviceContext) {
         final ControllerService controllerService = this.getControllerService();
@@ -108,18 +133,61 @@ public abstract class AbstractControllerServiceTest {
         }
     }
     
+    public void process_whenArgumentGiven_shouldReturnError(
+            ControllerService.ServiceContext serviceContext) {
+        this.process_whenArgumentGiven_shouldReturn(serviceContext, 500, false);
+    }
+
     public void process_whenArgumentGiven_shouldReturnSuccessfully(
             ControllerService.ServiceContext serviceContext) {
+        this.process_whenArgumentGiven_shouldReturn(serviceContext, 200, true);
+    }
+
+    public void process_whenArgumentGiven_shouldReturn(
+            ControllerService.ServiceContext serviceContext,
+            int code, boolean success) {
+        this.process_whenArgumentGiven_shouldReturn(serviceContext, is(code), success);
+    }
+
+    public void process_whenArgumentGiven_shouldReturn(
+            ControllerService.ServiceContext serviceContext,
+            Matcher<Integer> codeMatcher, boolean success) {
         final ControllerService controllerService = this.getControllerService();
         final Response result = controllerService.process(serviceContext);
-        assertThat(result.getCode(), is(200));
-        assertThat(result.isSuccess(), is(true));
+        LOG.debug("\n{}", result);
+        assertThat(result.getCode(), codeMatcher);
+        assertThat(result.isSuccess(), is(success));
     }
-    
+
     public void process_whenArgumentGiven_shouldReturnResponse(
             ControllerService.ServiceContext serviceContext, Response expResult) {
         final ControllerService controllerService = this.getControllerService();
         final Response result = controllerService.process(serviceContext);
+        LOG.debug("\n{}", result);
         assertThat(result, is(expResult));
+    }
+    
+    public ControllerService.ServiceContext getInvalidArgument() {
+        return new InvalidServiceContext(this.getEndpoint());
+    }
+
+    public ControllerService.ServiceContext getValidArgument() {
+        return new ValidServiceContext(this.getEndpoint());
+    }
+
+    public ControllerService.ServiceContext getServiceContext() {
+        return new ServiceContextImpl(this.getEndpoint());
+    }
+    
+    public ServletUtil getServletUtil() {
+        return getTestConfig().requestConfig().servletUtil();
+    }
+
+    public Response.Builder getResponseBuilder() {
+        return getTestConfig().responseConfig().responseBuilder();
+    }    
+        
+    public TestConfig getTestConfig() {
+        return new TestConfig();
     }
 }

@@ -13,56 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice.services.response;
+package com.looseboxes.cometd.chatservice.test;
 
-import java.io.Serializable;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import com.looseboxes.cometd.chatservice.services.response.Response;
 import java.util.Objects;
 
 /**
  * @author USER
  */
-public final class ResponseImpl<T> implements Serializable, Response<T>{
-
-    private boolean success;
+public class ResponseImpl<T> implements Response<T>{
     
-    private int code = 500; // Internal Server Error
-    
-    private long timestamp = System.currentTimeMillis();
-    
-    private String message = "";
-    
+    private int code;
+    private String message;
     private T data;
-
-    public ResponseImpl() { }
-
-    public Response withDefaults() {
-        return this.with(this.code);
-    }
-    
-    public Response with(int code) {
-        return this.with(code, this.message);
-    }
-
-    public Response with(int code, String message) {
-        final ResponseImpl res = new ResponseImpl();
-        res.setSuccess(success);
-        res.setCode(code);
-        res.setMessage(message);
-        res.setData(data);
-        return res;
-    }
-
-    @Override
-    public boolean isSuccess() {
-        return success;
-    }
-
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
+    private boolean success;
+    private long timestamp = System.currentTimeMillis();
 
     @Override
     public int getCode() {
@@ -71,15 +36,6 @@ public final class ResponseImpl<T> implements Serializable, Response<T>{
 
     public void setCode(int code) {
         this.code = code;
-    }
-
-    @Override
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
     }
 
     @Override
@@ -101,13 +57,31 @@ public final class ResponseImpl<T> implements Serializable, Response<T>{
     }
 
     @Override
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+
+    @Override
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    @Override
     public int hashCode() {
         int hash = 3;
-        hash = 97 * hash + (this.success ? 1 : 0);
-        hash = 97 * hash + this.code;
-        hash = 97 * hash + (int) (this.timestamp ^ (this.timestamp >>> 32));
-        hash = 97 * hash + Objects.hashCode(this.message);
-        hash = 97 * hash + Objects.hashCode(this.data);
+        hash = 83 * hash + this.code;
+        hash = 83 * hash + Objects.hashCode(this.message);
+        hash = 83 * hash + Objects.hashCode(this.data);
+        hash = 83 * hash + (this.success ? 1 : 0);
+        hash = 83 * hash + (int) (this.timestamp ^ (this.timestamp >>> 32));
         return hash;
     }
 
@@ -123,10 +97,10 @@ public final class ResponseImpl<T> implements Serializable, Response<T>{
             return false;
         }
         final ResponseImpl<?> other = (ResponseImpl<?>) obj;
-        if (this.success != other.success) {
+        if (this.code != other.code) {
             return false;
         }
-        if (this.code != other.code) {
+        if (this.success != other.success) {
             return false;
         }
         if (this.timestamp != other.timestamp) {
@@ -143,8 +117,7 @@ public final class ResponseImpl<T> implements Serializable, Response<T>{
 
     @Override
     public String toString() {
-        return "ResponseObject{" + "success=" + success + ", code=" + code + 
-                ", timestamp=" + LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault()) + 
-                ", message=" + message + ", data=" + data + '}';
+        return "ResponseImpl{" + "code=" + code + ", message=" + message + 
+                ", data=" + data + ", success=" + success + ", timestamp=" + timestamp + '}';
     }
 }

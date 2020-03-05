@@ -98,7 +98,7 @@ public class ControllerServiceContext implements ControllerService.ServiceContex
 
     public ChatRequestServiceContextImpl(
             BayeuxServer bayeuxServer, ChatSession chatSession, 
-            Map<String, Object> parameters, MessageResponseBuilder responseBuilder) {
+            Map<String, Object> parameters, Response.Builder responseBuilder) {
         this.bayeuxServer = Objects.requireNonNull(bayeuxServer);
         this.chatSession = Objects.requireNonNull(chatSession);
         this.parameters = Objects.requireNonNull(parameters);

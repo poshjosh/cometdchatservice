@@ -13,19 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice.services.response;
+package com.looseboxes.cometd.chatservice.services.request;
 
-import java.util.function.Supplier;
+import com.looseboxes.cometd.chatservice.controllers.Endpoints;
 
 /**
  * @author USER
  */
-public final class MessageResponseBuilderImpl extends ResponseBuilderImpl
-        implements MessageResponseBuilder{
+public class JoinControllerServiceTest extends AbstractControllerServiceTest{
 
-    public MessageResponseBuilderImpl(
-            Supplier<ResponseImpl> responseSupplier, 
-            ResponseCodeProvider responseCodeProvider) {
-        super(responseSupplier, responseCodeProvider);
+    @Override
+    public String getEndpoint() {
+        return Endpoints.JOIN;
+    }
+    
+    @Override
+    public ControllerService getControllerService() {
+        return new JoinControllerService(
+                getServletUtil(), getResponseBuilder(), 3_000, 7_000);
     }
 }

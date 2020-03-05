@@ -19,6 +19,10 @@ package com.looseboxes.cometd.chatservice.services.response;
  * @author USER
  */
 public interface Response<T> {
+    
+    public static Response.Builder<?> builder() {
+        return new ResponseBuilderImpl<>();
+    }
 
     int getCode();
 
@@ -29,4 +33,25 @@ public interface Response<T> {
     boolean isSuccess();
     
     long getTimestamp();
+
+    public interface Builder<T> {
+
+        Response<T> build();
+
+        Response.Builder<T> code(int code);
+
+        Response.Builder<T> data(T data);
+
+        Response.Builder<T> error(boolean error);
+
+        boolean isBuildAttempted();
+
+        default Response.Builder<T> message(Object message){
+            return this.message(message.toString());
+        }
+        
+        Response.Builder<T> message(String message);
+
+        Response.Builder<T> success(boolean success);
+    }
 }

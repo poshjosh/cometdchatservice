@@ -17,35 +17,165 @@
 package com.looseboxes.cometd.chatservice.services.response;
 
 import java.util.Objects;
-import java.util.function.Supplier;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author Chinomso Bassey Ikwuagwu on Apr 26, 2019 4:04:45 PM
  */
-public class ResponseBuilderImpl implements ResponseBuilder {
-
-    private final Supplier<ResponseImpl> responseSupplier;
+public class ResponseBuilderImpl<T> implements Response<T>, Response.Builder<T>{
+    
+    private int code = -1;
+    private T data;
+    private String message;
+    /**
+     * 1 for success, 0 for not-success, and -1 for not set
+     */
+    private int success = -1;
+    private long timestamp;
+    private final AtomicBoolean buildAttempted = new AtomicBoolean(false);
+    
     private final ResponseCodeProvider responseCodeProvider;
 
-    public ResponseBuilderImpl(
-            Supplier<ResponseImpl> responseSupplier,
-            ResponseCodeProvider responseCodeProvider) {
-        this.responseSupplier = Objects.requireNonNull(responseSupplier);
-        this.responseCodeProvider = Objects.requireNonNull(responseCodeProvider);
+    public ResponseBuilderImpl() {
+        this((candidate, resultIfNone) -> resultIfNone);
     }
     
+    public ResponseBuilderImpl(ResponseCodeProvider responseCodeProvider) {
+        this.responseCodeProvider = Objects.requireNonNull(responseCodeProvider);
+    }
+
     @Override
-    public <T> Response<T> buildResponse(Object msg, T value, boolean error) {
-        final ResponseImpl data = this.responseSupplier.get();
-        final int _c = error ? HttpServletResponse.SC_INTERNAL_SERVER_ERROR : HttpServletResponse.SC_OK;
-        final int code = value == null ? _c : responseCodeProvider.from(value, _c);
-        data.setCode(code);
-        if(msg != null) {
-            data.setMessage(msg.toString());
+    public Response<T> build() {
+        
+        if(this.isBuildAttempted()) {
+            throw new IllegalStateException("Method build() may only be called once");
         }
-        data.setData(value);
-        data.setSuccess(!error);
+        buildAttempted.compareAndSet(false, true);
+        
+        if(code == -1) {
+            this.code(this.guessCode());
+        }
+
+        if(success == -1) {
+            success(code >= 200 && code < 300);
+        }
+        
+        this.timestamp = System.currentTimeMillis();
+        
+        return this;
+    }
+    
+    private int guessCode() {
+        final int _c = isSuccess() ? HttpServletResponse.SC_OK :
+                HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+        return data == null ? _c : responseCodeProvider.from(data, _c);
+    }
+
+    @Override
+    public boolean isBuildAttempted() {
+        return this.buildAttempted.get();
+    }
+
+    @Override
+    public Response.Builder<T> error(boolean error) {
+        return this.success( ! error);
+    }
+
+    @Override
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    @Override
+    public int getCode() {
+        return code;
+    }
+
+    @Override
+    public Response.Builder code(int code) {
+        this.code = code;
+        return this;
+    }
+
+    @Override
+    public T getData() {
         return data;
+    }
+
+    @Override
+    public Response.Builder data(T data) {
+        this.data = data;
+        return this;
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
+    @Override
+    public Response.Builder message(String message) {
+        this.message = message;
+        return this;
+    }
+
+    @Override
+    public boolean isSuccess() {
+        return success == 1;
+    }
+
+    @Override
+    public Response.Builder success(boolean success) {
+        this.success = success ? 1 : 0;
+        return this;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 47 * hash + this.code;
+        hash = 47 * hash + Objects.hashCode(this.data);
+        hash = 47 * hash + Objects.hashCode(this.message);
+        hash = 47 * hash + this.success;
+        hash = 47 * hash + (int) (this.timestamp ^ (this.timestamp >>> 32));
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ResponseBuilderImpl<?> other = (ResponseBuilderImpl<?>) obj;
+        if (this.code != other.code) {
+            return false;
+        }
+        if (this.success != other.success) {
+            return false;
+        }
+        if (this.timestamp != other.timestamp) {
+            return false;
+        }
+        if (!Objects.equals(this.message, other.message)) {
+            return false;
+        }
+        if (!Objects.equals(this.data, other.data)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "{" + "code=" + code + 
+                ", data=" + data + ", message=" + message + 
+                ", success=" + this.isSuccess() + ", timestamp=" + timestamp + '}';
     }
 }

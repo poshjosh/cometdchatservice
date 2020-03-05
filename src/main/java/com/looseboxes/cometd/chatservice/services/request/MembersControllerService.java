@@ -18,7 +18,6 @@ package com.looseboxes.cometd.chatservice.services.request;
 import com.looseboxes.cometd.chatservice.chat.ChatServerOptionNames;
 import com.looseboxes.cometd.chatservice.ParamNames;
 import com.looseboxes.cometd.chatservice.controllers.Endpoints;
-import com.looseboxes.cometd.chatservice.services.response.MessageResponseBuilder;
 import com.looseboxes.cometd.chatservice.services.response.Response;
 import java.util.Collections;
 import java.util.Map;
@@ -33,16 +32,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Service
 public class MembersControllerService implements ControllerService{
 
-    private final MessageResponseBuilder msgResBuilder;
+    private final Response.Builder responseBuilder;
 
-    public MembersControllerService(@Autowired MessageResponseBuilder msgResBuilder) {
-        this.msgResBuilder = Objects.requireNonNull(msgResBuilder);
+    public MembersControllerService(@Autowired Response.Builder msgResBuilder) {
+        this.responseBuilder = Objects.requireNonNull(msgResBuilder);
     }
 
     @Override
     public Response process(ControllerService.ServiceContext serviceContext) {
 
-        final boolean error;
+        final boolean success;
         final String message;
         final Map outputData;
         
@@ -55,18 +54,18 @@ public class MembersControllerService implements ControllerService{
             final Map roomMembers = this.getMembers(
                     serviceContext.getBayeuxServer(), room);
 
-            error = false;
+            success = true;
             outputData = Collections.singletonMap(Endpoints.MEMBERS.substring(1), roomMembers);
             message = "success";
             
         }else{
         
-            error = true;
+            success = false;
             message = "You are not a member of any chat rooms";
-            outputData = Collections.EMPTY_MAP;
+            outputData = null;
         }
 
-        return msgResBuilder.buildResponse(message, outputData, error);
+        return responseBuilder.message(message).data(outputData).success(success).build();
     }
     
     private Map getMembers(BayeuxServer bayeuxServer, String room) {

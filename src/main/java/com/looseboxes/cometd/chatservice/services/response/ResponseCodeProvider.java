@@ -20,5 +20,10 @@ package com.looseboxes.cometd.chatservice.services.response;
  */
 public interface ResponseCodeProvider {
 
-    int from(Object o, int resultIfNone);
+    /**
+     * @param candidate The object for whom a response code is to be returned
+     * @param resultIfNone The result if no response code could be deduced
+     * @return The response code or resultIfNone if none could be deduced
+     */
+    int from(Object candidate, int resultIfNone);
 }

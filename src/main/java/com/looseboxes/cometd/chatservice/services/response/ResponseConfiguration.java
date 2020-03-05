@@ -15,11 +15,8 @@
  */
 package com.looseboxes.cometd.chatservice.services.response;
 
-import java.util.Objects;
-import java.util.function.Supplier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 
 /**
  * @author USER
@@ -27,38 +24,11 @@ import org.springframework.context.annotation.Scope;
 @Configuration
 public class ResponseConfiguration {
     
-    public static interface ResponseSupplier extends Supplier<ResponseImpl>{}
-    
-    private static final class ResponseSupplierImpl implements ResponseSupplier{
-        private final ResponseConfiguration config;
-        public ResponseSupplierImpl(ResponseConfiguration config) {
-            this.config = Objects.requireNonNull(config);
-        }
-        @Override
-        public ResponseImpl get() {
-            return (ResponseImpl)config.response();
-        }
-    }
-
-    @Bean public MessageResponseBuilder messageResponseBuilder() {
-        return new MessageResponseBuilderImpl(
-                this.responseSupplier(), this.responseCodeProvider());
-    }
-
-    @Bean public ResponseBuilder responseBuilder() {
-        return new ResponseBuilderImpl(
-                this.responseSupplier(), this.responseCodeProvider());
-    }
-    
-    @Bean public ResponseSupplier responseSupplier() {
-        return new ResponseSupplierImpl(this);
+    @Bean public Response.Builder<?> responseBuilder() {
+        return new ChatResponseBuilder(this.responseCodeProvider());
     }
     
     @Bean public ResponseCodeProvider responseCodeProvider() {
         return new ResponseCodeFromSpringAnnotationProvider();
-    }
-
-    @Bean @Scope("prototype") public Response response() {
-        return new ResponseImpl();
     }
 }

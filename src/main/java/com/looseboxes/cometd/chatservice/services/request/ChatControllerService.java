@@ -19,10 +19,10 @@ import com.looseboxes.cometd.chatservice.ParamNames;
 import com.looseboxes.cometd.chatservice.chat.ChatSession;
 import com.looseboxes.cometd.chatservice.services.response.Response;
 import com.looseboxes.cometd.chatservice.services.ServletUtil;
-import com.looseboxes.cometd.chatservice.services.response.MessageResponseBuilder;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Future;
+import javax.servlet.http.HttpServletResponse;
 import org.cometd.bayeux.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,15 +37,15 @@ public class ChatControllerService implements ControllerService{
     
     private final ServletUtil servletUtil; 
     
-    private final MessageResponseBuilder msgResBuilder;
+    private final Response.Builder msgResBuilder;
 
     public ChatControllerService(
             @Autowired JoinControllerService joinService,
             @Autowired ServletUtil servletUtil,
-            @Autowired MessageResponseBuilder msgResBuilder) {
+            @Autowired Response.Builder responseBuilder) {
         this.joinService = Objects.requireNonNull(joinService);
         this.servletUtil = Objects.requireNonNull(servletUtil);
-        this.msgResBuilder = Objects.requireNonNull(msgResBuilder);
+        this.msgResBuilder = Objects.requireNonNull(responseBuilder);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class ChatControllerService implements ControllerService{
             
             chatSession.send(chat, peer);
             
-            response = msgResBuilder.buildSuccessResponse();
+            response = this.buildSuccessResponse();
             
         }else{
             
@@ -89,7 +89,7 @@ public class ChatControllerService implements ControllerService{
 
             final Message message = servletUtil.waitForFuture(chatFuture, timeout);
             
-            response = msgResBuilder.buildResponse(chatSession, message);
+            response = msgResBuilder.message(chatSession.getState()).data(message).build();
         }
         
         return response;
@@ -116,7 +116,11 @@ public class ChatControllerService implements ControllerService{
             }
         }
         
-        return msgResBuilder.buildSuccessResponse();
+        return buildSuccessResponse();
+    }
+    
+    public Response<String> buildSuccessResponse(){
+        return msgResBuilder.code(HttpServletResponse.SC_OK).message("Success").build();
     }
 }
 

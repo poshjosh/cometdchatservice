@@ -21,13 +21,31 @@ import org.cometd.bayeux.Message;
 /**
  * @author USER
  */
-public interface MessageResponseBuilder extends ResponseBuilder{
-    
-    default Response buildResponse(ChatSession chatSession, Message message){
-        
-        final boolean success = message.isSuccessful();
-        
-        return buildResponse(
-                chatSession.getState().toString(), message, ! success);
+public final class ChatResponseBuilder<T> extends ResponseBuilderImpl<T>{
+
+    public ChatResponseBuilder() { }
+
+    public ChatResponseBuilder(ResponseCodeProvider responseCodeProvider) {
+        super(responseCodeProvider);
+    }
+
+    @Override
+    public Response.Builder<T> message(Object message) {
+        final String sval;
+        if(message instanceof ChatSession) {
+            sval = ((ChatSession)message).getState().toString();
+        }else{
+            sval = message.toString();
+        }
+        return this.message(sval);
+    }
+
+    @Override
+    public Response.Builder<T> data(T data) {
+        if(data instanceof Message) {
+            final Message message = (Message)data;
+            this.success(message.isSuccessful());
+        }
+        return super.data(data);
     }
 }

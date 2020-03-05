@@ -15,16 +15,15 @@
  */
 package com.looseboxes.cometd.chatservice.services.request;
 
-import com.looseboxes.cometd.chatservice.CometDProperties;
 import com.looseboxes.cometd.chatservice.services.response.Response;
 import java.util.concurrent.Future;
 import org.cometd.bayeux.Message;
 import com.looseboxes.cometd.chatservice.chat.ChatSession;
 import com.looseboxes.cometd.chatservice.services.ServletUtil;
-import com.looseboxes.cometd.chatservice.services.response.MessageResponseBuilder;
 import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * @author USER
@@ -34,16 +33,17 @@ public class JoinControllerService implements ControllerService{
 
     private final ServletUtil servletUtil; 
     
-    private final MessageResponseBuilder msgResBuilder;
+    private final Response.Builder responseBuilder;
     
-    private final CometDProperties cometdProps;
+    private final long joinTimeout;
 
     public JoinControllerService(@Autowired ServletUtil servletUtil,
-            @Autowired MessageResponseBuilder msgResBuilder,
-            @Autowired CometDProperties cometdProps) {
+            @Autowired Response.Builder responseBuilder,
+            @Value("${cometd.handshakeTimeout}") long handshakeTimeoutMillis,
+            @Value("${cometd.subscriptionTimeout}") long subscriptionTimeoutMillis) {
         this.servletUtil = Objects.requireNonNull(servletUtil);
-        this.msgResBuilder = Objects.requireNonNull(msgResBuilder);
-        this.cometdProps = Objects.requireNonNull(cometdProps);
+        this.responseBuilder = Objects.requireNonNull(responseBuilder);
+        this.joinTimeout = handshakeTimeoutMillis + subscriptionTimeoutMillis;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class JoinControllerService implements ControllerService{
         
         if(alreadyJoined) {
         
-            return msgResBuilder.buildResponse("Already joined chat", null, false);
+            return responseBuilder.message("Already joined chat").success(false).build();
         }
         
         final ChatSession chatSession = serviceContext.getChatSession();
@@ -63,10 +63,8 @@ public class JoinControllerService implements ControllerService{
             // Each time a message arrives on this channel, this will be invoked
         });
         
-        final long timeout = cometdProps.getJoinTimeout();
-       
-        final Message message = servletUtil.waitForFuture(joinFuture, timeout);
+        final Message message = servletUtil.waitForFuture(joinFuture, joinTimeout);
         
-        return msgResBuilder.buildResponse(chatSession, message);
+        return responseBuilder.message(chatSession.getState()).data(message).build();
     }
 }
