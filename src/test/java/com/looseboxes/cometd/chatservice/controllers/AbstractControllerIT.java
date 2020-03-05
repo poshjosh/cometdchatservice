@@ -18,7 +18,6 @@ package com.looseboxes.cometd.chatservice.controllers;
 import com.looseboxes.cometd.chatservice.services.request.ControllerService;
 import com.looseboxes.cometd.chatservice.services.request.ControllerService.ServiceContext;
 import com.looseboxes.cometd.chatservice.services.response.Response;
-import com.looseboxes.cometd.chatservice.services.response.ResponseBuilder;
 import com.looseboxes.cometd.chatservice.test.EndpointRequestBuilders;
 import com.looseboxes.cometd.chatservice.test.EndpointRequestParams;
 import com.looseboxes.cometd.chatservice.test.MyTestConfiguration;
@@ -28,7 +27,6 @@ import java.util.Collections;
 import java.util.Map;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.invocation.InvocationOnMock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -149,27 +147,15 @@ public abstract class AbstractControllerIT {
     }
     
     public Verifier whenMethodBuildResponseIsCalled(
-            ResponseBuilder instance, int code,
+            Response.Builder instance, int code,
             boolean error, String message, Object data) {
-        when(instance.buildResponse(message, data, error))
-                .thenReturn(this.testData.createResponse(code, error, message, data));
-        final Verifier verifier = () -> verify(instance)
-                .buildResponse(message, data, error);
-        return verifier;
-    }
-
-    public Verifier whenMethodBuildResponseIsCalled(
-            ResponseBuilder instance, int code) {
-        when(instance.buildResponse(isA(Object.class), isA(Object.class), anyBoolean()))
-                .thenAnswer((InvocationOnMock invoc) -> {
-            return this.testData.createResponse(code, 
-                    ! invoc.getArgument(2, Boolean.class), 
-                    invoc.getArgument(0, Object.class).toString(),
-                    invoc.getArgument(1, Object.class));
-        });
         
-        final Verifier verifier = () -> verify(instance).buildResponse(
-                isA(Object.class), isA(Object.class), anyBoolean());
+        final Response response = testData.createResponse(code, error, message, data);
+        
+        when(instance.build()).thenReturn(response);
+        
+        final Verifier verifier = () -> verify(instance).build();
+        
         return verifier;
     }
 }
