@@ -15,6 +15,7 @@
  */
 package com.looseboxes.cometd.chatservice.chat;
 
+import com.looseboxes.cometd.chatservice.CometDProperties;
 import java.util.HashMap;
 import java.util.Map;
 import org.cometd.bayeux.client.ClientSession;
@@ -22,9 +23,11 @@ import org.cometd.client.BayeuxClient;
 import org.cometd.client.transport.ClientTransport;
 import org.cometd.client.transport.LongPollingTransport;
 import org.eclipse.jetty.client.HttpClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.lang.Nullable;
 
 /**
  * @author USER
@@ -32,13 +35,36 @@ import org.springframework.context.annotation.Scope;
 @Configuration
 public class ChatConfiguration {
     
-    @Bean @Scope("prototype") public ChatSession chatSession(
-            String url, String channel, String room, String user) {
-        // Do not use an unmodifiable map
-        return this.createChatSession(url, new HashMap<>(), this.chatConfig(channel, room, user));
+    @Bean @Scope("prototype") public ChatConfig.Builder chatConfigBuilder(
+            @Nullable @Autowired CometDProperties props){
+        return this.chatConfigBuilder(
+                props == null ? null : props.getDefaultChannel());
+    }
+    
+    @Bean @Scope("prototype") public ChatConfig.Builder chatConfigBuilder(String channel){
+        ChatConfig.Builder builder = this.chatConfigBuilder();
+        if(channel != null) {
+            builder = builder.channel(channel);
+        }
+        return builder;
     }
 
-    @Bean @Scope("prototype") public ChatSession chatSession(String url, ChatConfig chatConfig) {
+    @Bean @Scope("prototype") public ChatConfig.Builder chatConfigBuilder(){
+        return new ChatConfigBuilderImpl();
+    }
+    
+    @Bean @Scope("prototype") public ChatSession chatSession(
+            String url, String channel, String room, String user) {
+        
+        final ChatConfig chatConfig = this.chatConfigBuilder()
+                .channel(channel).room(room).user(user).build();
+        
+        // Do not use an unmodifiable map
+        return this.createChatSession(url, new HashMap<>(), chatConfig);
+    }
+
+    @Bean @Scope("prototype") public ChatSession chatSession(
+            String url, ChatConfig chatConfig) {
         // Do not use an unmodifiable map
         return this.createChatSession(url, new HashMap<>(), chatConfig);
     }
@@ -52,10 +78,6 @@ public class ChatConfiguration {
             String url, Map<String, Object> transportOptions, ChatConfig chatConfig) {
         final ClientSession clientSession = this.clientSession(url, transportOptions);
         return new ChatSessionImpl(clientSession, chatConfig);
-    }
-
-    @Bean @Scope("prototype") public ChatConfig chatConfig(String channel, String room, String user) {
-        return new ChatConfigBean(channel, room, user);
     }
 
     @Bean @Scope("prototype") public ClientSession clientSession(String url) {

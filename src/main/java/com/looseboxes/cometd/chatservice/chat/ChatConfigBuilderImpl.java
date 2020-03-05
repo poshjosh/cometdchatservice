@@ -15,13 +15,12 @@
  */
 package com.looseboxes.cometd.chatservice.chat;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * @author USER
  */
-public class ChatConfigBean implements ChatConfig, Serializable{
+public class ChatConfigBuilderImpl implements ChatConfig, ChatConfig.Builder{
     
     private String channel;
     
@@ -39,12 +38,14 @@ public class ChatConfigBean implements ChatConfig, Serializable{
      * @see #setWebsocketEnabled(boolean) 
      */
     private boolean websocketEnabled = false;
+
+    public ChatConfigBuilderImpl() { }
     
-    public ChatConfigBean(String channel, String room, String user) {
+    public ChatConfigBuilderImpl(String channel, String room, String user) {
         this(channel, room, user, Chat.LOG_LEVEL_VALUES.INFO, false);
     }
     
-    public ChatConfigBean(String channel, String room, String user, 
+    public ChatConfigBuilderImpl(String channel, String room, String user, 
             String logLevel, boolean websocketEnabled) {
         this.channel = this.requireNonNullOrEmpty(channel);
         this.room = this.requireNonNullOrEmpty(room);
@@ -52,10 +53,16 @@ public class ChatConfigBean implements ChatConfig, Serializable{
         this.logLevel = this.requireNonNullOrEmpty(logLevel);
         this.websocketEnabled = websocketEnabled;
     }
+    
+    @Override
+    public ChatConfig build() {
+        return this;
+    }
 
     @Override
     public ChatConfig forUser(String user) {
-        return new ChatConfigBean(this.channel, this.room, user, this.logLevel, this.websocketEnabled);
+        return new ChatConfigBuilderImpl(this.channel, this.room, 
+                user, this.logLevel, this.websocketEnabled);
     }
 
     @Override
@@ -63,8 +70,10 @@ public class ChatConfigBean implements ChatConfig, Serializable{
         return channel;
     }
 
-    public void setChannel(String channel) {
+    @Override
+    public ChatConfig.Builder channel(String channel) {
         this.channel = channel;
+        return this;
     }
 
     @Override
@@ -72,8 +81,10 @@ public class ChatConfigBean implements ChatConfig, Serializable{
         return room;
     }
 
-    public void setRoom(String room) {
+    @Override
+    public ChatConfig.Builder room(String room) {
         this.room = room;
+        return this;
     }
 
     @Override
@@ -81,8 +92,10 @@ public class ChatConfigBean implements ChatConfig, Serializable{
         return user;
     }
 
-    public void setUser(String user) {
+    @Override
+    public ChatConfig.Builder user(String user) {
         this.user = user;
+        return this;
     }
 
     @Override
@@ -90,8 +103,10 @@ public class ChatConfigBean implements ChatConfig, Serializable{
         return logLevel;
     }
 
-    public void setLogLevel(String logLevel) {
+    @Override
+    public ChatConfig.Builder logLevel(String logLevel) {
         this.logLevel = logLevel;
+        return this;
     }
 
     @Override
@@ -105,9 +120,12 @@ public class ChatConfigBean implements ChatConfig, Serializable{
      * or {@link org.cometd.bayeux.server.BayeuxContext#getHttpSessionAttribute(java.lang.String) BayeuxContext#getHttpSessionAttribute}
      * amongst other methods accessing the HttpSession/HttpRequest will throw an Exception
      * @param websocketEnabled if true web socket will be enabled, otherwise it will be disabled
+     * @return the calling instance
      */
-    public void setWebsocketEnabled(boolean websocketEnabled) {
+    @Override
+    public ChatConfig.Builder websocketEnabled(boolean websocketEnabled) {
         this.websocketEnabled = websocketEnabled;
+        return this;
     }
 
     private String requireNonNullOrEmpty(String s) {
@@ -140,7 +158,7 @@ public class ChatConfigBean implements ChatConfig, Serializable{
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final ChatConfigBean other = (ChatConfigBean) obj;
+        final ChatConfigBuilderImpl other = (ChatConfigBuilderImpl) obj;
         if (this.websocketEnabled != other.websocketEnabled) {
             return false;
         }
@@ -161,7 +179,8 @@ public class ChatConfigBean implements ChatConfig, Serializable{
 
     @Override
     public String toString() {
-        return "ChatConfigBean{" + "channel=" + channel + ", room=" + room + ", user=" + user + ", logLevel=" + logLevel + ", websocketEnabled=" + websocketEnabled + '}';
+        return this.getClass().getSimpleName() + "{" + "channel=" + channel + 
+                ", room=" + room + ", user=" + user + ", logLevel=" + logLevel + 
+                ", websocketEnabled=" + websocketEnabled + '}';
     }
 }
-
