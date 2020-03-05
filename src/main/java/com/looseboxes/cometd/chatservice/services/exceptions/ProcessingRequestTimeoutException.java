@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 /**
  * @author USER
  */
-@ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
+@ResponseStatus(code=HttpStatus.GATEWAY_TIMEOUT, value=HttpStatus.GATEWAY_TIMEOUT)
 public class ProcessingRequestTimeoutException extends ProcessingRequestException {
 
     public ProcessingRequestTimeoutException() {

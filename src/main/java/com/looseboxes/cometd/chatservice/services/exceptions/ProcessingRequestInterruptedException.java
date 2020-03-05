@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 /**
  * @author USER
  */
-@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+@ResponseStatus(code=HttpStatus.INTERNAL_SERVER_ERROR, value=HttpStatus.INTERNAL_SERVER_ERROR)
 public class ProcessingRequestInterruptedException extends ProcessingRequestException{
 
     public ProcessingRequestInterruptedException() {

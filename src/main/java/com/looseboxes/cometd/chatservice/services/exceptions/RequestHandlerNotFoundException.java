@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 /**
  * @author USER
  */
-@ResponseStatus(HttpStatus.NOT_FOUND)
+@ResponseStatus(code=HttpStatus.NOT_FOUND, value=HttpStatus.NOT_FOUND)
 public class RequestHandlerNotFoundException extends ProcessingRequestException {
 
     public RequestHandlerNotFoundException() {

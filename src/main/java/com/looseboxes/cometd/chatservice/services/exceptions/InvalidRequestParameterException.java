@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 /**
  * @author USER
  */
-@ResponseStatus(HttpStatus.BAD_REQUEST)
+@ResponseStatus(code=HttpStatus.BAD_REQUEST, value=HttpStatus.BAD_REQUEST)
 public class InvalidRequestParameterException extends ProcessingRequestException{
 
     public InvalidRequestParameterException() {
