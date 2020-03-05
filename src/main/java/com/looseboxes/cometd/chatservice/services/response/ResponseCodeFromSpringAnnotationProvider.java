@@ -24,12 +24,20 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class ResponseCodeFromSpringAnnotationProvider implements ResponseCodeProvider{
 
     @Override
-    public int from(Object o, int resultIfNone) {
+    public int from(Object candidate, int resultIfNone) {
         
         final int code;
         
-        if(o.getClass().isAnnotationPresent(ResponseStatus.class)) {
-            final HttpStatus status = o.getClass().getAnnotation(ResponseStatus.class).code();
+        final Class<?> candidateClass = candidate instanceof Class ? 
+                (Class)candidate : candidate.getClass();
+        
+        if(candidateClass.isAnnotationPresent(ResponseStatus.class)) {
+            
+            final ResponseStatus responseStatus = candidateClass
+                    .getAnnotation(ResponseStatus.class);
+
+            final HttpStatus status = responseStatus.code();
+
             if(status == null) {
                 code = resultIfNone;
             }else{
@@ -39,7 +47,15 @@ public class ResponseCodeFromSpringAnnotationProvider implements ResponseCodePro
             code = resultIfNone;
         }
         
+        this.validateCode(code);
+        
         return code;
+    }
+    
+    public void validateCode(int code) {
+        if(code < 100 || code > 599) {
+            throw new IllegalArgumentException("Invalid http status code: " + code);
+        }
     }
 }    
 
