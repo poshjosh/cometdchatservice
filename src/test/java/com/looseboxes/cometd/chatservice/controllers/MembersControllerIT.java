@@ -15,8 +15,8 @@
  */
 package com.looseboxes.cometd.chatservice.controllers;
 
-import com.looseboxes.cometd.chatservice.services.request.ControllerService;
-import com.looseboxes.cometd.chatservice.services.request.MembersControllerService;
+import com.looseboxes.cometd.chatservice.services.ControllerService;
+import com.looseboxes.cometd.chatservice.services.MembersControllerService;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

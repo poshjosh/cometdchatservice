@@ -13,40 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice.services.request;
+package com.looseboxes.cometd.chatservice.services;
 
+import com.looseboxes.cometd.chatservice.services.MembersControllerService;
+import com.looseboxes.cometd.chatservice.services.ControllerService;
 import com.looseboxes.cometd.chatservice.controllers.Endpoints;
-import com.looseboxes.cometd.chatservice.services.ServletUtil;
-import com.looseboxes.cometd.chatservice.services.response.Response;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /**
  * @author USER
  */
-public class ChatControllerServiceTest extends AbstractControllerServiceTest{
-
+public class MembersControllerServiceTest extends AbstractControllerServiceTest{
+    
     @Test
-    @DisplayName("When method process is called with invalid argument, throw RuntimeException")
-    public void proces_whenInvalidArg_shouldThrowRuntimeException() {
-        this.process_whenArgumentGiven_shouldThrowRuntimeException(
-                this.getInvalidArgument());
+    @DisplayName("When method process is called with invalid argument, return error")
+    public void proces_whenInvalidArg_shouldReturnError() {
+        this.process_whenArgumentGiven_shouldReturn(
+                getInvalidArgument(), greaterThanOrEqualTo(300), false);
     }
     
     @Override
     public String getEndpoint() {
-        return Endpoints.CHAT;
+        return Endpoints.MEMBERS;
     }
     
     @Override
     public ControllerService getControllerService() {
-
-        final ServletUtil servletUtil = this.getServletUtil();
-
-        return new ChatControllerService(
-                new JoinControllerService(servletUtil, getResponseBuilder(), 3_000, 7_000), 
-                servletUtil,
-                getResponseBuilder()
-        );
+        return new MembersControllerService(this.getResponseBuilder());
     }
 }
+

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice.services.request;
+package com.looseboxes.cometd.chatservice.services;
 
 import com.looseboxes.cometd.chatservice.chat.ChatSession;
 import java.util.Map;
@@ -22,7 +22,7 @@ import org.cometd.bayeux.server.BayeuxServer;
 
 /**
  * package access java bean type used by 
- * {@link com.looseboxes.cometd.chatservice.services.request.ControllerServiceContextProviderImpl ControllerServiceContextProviderImpl}
+ * {@link com.looseboxes.cometd.chatservice.services.ControllerServiceContextProviderImpl ControllerServiceContextProviderImpl}
  * @author USER
  */
 final class ControllerServiceContext implements ControllerService.ServiceContext{

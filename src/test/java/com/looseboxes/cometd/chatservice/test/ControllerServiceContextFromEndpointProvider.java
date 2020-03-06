@@ -15,8 +15,8 @@
  */
 package com.looseboxes.cometd.chatservice.test;
 
-import com.looseboxes.cometd.chatservice.services.request.ControllerService;
-import com.looseboxes.cometd.chatservice.services.request.ControllerServiceContextImpl;
+import com.looseboxes.cometd.chatservice.services.ControllerService;
+import com.looseboxes.cometd.chatservice.services.ControllerServiceContextImpl;
 import java.util.Objects;
 
 /**

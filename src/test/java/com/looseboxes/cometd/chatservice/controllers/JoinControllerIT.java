@@ -15,12 +15,12 @@
  */
 package com.looseboxes.cometd.chatservice.controllers;
 
-import com.looseboxes.cometd.chatservice.services.request.ControllerService;
+import com.looseboxes.cometd.chatservice.services.ControllerService;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import com.looseboxes.cometd.chatservice.services.request.JoinControllerService;
+import com.looseboxes.cometd.chatservice.services.JoinControllerService;
 
 /**
  * @author USER

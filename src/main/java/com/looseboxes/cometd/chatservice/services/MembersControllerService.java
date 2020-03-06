@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.looseboxes.cometd.chatservice.services.request;
+package com.looseboxes.cometd.chatservice.services;
 
 import com.looseboxes.cometd.chatservice.chat.ChatServerOptionNames;
 import com.looseboxes.cometd.chatservice.ParamNames;

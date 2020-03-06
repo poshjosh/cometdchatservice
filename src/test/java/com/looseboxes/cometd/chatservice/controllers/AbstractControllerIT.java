@@ -15,9 +15,9 @@
  */
 package com.looseboxes.cometd.chatservice.controllers;
 
-import com.looseboxes.cometd.chatservice.services.request.ControllerService;
-import com.looseboxes.cometd.chatservice.services.request.ControllerService.ServiceContext;
-import com.looseboxes.cometd.chatservice.services.request.ControllerServiceContextProvider;
+import com.looseboxes.cometd.chatservice.services.ControllerService;
+import com.looseboxes.cometd.chatservice.services.ControllerService.ServiceContext;
+import com.looseboxes.cometd.chatservice.services.ControllerServiceContextProvider;
 import com.looseboxes.cometd.chatservice.services.response.Response;
 import com.looseboxes.cometd.chatservice.test.ControllerServiceContextFromEndpointProvider;
 import com.looseboxes.cometd.chatservice.test.EndpointRequestBuilders;

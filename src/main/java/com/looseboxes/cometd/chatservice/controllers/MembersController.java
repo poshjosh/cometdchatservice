@@ -15,8 +15,8 @@
  */
 package com.looseboxes.cometd.chatservice.controllers;
 
-import com.looseboxes.cometd.chatservice.services.request.ControllerService;
-import com.looseboxes.cometd.chatservice.services.request.ControllerServiceContextProvider;
+import com.looseboxes.cometd.chatservice.services.ControllerService;
+import com.looseboxes.cometd.chatservice.services.ControllerServiceContextProvider;
 import com.looseboxes.cometd.chatservice.services.response.Response;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.looseboxes.cometd.chatservice.services.request.MembersControllerService;
+import com.looseboxes.cometd.chatservice.services.MembersControllerService;
 import java.util.Objects;
 
 /**

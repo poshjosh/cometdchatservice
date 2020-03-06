@@ -17,11 +17,11 @@ package com.looseboxes.cometd.chatservice.test;
 
 import com.looseboxes.cometd.chatservice.AppConfiguration;
 import com.looseboxes.cometd.chatservice.chat.ChatConfiguration;
-import com.looseboxes.cometd.chatservice.services.request.RequestConfiguration;
+import com.looseboxes.cometd.chatservice.services.RequestConfiguration;
 import com.looseboxes.cometd.chatservice.services.response.ResponseConfiguration;
 import com.looseboxes.cometd.chatservice.initializers.InitConfiguration;
-import com.looseboxes.cometd.chatservice.services.request.ControllerService;
-import com.looseboxes.cometd.chatservice.services.request.ControllerServiceContextImpl;
+import com.looseboxes.cometd.chatservice.services.ControllerService;
+import com.looseboxes.cometd.chatservice.services.ControllerServiceContextImpl;
 import java.util.Objects;
 import org.springframework.context.annotation.Bean;
 
