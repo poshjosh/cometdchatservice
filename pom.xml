@@ -15,6 +15,8 @@
     <description>A Java microservice exposing cometd chat services</description>
 
     <properties>
+        <it.skip>false</it.skip>
+        <tests.skip>false</tests.skip>
         <app.port>8092</app.port>
         <cometd.version>4.0.5</cometd.version>
     </properties>
@@ -71,6 +73,11 @@
             <version>${cometd.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -78,7 +85,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>    
-                    <mainClass>com.looseboxes.cometd.chat.service.CometDApplication</mainClass>
+                    <mainClass>com.looseboxes.cometd.chatservice.CometDApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>
