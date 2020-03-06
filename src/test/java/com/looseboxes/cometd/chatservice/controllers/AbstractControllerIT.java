@@ -17,7 +17,9 @@ package com.looseboxes.cometd.chatservice.controllers;
 
 import com.looseboxes.cometd.chatservice.services.request.ControllerService;
 import com.looseboxes.cometd.chatservice.services.request.ControllerService.ServiceContext;
+import com.looseboxes.cometd.chatservice.services.request.ControllerServiceContextProvider;
 import com.looseboxes.cometd.chatservice.services.response.Response;
+import com.looseboxes.cometd.chatservice.test.ControllerServiceContextFromEndpointProvider;
 import com.looseboxes.cometd.chatservice.test.EndpointRequestBuilders;
 import com.looseboxes.cometd.chatservice.test.EndpointRequestParams;
 import com.looseboxes.cometd.chatservice.test.MyTestConfiguration;
@@ -25,12 +27,14 @@ import com.looseboxes.cometd.chatservice.test.TestConfig;
 import com.looseboxes.cometd.chatservice.test.TestData;
 import java.util.Collections;
 import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 import org.hamcrest.CoreMatchers;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.MockMvc;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
@@ -64,6 +68,8 @@ public abstract class AbstractControllerIT {
         void verify();
     }
     
+    @Autowired private ControllerServiceContextFromEndpointProvider provideSvcCtxForEndpoint;
+    
     @Autowired private TestData testData;
     
     @Autowired private EndpointRequestParams endpointReqParams;
@@ -72,6 +78,9 @@ public abstract class AbstractControllerIT {
 
     @Autowired private MockMvc mockMvc;
     
+    /** Required by the Controller being tested */
+    @MockBean private ControllerServiceContextProvider serviceContextProvider;
+
     protected abstract ControllerService getControllerService();
 
     public void requestToEndpoint_whenParamsValid_shouldReturnSuccessfully(
@@ -111,8 +120,12 @@ public abstract class AbstractControllerIT {
     public void requestToEndpoint_whenParamsGiven_shouldReturnMatchingResult(
             String endpoint, int code, boolean error, 
             String message, Object data, Map<String, String> params) {
+        
+        final Verifier svcCtxProviderVerifier = this.whenMethodFromIsCalled(
+                serviceContextProvider, endpoint);
 
-        final Verifier verifier = this.whenMethodProcessIsCalled(getControllerService(), code, error, message, data);
+        final Verifier controllerSvcVerifier = this.whenMethodProcessIsCalled(
+                getControllerService(), code, error, message, data);
         try{
             
             this.mockMvc.perform(endpointReqBuilders.builder(endpoint, params))
@@ -130,32 +143,53 @@ public abstract class AbstractControllerIT {
             fail(e.toString());
         }
         
-        verifier.verify();
+        svcCtxProviderVerifier.verify();
+        
+        controllerSvcVerifier.verify();
     }
 
-    public Verifier whenMethodProcessIsCalled(ControllerService reqHandler,
+    public Verifier whenMethodFromIsCalled(
+            ControllerServiceContextProvider controllerSvcCtxProvider,
+            String endpoint) {
+        
+        final ControllerService.ServiceContext serviceCtx = 
+                provideSvcCtxForEndpoint.from(endpoint);
+        
+        when(controllerSvcCtxProvider.from(isA(HttpServletRequest.class)))
+                .thenReturn(serviceCtx);
+        
+        final Verifier verifier = () -> verify(controllerSvcCtxProvider)
+                .from(isA(HttpServletRequest.class));
+        
+        return verifier;
+    }
+
+    public Verifier whenMethodProcessIsCalled(ControllerService controllerSvc,
             int code, boolean error, String message, Object data) {
         
         final Response response = testData.createResponse(code, error, message, data);
         
-        when(reqHandler.process(isA(ServiceContext.class))).thenReturn(response);
+        when(controllerSvc.process(isA(ServiceContext.class))).thenReturn(response);
         
-        final Verifier verifier = () -> verify(reqHandler)
+        final Verifier verifier = () -> verify(controllerSvc)
                 .process(isA(ServiceContext.class));
         
         return verifier;
     }
-    
+}
+/**
+ * 
     public Verifier whenMethodBuildResponseIsCalled(
-            Response.Builder instance, int code,
+            Response.Builder responseBuilder, int code,
             boolean error, String message, Object data) {
         
         final Response response = testData.createResponse(code, error, message, data);
         
-        when(instance.build()).thenReturn(response);
+        when(responseBuilder.build()).thenReturn(response);
         
-        final Verifier verifier = () -> verify(instance).build();
+        final Verifier verifier = () -> verify(responseBuilder).build();
         
         return verifier;
     }
-}
+ * 
+ */
