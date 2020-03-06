@@ -21,9 +21,11 @@ import java.util.Objects;
 import org.cometd.bayeux.server.BayeuxServer;
 
 /**
+ * package access java bean type used by 
+ * {@link com.looseboxes.cometd.chatservice.services.request.ControllerServiceContextProviderImpl ControllerServiceContextProviderImpl}
  * @author USER
  */
-public class ControllerServiceContext implements ControllerService.ServiceContext{
+final class ControllerServiceContext implements ControllerService.ServiceContext{
     
     private BayeuxServer bayeuxServer; 
     
