@@ -37,22 +37,26 @@ public class ChatConfiguration {
     
     @Bean @Scope("prototype") public ChatConfig.Builder chatConfigBuilder(
             @Nullable @Autowired CometDProperties props){
-        return this.chatConfigBuilder(
+        return this.createChatConfigBuilder(
                 props == null ? null : props.getDefaultChannel());
     }
     
     @Bean @Scope("prototype") public ChatConfig.Builder chatConfigBuilder(String channel){
-        ChatConfig.Builder builder = this.chatConfigBuilder();
+        return this.createChatConfigBuilder(channel);
+    }
+
+    @Bean @Scope("prototype") public ChatConfig.Builder chatConfigBuilder(){
+        return this.createChatConfigBuilder(null);
+    }
+    
+    public ChatConfig.Builder createChatConfigBuilder(String channel){
+        ChatConfig.Builder builder = new ChatConfigBuilderImpl();
         if(channel != null) {
             builder = builder.channel(channel);
         }
         return builder;
     }
 
-    @Bean @Scope("prototype") public ChatConfig.Builder chatConfigBuilder(){
-        return new ChatConfigBuilderImpl();
-    }
-    
     @Bean @Scope("prototype") public ChatSession chatSession(
             String url, String channel, String room, String user) {
         
