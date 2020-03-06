@@ -17,9 +17,11 @@ package com.looseboxes.cometd.chatservice.initializers;
 
 import com.looseboxes.cometd.chatservice.chat.ChatServerOptionNames;
 import com.looseboxes.cometd.chatservice.chat.MembersService;
-import com.looseboxes.cometd.chatservice.SafeContentService;
+import com.looseboxes.cometd.chatservice.chat.MessageListenerWithDataFilters;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.cometd.bayeux.server.BayeuxServer;
@@ -41,26 +43,36 @@ public class AddOptionsToBayeuxServerMockTest extends ChatServerInitActionMockTe
     private static final Logger LOG = LoggerFactory.getLogger(ContextImpl.class);
     
     private static final class ContextImpl 
-            implements ChatServerInitActionMockTestBase.Context{
+            implements ChatServerInitActionMockTestBase.Context<Map.Entry<String, Object>>{
 
         @Override
-        public List getArgs(){
-            return Arrays.asList(mock(MembersService.class), mock(SafeContentService.class));
+        public List<Map.Entry<String, Object>> getArgs(){
+            return Arrays.asList(
+                    getOption(ChatServerOptionNames.MEMBERS_SERVICE, 
+                            MembersService.class), 
+                    getOption(ChatServerOptionNames.CHANNEL_MESSAGE_LISTENER, 
+                            MessageListenerWithDataFilters.class));
+        }
+        
+        public Map.Entry<String, Object> getOption(String key, Class type) {
+            return new HashMap.SimpleImmutableEntry<>(key, mock(type));
         }
 
         @Override
-        public void onApplyMethodCalled(BayeuxServer server, List args) {
-            for(Object opt : args) {
+        public void onApplyMethodCalled(BayeuxServer server, 
+                List<Map.Entry<String, Object>> args) {
+            for(Map.Entry<String, Object> entry : args) {
                 LOG.debug("\nAdding option to BayeuxServer: {} = {}", 
-                        opt.getClass().getSimpleName(), opt);
-                server.setOption(ChatServerOptionNames.from(opt), opt);
+                        entry.getKey(), entry.getValue());
+                server.setOption(entry.getKey(), entry.getValue());
             }
         }
         @Override
-        public void assertThatResultsAreValid(BayeuxServer server, List args) {
+        public void assertThatResultsAreValid(BayeuxServer server, 
+                List<Map.Entry<String, Object>> args) {
 
             final Set<String> expOptionNames = (Set<String>)args.stream()
-                    .map((obj) -> ChatServerOptionNames.from(obj))
+                    .map((obj) -> obj.getKey())
                     .collect(Collectors.toSet());
             
             LOG.debug("Option names.\nExpected: {}\n   Found: {}",
