@@ -65,7 +65,8 @@ public class MembersControllerService implements ControllerService{
             outputData = null;
         }
 
-        return responseBuilder.message(message).data(outputData).success(success).build();
+        return getUniqueResponseBuilder()
+                .message(message).data(outputData).success(success).build();
     }
     
     private Map getMembers(BayeuxServer bayeuxServer, String room) {
@@ -85,5 +86,10 @@ public class MembersControllerService implements ControllerService{
         }
         
         return result;
+    }
+    
+    public Response.Builder getUniqueResponseBuilder() {
+        return responseBuilder.isBuildAttempted() ? 
+                responseBuilder.newInstance() : responseBuilder;
     }
 }

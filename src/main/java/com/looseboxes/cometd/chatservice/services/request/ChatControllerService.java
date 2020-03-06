@@ -89,7 +89,8 @@ public class ChatControllerService implements ControllerService{
 
             final Message message = servletUtil.waitForFuture(chatFuture, timeout);
             
-            response = getResponseBuilder().message(chatSession.getState()).data(message).build();
+            response = getUniqueResponseBuilder()
+                    .message(chatSession.getState()).data(message).build();
         }
         
         return response;
@@ -120,13 +121,15 @@ public class ChatControllerService implements ControllerService{
     }
     
     public Response buildSuccessResponse(){
-        return getResponseBuilder()
+        return getUniqueResponseBuilder()
                 .code(HttpServletResponse.SC_OK)
                 .message("Success").build();
     }
 
-    public Response.Builder getResponseBuilder() {
-        return responseBuilder.newInstance();
+    
+    public Response.Builder getUniqueResponseBuilder() {
+        return responseBuilder.isBuildAttempted() ? 
+                responseBuilder.newInstance() : responseBuilder;
     }
 }
 

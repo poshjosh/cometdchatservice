@@ -53,7 +53,8 @@ public class JoinControllerService implements ControllerService{
         
         if(alreadyJoined) {
         
-            return responseBuilder.message("Already joined chat").success(false).build();
+            return getUniqueResponseBuilder()
+                    .message("Already joined chat").success(false).build();
         }
         
         final ChatSession chatSession = serviceContext.getChatSession();
@@ -65,6 +66,12 @@ public class JoinControllerService implements ControllerService{
         
         final Message message = servletUtil.waitForFuture(joinFuture, joinTimeout);
         
-        return responseBuilder.message(chatSession.getState()).data(message).build();
+        return getUniqueResponseBuilder()
+                .message(chatSession.getState()).data(message).build();
+    }
+
+    public Response.Builder getUniqueResponseBuilder() {
+        return responseBuilder.isBuildAttempted() ? 
+                responseBuilder.newInstance() : responseBuilder;
     }
 }
