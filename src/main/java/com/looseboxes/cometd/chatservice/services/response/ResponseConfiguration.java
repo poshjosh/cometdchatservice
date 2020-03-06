@@ -17,6 +17,7 @@ package com.looseboxes.cometd.chatservice.services.response;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 
 /**
  * @author USER
@@ -24,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ResponseConfiguration {
     
-    @Bean public Response.Builder<?> responseBuilder() {
+    @Bean @Scope("prototype") public Response.Builder<?> responseBuilder() {
         return new ChatResponseBuilder(this.responseCodeProvider());
     }
     
