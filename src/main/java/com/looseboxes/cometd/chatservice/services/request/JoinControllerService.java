@@ -59,10 +59,7 @@ public class JoinControllerService implements ControllerService{
         
         final ChatSession chatSession = serviceContext.getChatSession();
 
-        final Future<Message> joinFuture = chatSession.join((channel, message) -> {
-            //@TODO 
-            // Each time a message arrives on this channel, this will be invoked
-        });
+        final Future<Message> joinFuture = chatSession.join();
         
         final Message message = servletUtil.waitForFuture(joinFuture, joinTimeout);
         
