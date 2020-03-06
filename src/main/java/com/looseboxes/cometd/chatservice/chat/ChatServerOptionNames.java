@@ -18,18 +18,9 @@ package com.looseboxes.cometd.chatservice.chat;
 /**
  * @author USER
  */
-public final class ChatServerOptionNames {
+public interface ChatServerOptionNames {
     
-    public static final String CHANNEL_MESSAGE_LISTENER = 
-            from(MessageListenerWithDataFilters.class);
+    String CHANNEL_MESSAGE_LISTENER = "ChannelMessageListener";
     
-    public static final String MEMBERS_SERVICE = from(MembersService.class);
-
-    public static final String from(Object instance) {
-        return from(instance.getClass());
-    }
-    
-    public static final String from(Class type) {
-        return type.getSimpleName();
-    }
+    String MEMBERS_SERVICE = "MembersService";
 }

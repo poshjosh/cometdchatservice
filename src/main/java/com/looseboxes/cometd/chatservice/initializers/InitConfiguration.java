@@ -23,7 +23,10 @@ import com.looseboxes.cometd.chatservice.chat.MembersServiceInMemoryCache;
 import com.looseboxes.cometd.chatservice.chat.MessageListenerWithDataFilters;
 import com.looseboxes.cometd.chatservice.SafeContentService;
 import com.looseboxes.cometd.chatservice.SafeContentServiceImpl;
+import com.looseboxes.cometd.chatservice.chat.ChatServerOptionNames;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.cometd.annotation.Configure;
 import org.cometd.annotation.Listener;
 import org.cometd.annotation.RemoteCall;
@@ -67,7 +70,7 @@ public class InitConfiguration {
             addExtensionsToBayeuxServer().apply(bayeuxServer, 
                     timesyncExtension(), acknowledgedMessagesExtension());
             addOptionsToBayeuxServer().apply(bayeuxServer, 
-                    membersService(), messageListenerWithDataFilters(safeContentService));
+                    membersServiceOption(), messageListenerOption(safeContentService));
             createDefaultChannelsIfAbsent().apply(bayeuxServer, channel);
 //            processAnnotatedServices().apply(bayeuxServer, 
 //                    echoRPC(), monitor());
@@ -77,6 +80,20 @@ public class InitConfiguration {
         return bayeuxInit;
     }
     
+    public Map.Entry<String, Object> membersServiceOption() {
+        return new HashMap.SimpleImmutableEntry<>(
+                ChatServerOptionNames.MEMBERS_SERVICE, membersService()
+        );
+    }
+    
+    public Map.Entry<String, Object> messageListenerOption(
+            SafeContentService safeContentService) {
+        return new HashMap.SimpleImmutableEntry<>(
+                ChatServerOptionNames.CHANNEL_MESSAGE_LISTENER, 
+                messageListenerWithDataFilters(safeContentService)
+        );
+    }
+
     @Bean public MessageListenerWithDataFilters messageListenerWithDataFilters(
             SafeContentService safeContentService) {
         return new MessageListenerWithDataFilters(
