@@ -89,6 +89,22 @@ public interface ChatSession {
      * to connect that user to cometd server.
      * Calls {@link #connect()} then 
      * {@link #subscribe(ClientSessionChannel.MessageListener) subscribe(.)} asynchronously
+     * @see #join(org.cometd.bayeux.client.ClientSessionChannel.MessageListener) 
+     * @see #connect() 
+     * @see #subscribe() 
+     * @return 
+     */
+    default Future<Message> join() {
+        return join((channel, message) -> {});
+    }
+    
+    /**
+     * Handshake with the server. When user logging into your system, you can call this method
+     * to connect that user to cometd server.
+     * Calls {@link #connect()} then 
+     * {@link #subscribe(ClientSessionChannel.MessageListener) subscribe(.)} asynchronously
+     * @param listener Used to listen for messages on this channel
+     * @see #join() 
      * @see #connect() 
      * @see #subscribe() 
      * @return 
@@ -121,12 +137,25 @@ public interface ChatSession {
      * @param messageListener
      */
     void send(String textMessage, String toUser, ClientSession.MessageListener messageListener);
-
+    
     /**
      * Connect before subscribing. 
      * <p>{@link #join()} Calls {@link #connect()} then 
      * {@link #subscribe(ClientSessionChannel.MessageListener) subscrible(.)}</p>
      * @return 
+     * @see #subscribe(org.cometd.bayeux.client.ClientSessionChannel.MessageListener) 
+     */
+    default Future<Message> subscribe() {
+        return subscribe((channel, message) -> {});
+    }
+
+    /**
+     * Connect before subscribing. 
+     * <p>{@link #join()} Calls {@link #connect()} then 
+     * {@link #subscribe(ClientSessionChannel.MessageListener) subscrible(.)}</p>
+     * @param listener Used to listen for messages on this channel
+     * @return 
+     * @see #subscribe() 
      */
     Future<Message> subscribe(ClientSessionChannel.MessageListener listener);
 
