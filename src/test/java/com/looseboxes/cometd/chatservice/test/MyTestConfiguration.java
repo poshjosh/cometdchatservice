@@ -23,7 +23,43 @@ import org.springframework.boot.test.context.TestConfiguration;
  */
 @TestConfiguration
 public class MyTestConfiguration extends TestConfig{
+    
     public MyTestConfiguration(@Value("${server.servlet.context-path:}") String contextPath) { 
         super(contextPath);
     }
 }
+/**
+ * 
+
+    @Autowired private AppConfiguration appConfig;
+    @Autowired private InitConfiguration initConfig;
+    @Autowired private RequestConfiguration requestConfig;
+    @Autowired private ResponseConfiguration responseConfig;
+    @Autowired private ChatConfiguration chatConfig;
+    
+    @Override
+    public AppConfiguration appConfig() {
+        return appConfig;
+    }
+
+    @Override
+    public InitConfiguration initConfig() {
+        return initConfig;
+    }
+
+    @Override
+    public RequestConfiguration requestConfig() {
+        return requestConfig;
+    }
+
+    @Override
+    public ResponseConfiguration responseConfig() {
+        return responseConfig;
+    }
+
+    @Override
+    public ChatConfiguration chatConfig() {
+        return chatConfig;
+    }
+ * 
+ */
