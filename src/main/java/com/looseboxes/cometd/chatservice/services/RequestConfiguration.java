@@ -15,9 +15,6 @@
  */
 package com.looseboxes.cometd.chatservice.services;
 
-import com.looseboxes.cometd.chatservice.services.RequestUrl;
-import com.looseboxes.cometd.chatservice.services.RequestUrlImpl;
-import com.looseboxes.cometd.chatservice.services.ServletUtil;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,10 +28,6 @@ public class RequestConfiguration {
     
     @Bean @Scope("prototype") public RequestUrl requestUrl(HttpServletRequest request){
         return new RequestUrlImpl(request);
-    }
-    
-    @Bean @Scope("prototype") public ControllerServiceContext controllerServiceContext() {
-        return new ControllerServiceContext();
     }
     
     @Bean public ControllerServiceContextProvider controllerServiceContextProvider(){
