@@ -19,11 +19,15 @@ package com.looseboxes.cometd.chatservice.services.response;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Chinomso Bassey Ikwuagwu on Apr 26, 2019 4:04:45 PM
  */
 public class ResponseBuilderImpl<T> implements Response<T>, Response.Builder<T>{
+
+    private static final Logger LOG = LoggerFactory.getLogger(ResponseBuilderImpl.class);
     
     private int code = -1;
     private T data;
@@ -47,6 +51,9 @@ public class ResponseBuilderImpl<T> implements Response<T>, Response.Builder<T>{
 
     @Override
     public Response<T> build() {
+        if(LOG.isTraceEnabled()) {
+            LOG.trace("build() called by: {}", this);
+        }
         
         if(this.isBuildAttempted()) {
             throw new IllegalStateException("Method build() may only be called once");
@@ -183,7 +190,8 @@ public class ResponseBuilderImpl<T> implements Response<T>, Response.Builder<T>{
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + "{" + "code=" + code + 
+        return getClass().getSimpleName() + "@" + Integer.toHexString(hashCode()) + 
+                "{" + "code=" + code + 
                 ", data=" + data + ", message=" + message + 
                 ", success=" + this.isSuccess() + ", timestamp=" + timestamp + '}';
     }
