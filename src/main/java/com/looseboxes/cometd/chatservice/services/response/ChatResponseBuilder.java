@@ -30,7 +30,7 @@ public final class ChatResponseBuilder<T> extends ResponseBuilderImpl<T>{
     }
 
     @Override
-    public Builder<T> newInstance() {
+    public Response.Builder<T> newInstance() {
         return new ChatResponseBuilder(this.getResponseCodeProvider());
     }
     
