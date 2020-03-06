@@ -18,19 +18,32 @@ package com.looseboxes.cometd.chatservice.initializers;
 import com.looseboxes.cometd.chatservice.chat.ChatServerOptionNames;
 import java.util.List;
 import org.cometd.bayeux.server.BayeuxServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author USER
  */
 public final class AddOptionsToChatServer implements ChatServerInitAction<Object>{
 
+    private static final Logger LOG = LoggerFactory.getLogger(AddOptionsToChatServer.class);
+    
     public AddOptionsToChatServer() { }
     
     @Override
     public BayeuxServer apply(BayeuxServer bayeux, List options) {
+    
+        LOG.trace("Options: {}", options);
+        
         options.stream().forEach((option) -> {
-            bayeux.setOption(ChatServerOptionNames.from(option), option);
+        
+            final String optionName = ChatServerOptionNames.from(option);
+            
+            LOG.trace("Adding: {} = {}", optionName, option);
+            
+            bayeux.setOption(optionName, option);
         });
+        
         return bayeux;
     }
 }
