@@ -27,7 +27,6 @@ import org.eclipse.jetty.client.HttpClient;
 import com.looseboxes.cometd.chatservice.chat.Chat;
 import com.looseboxes.cometd.chatservice.chat.ChatListener;
 import com.looseboxes.cometd.chatservice.chat.ChatSession;
-import org.cometd.bayeux.client.ClientSessionChannel;
 
 /**
  * To run this successfully, make sure the jetty server is started on the 
@@ -66,11 +65,7 @@ public class ReadMe {
             
             final ChatSession johnSession = new ChatSessionImpl(johnClient, johnConfig);
             
-            final ClientSessionChannel.MessageListener johnListener = (channel, message) -> {
-                // Each time john receives a message this is invoked
-            };
-            
-            final Future<Message> johnJoin = johnSession.join(johnListener);
+            final Future<Message> johnJoin = johnSession.join();
 
             final Message johnConnMsg = johnJoin.get(timeout, TimeUnit.MILLISECONDS);
             System.out.println("ReadMe:: Response to " + JOHN + "'s join: "+johnConnMsg);
@@ -82,11 +77,7 @@ public class ReadMe {
 
             final ChatSession marySession = new ChatSessionImpl(maryClient, maryConfig);
             
-            final ClientSessionChannel.MessageListener maryListener = (channel, message) -> {
-                // Each time mary receives a message this is invoked
-            };
-            
-            final Future<Message> maryJoin = marySession.join(maryListener);
+            final Future<Message> maryJoin = marySession.join();
 
             final Message maryConnMsg = maryJoin.get(timeout, TimeUnit.MILLISECONDS);
             System.out.println("ReadMe:: Response to " + MARY + "'s join: "+maryConnMsg);
