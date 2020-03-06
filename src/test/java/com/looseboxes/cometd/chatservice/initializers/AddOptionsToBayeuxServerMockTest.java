@@ -16,7 +16,7 @@
 package com.looseboxes.cometd.chatservice.initializers;
 
 import com.looseboxes.cometd.chatservice.chat.ChatServerOptionNames;
-import com.looseboxes.cometd.chatservice.chat.MembersService;
+import com.looseboxes.cometd.chatservice.chat.MembersServiceInMemoryCache;
 import com.looseboxes.cometd.chatservice.chat.MessageListenerWithDataFilters;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 /**
  * @author USER
@@ -49,13 +48,15 @@ public class AddOptionsToBayeuxServerMockTest extends ChatServerInitActionMockTe
         public List<Map.Entry<String, Object>> getArgs(){
             return Arrays.asList(
                     getOption(ChatServerOptionNames.MEMBERS_SERVICE, 
-                            MembersService.class), 
+                            new MembersServiceInMemoryCache()), 
                     getOption(ChatServerOptionNames.CHANNEL_MESSAGE_LISTENER, 
-                            MessageListenerWithDataFilters.class));
+                            new MessageListenerWithDataFilters(
+                                    (session, channel, object) -> { return object; }
+                            )));
         }
         
-        public Map.Entry<String, Object> getOption(String key, Class type) {
-            return new HashMap.SimpleImmutableEntry<>(key, mock(type));
+        public Map.Entry<String, Object> getOption(String key, Object value) {
+            return new HashMap.SimpleImmutableEntry<>(key, value);
         }
 
         @Override
