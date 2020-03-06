@@ -43,12 +43,10 @@ public class ChatControllerServiceTest extends AbstractControllerServiceTest{
 
         final ServletUtil servletUtil = this.getServletUtil();
 
-        final Response.Builder responseBuilder = this.getResponseBuilder();
-
         return new ChatControllerService(
-                new JoinControllerService(servletUtil, responseBuilder, 3_000, 7_000), 
+                new JoinControllerService(servletUtil, getResponseBuilder(), 3_000, 7_000), 
                 servletUtil,
-                responseBuilder
+                getResponseBuilder()
         );
     }
 }
