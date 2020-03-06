@@ -69,8 +69,8 @@ public class InitConfiguration {
             addOptionsToBayeuxServer().apply(bayeuxServer, 
                     membersService(), messageListenerWithDataFilters(safeContentService));
             createDefaultChannelsIfAbsent().apply(bayeuxServer, channel);
-            processAnnotatedServices().apply(bayeuxServer, 
-                    echoRPC(), monitor());
+//            processAnnotatedServices().apply(bayeuxServer, 
+//                    echoRPC(), monitor());
             dumpBayeuxServerState().apply(bayeuxServer, Collections.EMPTY_LIST);
         };
         
@@ -158,7 +158,9 @@ public class InitConfiguration {
 
         @RemoteCall("echo")
         public void doEcho(RemoteCall.Caller caller, Object data) {
-            LOG.info("ECHO from " + caller.getServerSession() + ": " + data);
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("ECHO from " + caller.getServerSession() + ": " + data);
+            }
             caller.result(data);
         }
     }
@@ -167,12 +169,18 @@ public class InitConfiguration {
     public static class Monitor {
         @Listener("/meta/subscribe")
         public void monitorSubscribe(ServerSession session, ServerMessage message) {
-            LOG.debug("Monitored Subscribe from " + session + " for " + message.get(Message.SUBSCRIPTION_FIELD));
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Monitored Subscribe from " + session + " for " + 
+                        message.get(Message.SUBSCRIPTION_FIELD));
+            }
         }
 
         @Listener("/meta/unsubscribe")
         public void monitorUnsubscribe(ServerSession session, ServerMessage message) {
-            LOG.debug("Monitored Unsubscribe from " + session + " for " + message.get(Message.SUBSCRIPTION_FIELD));
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Monitored Unsubscribe from " + session + " for " + 
+                        message.get(Message.SUBSCRIPTION_FIELD));
+            }
         }
 
         @Listener("/meta/*")
