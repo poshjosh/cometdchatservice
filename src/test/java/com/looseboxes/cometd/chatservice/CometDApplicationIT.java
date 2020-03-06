@@ -79,14 +79,14 @@ public class CometDApplicationIT {
         assertThat("{members={}}", not(data));
     }
 
-//    @Test
+    @Test
     public void joinRequest_ShouldReturnSuccessfully() throws Exception {
         System.out.println("joinRequest_ShouldReturnSuccessfully");
         
         this.givenUrl_ShouldReturnSuccess(Endpoints.JOIN);
     }
 
-//    @Test
+    @Test
     public void chatRequest_ShouldReturnSuccessfully() throws Exception {
         System.out.println("chatRequest_ShouldReturnSuccessfully");
 
