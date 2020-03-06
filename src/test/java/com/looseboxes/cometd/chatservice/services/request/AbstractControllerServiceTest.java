@@ -15,16 +15,13 @@
  */
 package com.looseboxes.cometd.chatservice.services.request;
 
-import com.looseboxes.cometd.chatservice.ParamNames;
 import com.looseboxes.cometd.chatservice.chat.ChatServerOptionNames;
-import com.looseboxes.cometd.chatservice.chat.ChatSession;
 import com.looseboxes.cometd.chatservice.controllers.Endpoints;
 import com.looseboxes.cometd.chatservice.services.ServletUtil;
 import com.looseboxes.cometd.chatservice.services.response.Response;
 import com.looseboxes.cometd.chatservice.test.TestConfig;
 import java.util.Collections;
 import java.util.Map;
-import org.cometd.bayeux.server.BayeuxServer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,39 +40,7 @@ public abstract class AbstractControllerServiceTest {
     
     private final boolean logStackTrace = TestConfig.LOG_STACKTRACE;
     
-    public static class ServiceContextImpl 
-            implements ControllerService.ServiceContext{
-        
-        private final BayeuxServer bayeuxServer;
-        private final ChatSession chatSession;
-        private final Map params;
-        
-        public ServiceContextImpl(String endpoint) {
-            this(new TestConfig(), endpoint);
-        }
-        public ServiceContextImpl(TestConfig testConfig, String endpoint) {
-            bayeuxServer = testConfig.testChatObjects().getBayeuxServer();
-            params = testConfig.endpointRequestParams().forEndpoint(endpoint);
-            String user = (String)params.get(ParamNames.USER);
-            user = user == null ? "test_user" : user;
-            chatSession = testConfig.testChatObjects().getChatSession(user);
-        }
-        
-        @Override
-        public BayeuxServer getBayeuxServer() {
-            return bayeuxServer;
-        }
-        @Override
-        public ChatSession getChatSession() {
-            return chatSession;
-        }
-        @Override
-        public Map<String, Object> getParameters() {
-            return (Map)params;
-        }
-    }
-
-    public static class ValidServiceContext extends ServiceContextImpl{
+    public static class ValidServiceContext extends ControllerServiceContextImpl{
         public ValidServiceContext(String endpoint) {
             this(new TestConfig(), endpoint);
         }
@@ -91,7 +56,7 @@ public abstract class AbstractControllerServiceTest {
         }
     }
     
-    public static class InvalidServiceContext extends ServiceContextImpl{
+    public static class InvalidServiceContext extends ControllerServiceContextImpl{
         public InvalidServiceContext(String endpoint) {
             super(endpoint);
         }
@@ -176,7 +141,8 @@ public abstract class AbstractControllerServiceTest {
     }
 
     public ControllerService.ServiceContext getServiceContext() {
-        return new ServiceContextImpl(this.getEndpoint());
+        return getTestConfig()
+                .controllerServiceContextFromEndpointProvider().from(getEndpoint());
     }
     
     public ServletUtil getServletUtil() {
