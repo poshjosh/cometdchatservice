@@ -51,6 +51,12 @@ public class ControllerServiceContext implements ControllerService.ServiceContex
         this.chatSession = chatSession;
     }
 
+    /**
+     * @return A map of parameters primarily extracted from a 
+     * {@link javax.servlet.http.HttpServletRequest HttpServletRequest} and 
+     * whose values are either <code>String</code> (i.e text) or
+     * <code>String[]</code> (i.e array of text values)
+     */
     @Override
     public Map<String, Object> getParameters() {
         return parameters;

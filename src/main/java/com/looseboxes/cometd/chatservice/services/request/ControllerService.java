@@ -66,6 +66,12 @@ public interface ControllerService {
             return false;
         }
         
+        /**
+         * @return A map of parameters primarily extracted from a 
+         * {@link javax.servlet.http.HttpServletRequest HttpServletRequest} and 
+         * whose values are either <code>String</code> (i.e text) or
+         * <code>String[]</code> (i.e array of text values)
+         */
         Map<String, Object> getParameters();
     }
     
