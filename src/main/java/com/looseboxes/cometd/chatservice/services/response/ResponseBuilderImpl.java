@@ -25,21 +25,17 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Chinomso Bassey Ikwuagwu on Apr 26, 2019 4:04:45 PM
  */
-public class ResponseBuilderImpl<T> implements Response<T>, Response.Builder<T>{
+public class ResponseBuilderImpl<T> implements Response.Builder<T>{
 
     private static final Logger LOG = LoggerFactory.getLogger(ResponseBuilderImpl.class);
     
-    private int code = -1;
-    private T data;
-    private String message;
-    /**
-     * 1 for success, 0 for not-success, and -1 for not set
-     */
-    private int success = -1;
-    private long timestamp;
+    private final ResponseBean<T> bean = new ResponseBean<>();
+    
     private final AtomicBoolean buildAttempted = new AtomicBoolean(false);
     
     private final ResponseCodeProvider responseCodeProvider;
+    
+    private boolean successSet;
 
     public ResponseBuilderImpl() {
         this((candidate, resultIfNone) -> resultIfNone);
@@ -60,27 +56,28 @@ public class ResponseBuilderImpl<T> implements Response<T>, Response.Builder<T>{
         }
         buildAttempted.compareAndSet(false, true);
         
-        if(code == -1) {
-            this.code(this.guessCode());
+        if(bean.getCode() < 1) {
+            this.code(this.guessCode(bean.getData()));
         }
 
-        if(success == -1) {
-            success(code >= 200 && code < 300);
+        if( ! successSet) {
+            final int code = bean.getCode();
+            this.success(code >= 200 && code < 300);
         }
         
-        this.timestamp = System.currentTimeMillis();
+        bean.setTimestamp(System.currentTimeMillis());
         
-        return this;
+        return bean;
     }
     
-    private int guessCode() {
-        final int _c = isSuccess() ? HttpServletResponse.SC_OK :
+    private int guessCode(Object obj) {
+        final int _c = successSet && bean.isSuccess() ? HttpServletResponse.SC_OK :
                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-        return data == null ? _c : responseCodeProvider.from(data, _c);
+        return obj == null ? _c : responseCodeProvider.from(obj, _c);
     }
 
     @Override
-    public Builder<T> newInstance() {
+    public Response.Builder<T> newInstance() {
         return new ResponseBuilderImpl(this.responseCodeProvider);
     }
 
@@ -91,108 +88,36 @@ public class ResponseBuilderImpl<T> implements Response<T>, Response.Builder<T>{
 
     @Override
     public Response.Builder<T> error(boolean error) {
-        return this.success( ! error);
-    }
-
-    @Override
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    @Override
-    public int getCode() {
-        return code;
+        this.bean.setSuccess( ! error);
+        return this;
     }
 
     @Override
     public Response.Builder code(int code) {
-        this.code = code;
+        this.bean.setCode(code);
         return this;
-    }
-
-    @Override
-    public T getData() {
-        return data;
     }
 
     @Override
     public Response.Builder data(T data) {
-        this.data = data;
+        this.bean.setData(data);
         return this;
-    }
-
-    @Override
-    public String getMessage() {
-        return message;
     }
 
     @Override
     public Response.Builder message(String message) {
-        this.message = message;
+        this.bean.setMessage(message);
         return this;
     }
 
     @Override
-    public boolean isSuccess() {
-        return success == 1;
-    }
-
-    @Override
     public Response.Builder success(boolean success) {
-        this.success = success ? 1 : 0;
+        this.successSet = true;
+        this.bean.setSuccess(success);
         return this;
     }
 
     public ResponseCodeProvider getResponseCodeProvider() {
         return responseCodeProvider;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 5;
-        hash = 47 * hash + this.code;
-        hash = 47 * hash + Objects.hashCode(this.data);
-        hash = 47 * hash + Objects.hashCode(this.message);
-        hash = 47 * hash + this.success;
-        hash = 47 * hash + (int) (this.timestamp ^ (this.timestamp >>> 32));
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final ResponseBuilderImpl<?> other = (ResponseBuilderImpl<?>) obj;
-        if (this.code != other.code) {
-            return false;
-        }
-        if (this.success != other.success) {
-            return false;
-        }
-        if (this.timestamp != other.timestamp) {
-            return false;
-        }
-        if (!Objects.equals(this.message, other.message)) {
-            return false;
-        }
-        if (!Objects.equals(this.data, other.data)) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + "@" + Integer.toHexString(hashCode()) + 
-                "{" + "code=" + code + 
-                ", data=" + data + ", message=" + message + 
-                ", success=" + this.isSuccess() + ", timestamp=" + timestamp + '}';
     }
 }
