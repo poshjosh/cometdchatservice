@@ -15,8 +15,8 @@
  */
 package com.looseboxes.cometd.chatservice.initializers;
 
-import com.looseboxes.cometd.chatservice.chat.ChatServerOptionNames;
 import java.util.List;
+import java.util.Map;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,24 +24,22 @@ import org.slf4j.LoggerFactory;
 /**
  * @author USER
  */
-public final class AddOptionsToChatServer implements ChatServerInitAction<Object>{
+public final class AddOptionsToChatServer implements ChatServerInitAction<Map.Entry<String, Object>>{
 
     private static final Logger LOG = LoggerFactory.getLogger(AddOptionsToChatServer.class);
     
     public AddOptionsToChatServer() { }
     
     @Override
-    public BayeuxServer apply(BayeuxServer bayeux, List options) {
+    public BayeuxServer apply(BayeuxServer bayeux, List<Map.Entry<String, Object>> options) {
     
         LOG.trace("Options: {}", options);
         
         options.stream().forEach((option) -> {
-        
-            final String optionName = ChatServerOptionNames.from(option);
             
-            LOG.trace("Adding: {} = {}", optionName, option);
+            LOG.trace("Adding: {} = {}", option.getKey(), option.getValue());
             
-            bayeux.setOption(optionName, option);
+            bayeux.setOption(option.getKey(), option.getValue());
         });
         
         return bayeux;
