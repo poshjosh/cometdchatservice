@@ -21,20 +21,29 @@ package com.looseboxes.cometd.chatservice.services;
 public interface RequestUrl {
 
     String getBaseUrl();
+    
+    String getContextPath();
 
     /**
-     * <code>String contextURL = baseURL + contextPath;</code>
-     * @return
+     * <code>String contextUrl = getBaseUrl() + getContextPath();</code>
+     * @return The URL to the context path
+     * @see #getBaseUrl() 
+     * @see #getContextPath() 
      */
-    String getContextUrl();
+    default String getContextUrl() {
+        return getBaseUrl() + getContextPath();
+    }
 
     /**
-     * <code><pre>
-     * String endpointUrl = getContextUrl() + endpoint;
-     * </pre></code>
+     * <code>String endpointUrl = getContextUrl() + endpoint;</code>
      * @param endpoint
-     * @see #getContextUrl(javax.servlet.http.HttpServletRequest)
      * @return The URL to the endpoint
+     * @see #getContextUrl() 
      */
-    String getEndpointUrl(String endpoint);
+    default String getEndpointUrl(String endpoint) {
+        
+        return getContextUrl() + endpoint;
+    }
+    
+    String getRequestUrl();
 }

@@ -39,12 +39,10 @@ public final class RequestUrlImpl implements RequestUrl {
     }
             
     /**
-     * <code><pre>
-     * String endpointUrl = getContextUrl() + endpoint;
-     * </pre></code>
+     * <code>String endpointUrl = getContextUrl() + endpoint;</code>
      * @param endpoint
-     * @see #getContextUrl(javax.servlet.http.HttpServletRequest) 
      * @return The URL to the endpoint
+     * @see #getContextUrl() 
      */
     @Override
     public String getEndpointUrl(String endpoint) {
@@ -56,17 +54,18 @@ public final class RequestUrlImpl implements RequestUrl {
         return result;
     }
 
-    /**
-     * <code>String contextURL = baseURL + contextPath;</code>
-     * @return 
-     */
     @Override
-    public String getContextUrl() {
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    @Override
+    public String getContextPath() {
         return contextPath;
     }
 
     @Override
-    public String getBaseUrl() {
-        return baseUrl;
+    public String getRequestUrl() {
+        return requestUrl;
     }
 }
