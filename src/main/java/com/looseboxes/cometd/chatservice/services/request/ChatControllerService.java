@@ -89,7 +89,7 @@ public class ChatControllerService implements ControllerService{
 
             final Message message = servletUtil.waitForFuture(chatFuture, timeout);
             
-            response = responseBuilder.message(chatSession.getState()).data(message).build();
+            response = getResponseBuilder().message(chatSession.getState()).data(message).build();
         }
         
         return response;
