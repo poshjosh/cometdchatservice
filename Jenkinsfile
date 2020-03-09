@@ -15,8 +15,8 @@ pipeline {
         ARTIFACTID = readMavenPom().getArtifactId();
         VERSION = readMavenPom().getVersion()
         PROJECT_NAME = "${ARTIFACTID}:${VERSION}"
-        IMAGE = "poshjosh/${PROJECT_NAME}";
-        IMAGE_NAME = IMAGE.toLowerCase()
+        IMAGE_REF = "poshjosh/${PROJECT_NAME}";
+        IMAGE_NAME = IMAGE_REF.toLowerCase()
     }
     options {
         timeout(time: 1, unit: 'HOURS')
@@ -51,7 +51,6 @@ pipeline {
                     }
                     post {
                         always {
-//                            junit testResults: 'target/surefire-reports/*.xml'
                             junit(allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml')
                         }
                     }
@@ -78,16 +77,6 @@ pipeline {
                         }
                     }
                 }
-                stage('Package') {
-                    steps {
-                        sh 'mvn -B jar:jar'
-                    }
-                }
-                stage('Install Local') {
-                    steps {
-                        sh 'mvn -B jar:jar source:jar install:install'
-                    }
-                }
                 stage('Documentation') {
                     steps {
                         sh 'mvn -B site'
@@ -98,10 +87,23 @@ pipeline {
                         }
                     }
                 }
+//                stage('Package') {
+//                    steps {
+//                        sh 'mvn -B jar:jar'
+//                    }
+//                }
+                stage('Install Local') {
+                    steps {
+                        sh 'mvn -B jar:jar source:jar install:install'
+                    }
+                }
 //                stage('Deploy Image') {
 //                    steps {
 //                        withDockerRegistry([url: '', credentialsId: 'dockerhub-creds']) {
-//                            sh "docker push $IMAGE_NAME"
+//                            sh ''' 
+//                                "docker push $IMAGE_NAME"
+//                                "docker rmi $IMAGE_NAME"
+//                            '''                            
 //                        }
 //                    }
 //                }
