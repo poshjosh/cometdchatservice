@@ -1,3 +1,8 @@
+ResponseBuilder should follow real builder pattern
+
+DO NOT MOCK
+BayeuxServer because it isn't owned by this app. Rather use new BayeuxServerImpl
+
 WRITE TESTS TO ENSURE THIS DOESN'T REPEAT
 Wrong value for room. ce/privatechat instead of service/privatechat
 -------------------------------------------------------
