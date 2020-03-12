@@ -3,13 +3,16 @@
  * https://github.com/poshjosh/cometdchatservice
  * @see https://hub.docker.com/_/maven
  */
-def IMAGE_NAME = 'poshjosh/cometdchatservice:1.0-snapshot'
 pipeline {
-    agent {
-        docker {
-            image 'maven:3-alpine'
-            args "-v /root/.m2:/root/.m2"
-        }
+    agent any
+    environment {
+        APP_PORT = '8092'
+        ARTIFACTID = readMavenPom().getArtifactId();
+        VERSION = readMavenPom().getVersion()
+        PROJECT_NAME = "${ARTIFACTID}:${VERSION}"
+        IMAGE_REF = "poshjosh/${PROJECT_NAME}";
+        IMAGE_NAME = IMAGE_REF.toLowerCase()
+        RUN_ARGS = "--rm -e MAVEN_CONFIG=/home/.m2 -v /home/.m2:/root/.m2 -p ${APP_PORT}:${APP_PORT}"
     }
     options {
         timestamps()
@@ -24,37 +27,116 @@ pipeline {
         pollSCM('H H(8-16)/2 * * 1-5')
     }
     stages {
-        stage('Build') {
+        stage('Build Image') {
             steps {
-                sh 'mvn -B -DskipTests clean package'
-            }
-        }
-        stage('Test') {
-            steps {
-                sh 'mvn test'
-            }
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml'
+                script {
+                    def additionalBuildArgs = "--pull"
+                    if (env.BRANCH_NAME == "master") {
+                        additionalBuildArgs = "--pull --no-cache"
+                    }
+                    docker.build("${IMAGE_NAME}", "${additionalBuildArgs} .")
                 }
             }
         }
-//        stage('Deploy Image') {
-//            steps {
-//                script {
-//                    docker.withRegistry('', 'dockerhub-creds') { // Must have been specified in Jenkins
-//                        sh "docker push ${IMAGE_NAME}"
-//                    }
-//                }
-//            }
-//        }
+        stage('Build Artifact') {
+            steps {
+                script{
+                    docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
+                        sh 'mvn -X -B clean compiler:compile'
+                    }
+                }
+            }
+        }
+        stage('Unit Tests') {
+            steps {
+                script{
+                    docker.image("${IMAGE_NAME}").inside{
+                        sh 'mvn -B resources:testResources compiler:testCompile surefire:test'
+                    }
+                }
+            }
+            post {
+                always {
+                    junit(
+                        allowEmptyResults: true,
+                        testResults: '**/target/surefire-reports/TEST-*.xml'
+                    )
+                }
+            }
+        }
+        stage('Quality Analysis') {
+            parallel {
+                stage('Integration Tests') {
+                    steps {
+                        script{
+                            docker.image("${IMAGE_NAME}").inside{
+                                sh 'mvn -B failsafe:integration-test failsafe:verify'
+                            }
+                        }
+                    }
+                }
+                stage('Sanity Check') {
+                    steps {
+                        script{
+                            docker.image("${IMAGE_NAME}").inside{
+                                sh 'mvn -B checkstyle:checkstyle pmd:pmd pmd:cpd com.github.spotbugs:spotbugs-maven-plugin:spotbugs'
+                            }
+                        }
+                    }
+                }
+                stage('Sonar Scan') {
+                    environment {
+                        SONAR = credentials('sonar-creds') // Must have been specified in Jenkins
+                    }
+                    steps {
+                        script{
+                            docker.image("${IMAGE_NAME}").inside{
+                                sh "mvn -B sonar:sonar -Dsonar.login=$SONAR_USR -Dsonar.password=$SONAR_PSW"
+                            }
+                        }
+                    }
+                }
+            }
+        }
         stage('Documentation') {
             steps {
-                sh 'mvn -B site:site'
+                script{
+                    docker.image("${IMAGE_NAME}").inside{
+                        sh 'mvn -B site:site'
+                    }
+                }
             }
             post {
                 always {
                     publishHTML(target: [reportName: 'Site', reportDir: 'target/site', reportFiles: 'index.html', keepAll: false])
+                }
+            }
+        }
+        stage('Run Image') {
+            steps {
+                script{
+                    docker.image("${IMAGE_NAME}").run()
+                }
+            }
+        }
+        stage('Install Local') {
+            steps {
+                script{
+                    docker.image("${IMAGE_NAME}").inside{
+                        sh 'mvn -B jar:jar source:jar install:install'
+                    }
+                }
+            }
+        }
+        stage('Deploy Image') {
+            when {
+                branch 'master'
+            }
+            steps {
+                script {
+                    docker.withRegistry('', 'dockerhub-creds') { // Must have been specified in Jenkins
+                        sh "docker push ${IMAGE_NAME}"
+                    }
                 }
             }
         }
