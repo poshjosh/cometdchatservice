@@ -26,6 +26,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 /**
+ * A service to check if text contains adult, violent, racy, graphic, medical, 
+ * spoof.. and other content considered unsafe.
  * @author USER
  */
 public class SafeContentServiceImpl implements SafeContentService {

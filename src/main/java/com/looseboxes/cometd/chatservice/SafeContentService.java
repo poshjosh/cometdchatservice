@@ -16,6 +16,8 @@
 package com.looseboxes.cometd.chatservice;
 
 /**
+ * A service to check if text contains adult, violent, racy, graphic, medical, 
+ * spoof.. and other content considered unsafe.
  * @author USER
  */
 public interface SafeContentService {
