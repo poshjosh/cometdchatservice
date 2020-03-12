@@ -12,7 +12,7 @@ pipeline {
         PROJECT_NAME = "${ARTIFACTID}:${VERSION}"
         IMAGE_REF = "poshjosh/${PROJECT_NAME}";
         IMAGE_NAME = IMAGE_REF.toLowerCase()
-        RUN_ARGS = '--rm -v "$HOME/.m2":/root/.m2'
+        RUN_ARGS = "--rm -v /var/jenkins_home/.m2:/root/.m2 -p ${APP_PORT}:${APP_PORT}"
     }
     options {
         timestamps()
@@ -38,10 +38,10 @@ pipeline {
                 }
             }
         }
-        stage('Clean & Build') {
+        stage('Build Artifact') {
             steps {
                 script{
-                    docker.image("${IMAGE_NAME}").inside("${RUN_ARGS} -p ${APP_PORT}:${APP_PORT}"){
+                    docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
                         sh 'mvn -X -B clean compiler:compile'        
                     }
                 }
