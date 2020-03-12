@@ -8,7 +8,7 @@ pipeline {
     agent {
         docker {
             image 'maven:3-alpine'
-            args "-v /root/.m2:/root/.m2 -t ${IMAGE_NAME}"
+            args "-v /root/.m2:/root/.m2"
         }
     }
     options {
@@ -39,15 +39,15 @@ pipeline {
                 }
             }
         }
-        stage('Deploy Image') {
-            steps {
-                script {
-                    docker.withRegistry('', 'dockerhub-creds') { // Must have been specified in Jenkins
-                        sh "docker push ${IMAGE_NAME}"
-                    }
-                }
-            }
-        }
+//        stage('Deploy Image') {
+//            steps {
+//                script {
+//                    docker.withRegistry('', 'dockerhub-creds') { // Must have been specified in Jenkins
+//                        sh "docker push ${IMAGE_NAME}"
+//                    }
+//                }
+//            }
+//        }
         stage('Documentation') {
             steps {
                 sh 'mvn -B site:site'
