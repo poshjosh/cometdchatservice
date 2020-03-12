@@ -13,7 +13,7 @@ pipeline {
         IMAGE_REF = "poshjosh/${PROJECT_NAME}";
         IMAGE_NAME = IMAGE_REF.toLowerCase()
 //        RUN_ARGS = "--rm -v /home/.m2:/usr/share/maven/ref/repository /home/.m2:/root/.m2 -p ${APP_PORT}:${APP_PORT}"
-        RUN_ARGS = "--rm -v /home/.m2:/root/.m2 -p ${APP_PORT}:${APP_PORT}"
+        RUN_ARGS = "--rm -v ${PWD}:/var/jenkins_home/workspace/cometdchatservice_dev -v /home/.m2:/root/.m2 -v ${PWD}/target:/var/jenkins_home/workspace/cometdchatservice_dev/target -p ${APP_PORT}:${APP_PORT}"
     }
     options {
         timestamps()
