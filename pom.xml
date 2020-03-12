@@ -5,6 +5,7 @@
         <groupId>com.looseboxes</groupId>
         <artifactId>services</artifactId>
         <version>1.0</version>
+        <relativePath>../services/pom.xml</relativePath>
     </parent>
 
     <artifactId>cometdchatservice</artifactId>
