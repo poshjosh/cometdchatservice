@@ -12,7 +12,8 @@ pipeline {
         PROJECT_NAME = "${ARTIFACTID}:${VERSION}"
         IMAGE_REF = "poshjosh/${PROJECT_NAME}";
         IMAGE_NAME = IMAGE_REF.toLowerCase()
-        RUN_ARGS = "--rm -e MAVEN_CONFIG=/home/.m2 -v /home/.m2:/root/.m2 -p ${APP_PORT}:${APP_PORT}"
+//        RUN_ARGS = "--rm -v /home/.m2:/usr/share/maven/ref/repository /home/.m2:/root/.m2 -p ${APP_PORT}:${APP_PORT}"
+        RUN_ARGS = "--rm /home/.m2:/root/.m2 -p ${APP_PORT}:${APP_PORT}"
     }
     options {
         timestamps()
