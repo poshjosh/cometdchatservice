@@ -12,7 +12,7 @@ pipeline {
         PROJECT_NAME = "${ARTIFACTID}:${VERSION}"
         IMAGE_REF = "poshjosh/${PROJECT_NAME}";
         IMAGE_NAME = IMAGE_REF.toLowerCase()
-        RUN_ARGS = '-v "/home/.m2":/root/.m2'
+        RUN_ARGS = '-v "%HOMEDRIVE%%HOMEPATH%/.m2":/root/.m2'
     }
     options {
         timestamps()
@@ -44,19 +44,9 @@ pipeline {
                     echo "PWD = $PWD"
                     echo "HOME = $HOME"
                     sh 'ls -a'
-                    sh 'cd home'
-                    sh 'ls -a'
-                    sh 'cd .m2'
-                    sh 'cd repository'
-                    sh 'ls -a'
                     docker.image("${IMAGE_NAME}").inside("${RUN_ARGS} -p ${APP_PORT}:${APP_PORT}"){
                         echo "PWD = $PWD"
                         echo "HOME = $HOME"
-                        sh 'ls -a'
-                        sh 'cd root'
-                        sh 'ls -a'
-                        sh 'cd .m2'
-                        sh 'cd repository'
                         sh 'ls -a'
                         sh 'mvn -B clean compiler:compile'        
                     }
