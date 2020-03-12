@@ -41,10 +41,7 @@ pipeline {
             steps {
                 script{
                     docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
-                        sh '''
-                            "mvn -B -f pom.xml -s /usr/share/maven/ref/settings-docker.xml dependency:resolve"
-                            "mvn -B clean compiler:compile"
-                        '''        
+                        sh 'mvn -B clean compiler:compile'        
                     }
                 }
             }
