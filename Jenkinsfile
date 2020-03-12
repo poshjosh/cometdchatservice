@@ -6,12 +6,13 @@
 pipeline {
     agent any
     environment {
+        APP_PORT = '8092'
         ARTIFACTID = readMavenPom().getArtifactId();
         VERSION = readMavenPom().getVersion()
         PROJECT_NAME = "${ARTIFACTID}:${VERSION}"
         IMAGE_REF = "poshjosh/${PROJECT_NAME}";
         IMAGE_NAME = IMAGE_REF.toLowerCase()
-        RUN_ARGS = '-v "$HOME/.m2":/root/.m2'
+        RUN_ARGS = '-v "/home/.m2":/root/.m2'
     }
     options {
         timestamps()
@@ -40,7 +41,7 @@ pipeline {
         stage('Clean & Build') {
             steps {
                 script{
-                    docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
+                    docker.image("${IMAGE_NAME}").inside("${RUN_ARGS} -p ${APP_PORT}:${APP_PORT}"){
                         echo "PWD = $PWD"
                         echo "HOME = $HOME"
                         sh 'mvn -B clean compiler:compile'        
