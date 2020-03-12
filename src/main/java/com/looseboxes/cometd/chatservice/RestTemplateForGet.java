@@ -20,6 +20,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 
 /**
+ * A REST template for Http GET request with parameters
  * @author USER
  */
 public interface RestTemplateForGet {
