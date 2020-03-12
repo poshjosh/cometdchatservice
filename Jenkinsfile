@@ -12,7 +12,7 @@ pipeline {
         PROJECT_NAME = "${ARTIFACTID}:${VERSION}"
         IMAGE_REF = "poshjosh/${PROJECT_NAME}";
         IMAGE_NAME = IMAGE_REF.toLowerCase()
-        RUN_ARGS = '--rm -v /home/.m2:/root/.m2'
+        RUN_ARGS = '--rm -v "$HOME/.m2":/root/.m2'
     }
     options {
         timestamps()
@@ -41,14 +41,8 @@ pipeline {
         stage('Clean & Build') {
             steps {
                 script{
-                    echo "PWD = $PWD"
-                    echo "HOME = $HOME"
-                    sh 'ls -a'
                     docker.image("${IMAGE_NAME}").inside("${RUN_ARGS} -p ${APP_PORT}:${APP_PORT}"){
-                        echo "PWD = $PWD"
-                        echo "HOME = $HOME"
-                        sh 'ls -a'
-                        sh 'mvn -B clean compiler:compile'        
+                        sh 'mvn -X -B clean compiler:compile'        
                     }
                 }
             }
