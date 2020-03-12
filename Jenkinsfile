@@ -41,6 +41,8 @@ pipeline {
             steps {
                 script{
                     docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
+                        echo "PWD = $PWD"
+                        echo "HOME = $HOME"
                         sh 'mvn -B clean compiler:compile'        
                     }
                 }
