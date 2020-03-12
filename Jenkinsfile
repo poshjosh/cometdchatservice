@@ -12,7 +12,7 @@ pipeline {
         PROJECT_NAME = "${ARTIFACTID}:${VERSION}"
         IMAGE_REF = "poshjosh/${PROJECT_NAME}";
         IMAGE_NAME = IMAGE_REF.toLowerCase()
-        RUN_ARGS = '-v "%HOMEDRIVE%%HOMEPATH%/.m2":/root/.m2'
+        RUN_ARGS = '--rm -v /home/.m2:/root/.m2'
     }
     options {
         timestamps()
