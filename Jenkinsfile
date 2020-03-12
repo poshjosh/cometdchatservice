@@ -110,6 +110,13 @@ pipeline {
                 }
             }
         }
+        stage('Run Image') {
+            steps {
+                script{
+                    docker.image("${IMAGE_NAME}").run()
+                }
+            }
+        }
         stage('Install Local') {
             steps {
                 script{
