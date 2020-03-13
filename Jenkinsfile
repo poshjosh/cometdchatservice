@@ -7,6 +7,7 @@ pipeline {
 //    agent any
     agent {
         node {
+            label 'docker'
             customWorkspace '/usr/src/cometdchatservice'
         }
     }
