@@ -13,7 +13,7 @@ pipeline {
         APP_ID = "${ARTIFACTID}:${VERSION}"
         IMAGE_REF = "poshjosh/${APP_ID}"
         IMAGE_NAME = IMAGE_REF.toLowerCase()
-        RUN_ARGS = "-v /home/.m2:${HOME}/.m2 -v ${PWD}:/usr/src/app -v ${HOME}/.m2:/root/.m2 -v ${PWD}/target:/usr/src/app/target -w /usr/src/app -p ${APP_PORT}:${APP_PORT}"
+        RUN_ARGS = "-v /home/.m2:${HOME}/.m2 -v ${PWD}:/usr/src/app -v /home/.m2:/root/.m2 -v ${PWD}/target:/usr/src/app/target -w /usr/src/app -p ${APP_PORT}:${APP_PORT}"
     }
     options {
         timestamps()
@@ -42,13 +42,15 @@ pipeline {
         stage('Build Artifact') {
             steps {
                 script{
-                    echo "HOME = ${HOME}"
-                    sh 'printenv'
-                    docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
+                    ws('/usr/src/app') {
                         echo "HOME = ${HOME}"
-                        sh 'printenv'    
-//                        sh 'cat /usr/share/maven/ref/settings-docker.xml'
-                        sh 'mvn -X -B clean compiler:compile'
+                        sh 'printenv'
+                        docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
+                            echo "HOME = ${HOME}"
+                            sh 'printenv'    
+                            sh 'cat /usr/share/maven/ref/settings-docker.xml'
+                            sh 'mvn -X -B clean compiler:compile'
+                        }
                     }
                 }
             }
