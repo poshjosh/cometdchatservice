@@ -5,12 +5,7 @@
  * @see https://github.com/carlossg/docker-maven
  */
 pipeline {
-    agent {
-        docker {
-            image 'maven:3-alpine'
-            args "-u root -v ${HOME}/.m2:/root/.m2 -v /home/.m2:${WORKSPACE}/.m2"
-        }
-    }
+    agent any
     environment {
         APP_PORT = '8092'
         ARTIFACTID = readMavenPom().getArtifactId()
@@ -34,8 +29,10 @@ pipeline {
     stages {
         stage('Build Artifact') {
             agent {
-                node{
+                docker {
+                    image 'maven:3-alpine'
                     reuseNode 'true'
+                    args "-u root -v ${HOME}/.m2:/root/.m2 -v /home/.m2:${WORKSPACE}/.m2"
                 }
             }
             steps {
@@ -102,7 +99,6 @@ pipeline {
             }
         }
         stage('Dockerize') {
-            agent any
             stages{
                 stage('Build Image') {
                     steps {
