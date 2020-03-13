@@ -68,29 +68,30 @@ pipeline {
                         }
                     }
                 }
-            }
-            parallel {
-                stage('Integration Tests') {
-                    steps {
-                        sh 'mvn -B failsafe:integration-test failsafe:verify'
+                stage('Quality Assurance') {
+                    parallel {
+                        stage('Integration Tests') {
+                            steps {
+                                sh 'mvn -B failsafe:integration-test failsafe:verify'
+                            }
+                        }
+                        stage('Sanity Check') {
+                            steps {
+                                sh 'mvn -B checkstyle:checkstyle pmd:pmd pmd:cpd com.github.spotbugs:spotbugs-maven-plugin:spotbugs'
+                            }
+                        }
+                        stage('Sonar Scan') {
+                            environment {
+                                SONAR = credentials('sonar-creds') // Must have been specified in Jenkins
+                            }
+                            steps {
+                                // -Dsonar.host.url=${env.SONARQUBE_HOST}
+                                sh "mvn -B sonar:sonar -Dsonar.login=$SONAR_USR -Dsonar.password=$SONAR_PSW"
+                            }
+                        }
                     }
+
                 }
-                stage('Sanity Check') {
-                    steps {
-                        sh 'mvn -B checkstyle:checkstyle pmd:pmd pmd:cpd com.github.spotbugs:spotbugs-maven-plugin:spotbugs'
-                    }
-                }
-                stage('Sonar Scan') {
-                    environment {
-                        SONAR = credentials('sonar-creds') // Must have been specified in Jenkins
-                    }
-                    steps {
-                        // -Dsonar.host.url=${env.SONARQUBE_HOST}
-                        sh "mvn -B sonar:sonar -Dsonar.login=$SONAR_USR -Dsonar.password=$SONAR_PSW"
-                    }
-                }
-            }
-            stages {
                 stage('Documentation') {
                     steps {
                         sh 'mvn -B site:site'
