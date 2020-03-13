@@ -44,7 +44,7 @@ pipeline {
         stage('Build Artifact') {
             steps {
                 script{
-                    docker.image("${IMAGE_NAME}").withRun("${RUN_ARGS}"){
+                    docker.image("${IMAGE_NAME}").withRun("${RUN_ARGS}"){ c ->
                         sh "docker logs ${c.id}"
                         sh 'cd .. && ls -a && cd .. && ls -a'
                         sh 'mvn -X -B clean compiler:compile'
