@@ -45,9 +45,10 @@ pipeline {
             steps {
                 script{
 //                    ws('/usr/src/app') {
-                        sh 'ls -a'
+                        sh 'cd .. && ls -a && cd .. && ls -a'
                         docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
-                            sh 'ls -a'
+                            sh "docker logs ${c.id}"
+                            sh 'cd .. && ls -a && cd .. && ls -a'
                             sh 'mvn -X -B clean compiler:compile'
                         }
 //                    }
