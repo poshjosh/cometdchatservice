@@ -4,7 +4,12 @@
  * @see https://hub.docker.com/_/maven
  */
 pipeline {
-    agent any
+//    agent any
+    agent {
+        node {
+            customWorkspace '/usr/src/cometdchatservice'
+        }
+    }
     environment {
         APP_PORT = '8092'
         ARTIFACTID = readMavenPom().getArtifactId();
@@ -51,8 +56,11 @@ pipeline {
 //                    docker exec -d -u 1000 "${ARTIFACTID}" /bin/bash
 //                    mvn -X -B clean compiler:compile
 //                '''
+//                sh 'COPY /home/.m2 /var/jenkins_home/workspace/cometdchatservice_dev/?/.m2'
                 script{
                     docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
+                        echo "HOME = ${HOME}"
+                        echo "PWD = ${PWD}"
                         sh 'mvn -X -B clean compiler:compile'
                     }
                 }
