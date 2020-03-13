@@ -97,6 +97,7 @@ pipeline {
             }
         }
         stage('Dockerize') {
+            agent any
             stages{
                 stage('Build Image') {
                     steps {
