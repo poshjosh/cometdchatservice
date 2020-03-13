@@ -42,53 +42,40 @@ pipeline {
                 }
             }
         }
-        stage('Build Artifact') {
-            steps {
-                script{
-//                    ws('/usr/src/app') {
-                        docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
-//                            sh 'cd .. && ls -a && cd .. && ls -a'
-                            sh 'mvn -X -B clean compiler:compile'
-                        }
-//                    }
+        stage('Maven') {
+            agent {
+                docker {
+                    image 'maven:3-alpine'
+                    args '-v /home/.m2:/root/.m2'
                 }
             }
-        }
-        stage('Unit Tests') {
-            steps {
-                script{
-                    docker.image("${IMAGE_NAME}").inside{
-                        sh 'mvn -B resources:testResources compiler:testCompile surefire:test'
+            stage('Build Artifact') {
+                steps {
+                    sh 'mvn -B clean compiler:compile'
+                }
+            }
+            stage('Unit Tests') {
+                steps {
+                    sh 'mvn -B resources:testResources compiler:testCompile surefire:test'
+                }
+                post {
+                    always {
+                        junit(
+                            allowEmptyResults: true,
+                            testResults: '**/target/surefire-reports/TEST-*.xml'
+                        )
                     }
                 }
             }
-            post {
-                always {
-                    junit(
-                        allowEmptyResults: true,
-                        testResults: '**/target/surefire-reports/TEST-*.xml'
-                    )
-                }
-            }
-        }
-        stage('Quality Analysis') {
             parallel {
                 stage('Integration Tests') {
                     steps {
-                        script{
-                            docker.image("${IMAGE_NAME}").inside{
-                                sh 'mvn -B failsafe:integration-test failsafe:verify'
-                            }
-                        }
+                        sh 'mvn -B failsafe:integration-test failsafe:verify'
                     }
                 }
                 stage('Sanity Check') {
                     steps {
-                        script{
-                            docker.image("${IMAGE_NAME}").inside{
-                                sh 'mvn -B checkstyle:checkstyle pmd:pmd pmd:cpd com.github.spotbugs:spotbugs-maven-plugin:spotbugs'
-                            }
-                        }
+                        sh 'mvn -B checkstyle:checkstyle pmd:pmd pmd:cpd com.github.spotbugs:spotbugs-maven-plugin:spotbugs'
                     }
                 }
                 stage('Sonar Scan') {
@@ -96,27 +83,24 @@ pipeline {
                         SONAR = credentials('sonar-creds') // Must have been specified in Jenkins
                     }
                     steps {
-                        script{
-                            // -Dsonar.host.url=${env.SONARQUBE_HOST}
-                            docker.image("${IMAGE_NAME}").inside{
-                                sh "mvn -B sonar:sonar -Dsonar.login=$SONAR_USR -Dsonar.password=$SONAR_PSW"
-                            }
-                        }
+                        // -Dsonar.host.url=${env.SONARQUBE_HOST}
+                        sh "mvn -B sonar:sonar -Dsonar.login=$SONAR_USR -Dsonar.password=$SONAR_PSW"
                     }
                 }
             }
-        }
-        stage('Documentation') {
-            steps {
-                script{
-                    docker.image("${IMAGE_NAME}").inside{
-                        sh 'mvn -B site:site'
+            stage('Documentation') {
+                steps {
+                    sh 'mvn -B site:site'
+                }
+                post {
+                    always {
+                        publishHTML(target: [reportName: 'Site', reportDir: 'target/site', reportFiles: 'index.html', keepAll: false])
                     }
                 }
             }
-            post {
-                always {
-                    publishHTML(target: [reportName: 'Site', reportDir: 'target/site', reportFiles: 'index.html', keepAll: false])
+            stage('Install Local') {
+                steps {
+                    sh 'mvn -B jar:jar source:jar install:install'
                 }
             }
         }
@@ -124,15 +108,6 @@ pipeline {
             steps {
                 script{
                     docker.image("${IMAGE_NAME}").run()
-                }
-            }
-        }
-        stage('Install Local') {
-            steps {
-                script{
-                    docker.image("${IMAGE_NAME}").inside{
-                        sh 'mvn -B jar:jar source:jar install:install'
-                    }
                 }
             }
         }
