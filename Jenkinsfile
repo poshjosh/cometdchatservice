@@ -2,26 +2,18 @@
 /**
  * https://github.com/poshjosh/cometdchatservice
  * @see https://hub.docker.com/_/maven
+ * @see https://github.com/carlossg/docker-maven
  */
 pipeline {
     agent any
-//    agent {
-//        node{
-//            label 'docker'
-//            customWorkspace '/usr/src/cometdchatservice'
-//        }
-//    }
     environment {
         APP_PORT = '8092'
         ARTIFACTID = readMavenPom().getArtifactId()
         VERSION = readMavenPom().getVersion()
-        PROJECT_NAME = "${ARTIFACTID}:${VERSION}"
-        IMAGE_REF = "poshjosh/${PROJECT_NAME}"
+        APP_ID = "${ARTIFACTID}:${VERSION}"
+        IMAGE_REF = "poshjosh/${APP_ID}"
         IMAGE_NAME = IMAGE_REF.toLowerCase()
-//        RUN_ARGS = "--rm -v /home/.m2:/usr/share/maven/ref/repository /home/.m2:/root/.m2 -p ${APP_PORT}:${APP_PORT}"
-//        RUN_ARGS = "--rm -v ${PWD}:/var/jenkins_home/workspace/cometdchatservice_dev -v /home/.m2:/root/.m2 -v ${PWD}/target:/var/jenkins_home/workspace/cometdchatservice_dev/target -p ${APP_PORT}:${APP_PORT}"
-//        RUN_ARGS = "-v ${PWD}:/usr/src/${ARTIFACTID} -v /home/.m2:${HOME}/workspace/cometdchatservice_dev/?/.m2 -v /home/.m2:/root/.m2 -v ${PWD}target:/usr/src/${ARTIFACTID}/target -w /usr/src/${ARTIFACTID} -p ${APP_PORT}:${APP_PORT}"
-        RUN_ARGS = "-v ${HOME}/.m2:/root/.m2 -p ${APP_PORT}:${APP_PORT}"
+        RUN_ARGS = "-v ${PWD}:/usr/src/app -v ${HOME}/.m2:/root/.m2 -v ${PWD}/target:/usr/src/app/target -w /usr/src/app -p ${APP_PORT}:${APP_PORT}"
     }
     options {
         timestamps()
@@ -51,42 +43,16 @@ pipeline {
             steps {
                 script{
                     echo "HOME = ${HOME}"
-                    echo "PWD = ${PWD}"
                     sh 'printenv'
-//                    sh "mkdir -p /usr/src/${ARTIFACTID}"
-//                    ws("/usr/src/${ARTIFACTID}") {
-                        docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
-                            echo "HOME = ${HOME}"
-                            echo "PWD = ${PWD}"
-                            sh 'printenv'    
-                            sh 'cat /usr/share/maven/ref/settings-docker.xml'
-                            sh 'mvn -X -B clean compiler:compile'
-                        }
-//                    }
+                    docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
+                        echo "HOME = ${HOME}"
+                        sh 'printenv'    
+//                        sh 'cat /usr/share/maven/ref/settings-docker.xml'
+                        sh 'mvn -X -B clean compiler:compile'
+                    }
                 }
             }
         }
-//        stage('Build Artifact') {
-//            steps {
-//                sh "docker run -d -u 1000:1000 --rm -v /:/var/jenkins_home/workspace/cometdchatservice_dev -v /home/.m2:/root/.m2 -v //target:/var/jenkins_home/workspace/cometdchatservice_dev/target -p 8092:8092 -w /var/jenkins_home/workspace/cometdchatservice_dev -v /var/jenkins_home/workspace/cometdchatservice_dev:/var/jenkins_home/workspace/cometdchatservice_dev:rw,z -v /var/jenkins_home/workspace/cometdchatservice_dev@tmp:/var/jenkins_home/workspace/cometdchatservice_dev@tmp:rw,z"
-//                sh "docker run -d -u 1000:1000 --rm -v ${PWD}:/var/jenkins_home/workspace/cometdchatservice_dev:rw,z -v ${PWD}@tmp:/var/jenkins_home/workspace/cometdchatservice_dev@tmp:rw,z -v /home/.m2:/root/.m2 -v ${PWD}/target:/var/jenkins_home/workspace/cometdchatservice_dev/target -p ${APP_PORT}:${APP_PORT} -w /var/jenkins_home/workspace/cometdchatservice_dev ${IMAGE_NAME}"
-//                echo "HOME = ${HOME}"
-//                echo "PWD = ${PWD}"
-//                sh '''
-//                    docker run -d -u 1000:1000 --rm --name "${ARTIFACTID}" -v "${PWD}":/usr/src/"${ARTIFACTID}" -v /home/.m2:/root/.m2 -v "${PWD}"target:/usr/src/"${ARTIFACTID}"/target -w /usr/src/"${ARTIFACTID}" -p "${APP_PORT}:${APP_PORT}" "${IMAGE_NAME}"
-//                    docker exec -d -u 1000 "${ARTIFACTID}" /bin/bash
-//                    mvn -X -B clean compiler:compile
-//                '''
-//                sh 'COPY /home/.m2 /var/jenkins_home/workspace/cometdchatservice_dev/?/.m2'
-//                script{
-//                    docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
-//                        echo "HOME = ${HOME}"
-//                        echo "PWD = ${PWD}"
-//                        sh 'mvn -X -B clean compiler:compile'
-//                    }
-//                }
-//            }
-//        }
         stage('Unit Tests') {
             steps {
                 script{
