@@ -27,7 +27,7 @@ pipeline {
         pollSCM('H H(8-16)/2 * * 1-5')
     }
     stages {
-        stage('Build Artifact') {
+        stage('Maven') {
             agent {
                 docker {
                     image 'maven:3-alpine'
@@ -35,67 +35,69 @@ pipeline {
                     args "-u root -v /home/.m2:/root/.m2"
                 }
             }
-            steps {
-//                sh 'mvn -s /usr/share/maven/ref/settings-docker.xml -B -X clean compiler:compile'
-                sh 'ls -a && cd .. && ls -a && cd .. && ls -a'
-                sh 'mvn -B -X clean compiler:compile'
-            }
-            post {
-                always {
-                    archiveArtifacts artifacts: 'target/*.jar', onlyIfSuccessful: true
-                }
-            }
-        }
-        stage('Unit Tests') {
-            steps {
-                sh 'mvn -B resources:testResources compiler:testCompile surefire:test'
-            }
-            post {
-                always {
-                    junit(
-                        allowEmptyResults: true,
-                        testResults: '**/target/surefire-reports/TEST-*.xml'
-                    )
-                }
-            }
-        }
-        stage('Quality Assurance') {
-            parallel {
-                stage('Integration Tests') {
+            stages{
+                stage('Build Artifact') {
                     steps {
-                        sh 'mvn -B failsafe:integration-test failsafe:verify'
+                        sh 'mvn -B -X clean compiler:compile'
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'target/*.jar', onlyIfSuccessful: true
+                        }
                     }
                 }
-                stage('Sanity Check') {
+                stage('Unit Tests') {
                     steps {
-                        sh 'mvn -B checkstyle:checkstyle pmd:pmd pmd:cpd com.github.spotbugs:spotbugs-maven-plugin:spotbugs'
+                        sh 'mvn -B resources:testResources compiler:testCompile surefire:test'
+                    }
+                    post {
+                        always {
+                            junit(
+                                allowEmptyResults: true,
+                                testResults: '**/target/surefire-reports/TEST-*.xml'
+                            )
+                        }
                     }
                 }
-                stage('Sonar Scan') {
-                    environment {
-                        SONAR = credentials('sonar-creds') // Must have been specified in Jenkins
+                stage('Quality Assurance') {
+                    parallel {
+                        stage('Integration Tests') {
+                            steps {
+                                sh 'mvn -B failsafe:integration-test failsafe:verify'
+                            }
+                        }
+                        stage('Sanity Check') {
+                            steps {
+                                sh 'mvn -B checkstyle:checkstyle pmd:pmd pmd:cpd com.github.spotbugs:spotbugs-maven-plugin:spotbugs'
+                            }
+                        }
+                        stage('Sonar Scan') {
+                            environment {
+                                SONAR = credentials('sonar-creds') // Must have been specified in Jenkins
+                            }
+                            steps {
+                                // -Dsonar.host.url=${env.SONARQUBE_HOST}
+                                sh "mvn -B sonar:sonar -Dsonar.login=$SONAR_USR -Dsonar.password=$SONAR_PSW"
+                            }
+                        }
                     }
-                    steps {
-                        // -Dsonar.host.url=${env.SONARQUBE_HOST}
-                        sh "mvn -B sonar:sonar -Dsonar.login=$SONAR_USR -Dsonar.password=$SONAR_PSW"
-                    }
-                }
-            }
 
-        }
-        stage('Documentation') {
-            steps {
-                sh 'mvn -B site:site'
-            }
-            post {
-                always {
-                    publishHTML(target: [reportName: 'Site', reportDir: 'target/site', reportFiles: 'index.html', keepAll: false])
                 }
-            }
-        }
-        stage('Install Local') {
-            steps {
-                sh 'mvn -B jar:jar source:jar install:install'
+                stage('Documentation') {
+                    steps {
+                        sh 'mvn -B site:site'
+                    }
+                    post {
+                        always {
+                            publishHTML(target: [reportName: 'Site', reportDir: 'target/site', reportFiles: 'index.html', keepAll: false])
+                        }
+                    }
+                }
+                stage('Install Local') {
+                    steps {
+                        sh 'mvn -B jar:jar source:jar install:install'
+                    }
+                }
             }
         }
         stage('Dockerize') {
