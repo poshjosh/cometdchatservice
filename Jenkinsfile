@@ -4,13 +4,7 @@
  * @see https://hub.docker.com/_/maven
  */
 pipeline {
-//    agent any
-    agent {
-        node {
-            label 'docker'
-            customWorkspace '/usr/src/cometdchatservice'
-        }
-    }
+    agent any
     environment {
         APP_PORT = '8092'
         ARTIFACTID = readMavenPom().getArtifactId();
@@ -46,6 +40,19 @@ pipeline {
                 }
             }
         }
+        ws("/usr/src/${ARTIFACTID}") {
+            stage('Build Artifact') {
+                steps {
+                    script{
+                        docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
+                            echo "HOME = ${HOME}"
+                            echo "PWD = ${PWD}"
+                            sh 'mvn -X -B clean compiler:compile'
+                        }
+                    }
+                }
+            }
+        }
         stage('Build Artifact') {
             steps {
 //                sh "docker run -d -u 1000:1000 --rm -v /:/var/jenkins_home/workspace/cometdchatservice_dev -v /home/.m2:/root/.m2 -v //target:/var/jenkins_home/workspace/cometdchatservice_dev/target -p 8092:8092 -w /var/jenkins_home/workspace/cometdchatservice_dev -v /var/jenkins_home/workspace/cometdchatservice_dev:/var/jenkins_home/workspace/cometdchatservice_dev:rw,z -v /var/jenkins_home/workspace/cometdchatservice_dev@tmp:/var/jenkins_home/workspace/cometdchatservice_dev@tmp:rw,z"
@@ -58,13 +65,13 @@ pipeline {
 //                    mvn -X -B clean compiler:compile
 //                '''
 //                sh 'COPY /home/.m2 /var/jenkins_home/workspace/cometdchatservice_dev/?/.m2'
-                script{
-                    docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
-                        echo "HOME = ${HOME}"
-                        echo "PWD = ${PWD}"
-                        sh 'mvn -X -B clean compiler:compile'
-                    }
-                }
+//                script{
+//                    docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
+//                        echo "HOME = ${HOME}"
+//                        echo "PWD = ${PWD}"
+//                        sh 'mvn -X -B clean compiler:compile'
+//                    }
+//                }
             }
         }
         stage('Unit Tests') {
