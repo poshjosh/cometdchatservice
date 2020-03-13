@@ -8,7 +8,7 @@ pipeline {
     agent {
         docker {
             image 'maven:3-alpine'
-            args "-v ${HOME}/.m2:/root/.m2 -v /home/.m2:${WORKSPACE}/.m2"
+            args "-u root -v ${HOME}/.m2:/root/.m2 -v /home/.m2:${WORKSPACE}/.m2"
         }
     }
     environment {
@@ -33,6 +33,11 @@ pipeline {
     }
     stages {
         stage('Build Artifact') {
+            agent {
+                node{
+                    reuseNode 'true'
+                }
+            }
             steps {
 //                sh 'mvn -s /usr/share/maven/ref/settings-docker.xml -B -X clean compiler:compile'
                 sh 'ls -a && cd .. && ls -a && cd .. && ls -a'
