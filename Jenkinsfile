@@ -49,21 +49,23 @@ pipeline {
                     args '-v /home/.m2:/root/.m2'
                 }
             }
-            stage('Build Artifact') {
-                steps {
-                    sh 'mvn -B clean compiler:compile'
+            stages {
+                stage('Build Artifact') {
+                    steps {
+                        sh 'mvn -B clean compiler:compile'
+                    }
                 }
-            }
-            stage('Unit Tests') {
-                steps {
-                    sh 'mvn -B resources:testResources compiler:testCompile surefire:test'
-                }
-                post {
-                    always {
-                        junit(
-                            allowEmptyResults: true,
-                            testResults: '**/target/surefire-reports/TEST-*.xml'
-                        )
+                stage('Unit Tests') {
+                    steps {
+                        sh 'mvn -B resources:testResources compiler:testCompile surefire:test'
+                    }
+                    post {
+                        always {
+                            junit(
+                                allowEmptyResults: true,
+                                testResults: '**/target/surefire-reports/TEST-*.xml'
+                            )
+                        }
                     }
                 }
             }
@@ -88,19 +90,21 @@ pipeline {
                     }
                 }
             }
-            stage('Documentation') {
-                steps {
-                    sh 'mvn -B site:site'
-                }
-                post {
-                    always {
-                        publishHTML(target: [reportName: 'Site', reportDir: 'target/site', reportFiles: 'index.html', keepAll: false])
+            stages {
+                stage('Documentation') {
+                    steps {
+                        sh 'mvn -B site:site'
+                    }
+                    post {
+                        always {
+                            publishHTML(target: [reportName: 'Site', reportDir: 'target/site', reportFiles: 'index.html', keepAll: false])
+                        }
                     }
                 }
-            }
-            stage('Install Local') {
-                steps {
-                    sh 'mvn -B jar:jar source:jar install:install'
+                stage('Install Local') {
+                    steps {
+                        sh 'mvn -B jar:jar source:jar install:install'
+                    }
                 }
             }
         }
