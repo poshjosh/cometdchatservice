@@ -37,6 +37,8 @@ public class JoinControllerService implements ControllerService{
     
     private final long joinTimeout;
 
+    // Use @Autowired to get @Value to work.
+    @Autowired
     public JoinControllerService(@Autowired ServletUtil servletUtil,
             @Autowired Response.Builder responseBuilder,
             @Value("${cometd.handshakeTimeout}") long handshakeTimeoutMillis,
