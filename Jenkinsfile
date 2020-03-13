@@ -44,16 +44,16 @@ pipeline {
         stage('Build Artifact') {
             steps {
                 script{
-                    ws('/usr/src/app') {
+//                    ws('/usr/src/app') {
                         echo "HOME = ${HOME}"
                         sh 'printenv'
                         docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
                             echo "HOME = ${HOME}"
                             sh 'printenv'    
-                            sh 'cat /usr/share/maven/ref/settings-docker.xml'
+//                            sh 'cat /usr/share/maven/ref/settings-docker.xml'
                             sh 'mvn -s /usr/share/maven/ref/settings-docker.xml -X -B clean compiler:compile'
                         }
-                    }
+//                    }
                 }
             }
         }
