@@ -44,7 +44,7 @@ pipeline {
 //                sh "docker run -d -u 1000:1000 --rm -v /:/var/jenkins_home/workspace/cometdchatservice_dev -v /home/.m2:/root/.m2 -v //target:/var/jenkins_home/workspace/cometdchatservice_dev/target -p 8092:8092 -w /var/jenkins_home/workspace/cometdchatservice_dev -v /var/jenkins_home/workspace/cometdchatservice_dev:/var/jenkins_home/workspace/cometdchatservice_dev:rw,z -v /var/jenkins_home/workspace/cometdchatservice_dev@tmp:/var/jenkins_home/workspace/cometdchatservice_dev@tmp:rw,z"
 //                sh "docker run -d -u 1000:1000 --rm -v ${PWD}:/var/jenkins_home/workspace/cometdchatservice_dev:rw,z -v ${PWD}@tmp:/var/jenkins_home/workspace/cometdchatservice_dev@tmp:rw,z -v /home/.m2:/root/.m2 -v ${PWD}/target:/var/jenkins_home/workspace/cometdchatservice_dev/target -p 8092:8092 -w /var/jenkins_home/workspace/cometdchatservice_dev ${IMAGE_NAME}"
                 sh '''
-                    "docker run -d -u 1000:1000 --rm -v /home/.m2:/root/.m2 -p 8092:8092 ${IMAGE_NAME}"
+                    "docker run -d -u 1000:1000 --rm -v ${PWD}:/usr/src/app -v /home/.m2:/root/.m2 -v ${PWD}target:/usr/src/app/target -w /usr/src/app -p 8092:8092 ${IMAGE_NAME}"
                     "docker exec -u 1000 -it ${IMAGE_NAME} /bin/bash"
                     "mvn -X -B clean compiler:compile"
                 '''
