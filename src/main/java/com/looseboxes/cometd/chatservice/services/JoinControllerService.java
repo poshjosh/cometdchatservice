@@ -15,15 +15,14 @@
  */
 package com.looseboxes.cometd.chatservice.services;
 
+import com.looseboxes.cometd.chatservice.CometDProperties;
 import com.looseboxes.cometd.chatservice.services.response.Response;
 import java.util.concurrent.Future;
 import org.cometd.bayeux.Message;
 import com.looseboxes.cometd.chatservice.chat.ChatSession;
-import com.looseboxes.cometd.chatservice.services.ServletUtil;
 import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  * @author USER
@@ -37,12 +36,18 @@ public class JoinControllerService implements ControllerService{
     
     private final long joinTimeout;
 
-    // Use @Autowired to get @Value to work.
-    @Autowired
     public JoinControllerService(@Autowired ServletUtil servletUtil,
             @Autowired Response.Builder responseBuilder,
-            @Value("${cometd.handshakeTimeout}") long handshakeTimeoutMillis,
-            @Value("${cometd.subscriptionTimeout}") long subscriptionTimeoutMillis) {
+            @Autowired CometDProperties cometDProperties) {
+        
+        this(servletUtil, responseBuilder, 
+                cometDProperties.getHandshakeTimeout(),
+                cometDProperties.getSubscriptionTimeout());
+    }
+    
+    public JoinControllerService(
+            ServletUtil servletUtil, Response.Builder responseBuilder,
+            long handshakeTimeoutMillis, long subscriptionTimeoutMillis) {
         this.servletUtil = Objects.requireNonNull(servletUtil);
         this.responseBuilder = Objects.requireNonNull(responseBuilder);
         this.joinTimeout = handshakeTimeoutMillis + subscriptionTimeoutMillis;
