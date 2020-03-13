@@ -31,17 +31,6 @@ pipeline {
         pollSCM('H H(8-16)/2 * * 1-5')
     }
     stages {
-        stage('Build Image') {
-            steps {
-                script {
-                    def additionalBuildArgs = "--pull"
-                    if (env.BRANCH_NAME == "master") {
-                        additionalBuildArgs = "--pull --no-cache"
-                    }
-                    docker.build("${IMAGE_NAME}", "${additionalBuildArgs} .")
-                }
-            }
-        }
         stage('Maven') {
             agent {
                 docker {
@@ -53,6 +42,11 @@ pipeline {
                 stage('Build Artifact') {
                     steps {
                         sh 'mvn -B clean compiler:compile'
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'target/*.jar', onlyIfSuccessful: true
+                        }
                     }
                 }
                 stage('Unit Tests') {
@@ -106,6 +100,17 @@ pipeline {
                     steps {
                         sh 'mvn -B jar:jar source:jar install:install'
                     }
+                }
+            }
+        }
+        stage('Build Image') {
+            steps {
+                script {
+                    def additionalBuildArgs = "--pull"
+                    if (env.BRANCH_NAME == "master") {
+                        additionalBuildArgs = "--pull --no-cache"
+                    }
+                    docker.build("${IMAGE_NAME}", "${additionalBuildArgs} .")
                 }
             }
         }
