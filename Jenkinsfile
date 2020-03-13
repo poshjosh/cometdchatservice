@@ -51,7 +51,6 @@ pipeline {
                             echo "HOME = ${HOME}"
                             sh 'printenv'    
 //                            sh 'cat /usr/share/maven/ref/settings-docker.xml'
-                            sh 'u root'
                             sh 'mvn -X -B clean compiler:compile'
                         }
 //                    }
