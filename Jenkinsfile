@@ -15,7 +15,8 @@ pipeline {
         IMAGE_NAME = IMAGE_REF.toLowerCase()
 //        RUN_ARGS = "-v /home/.m2:${HOME}/.m2 -v ${PWD}:/usr/src/app -v /home/.m2:/root/.m2 -v ${PWD}/target:/usr/src/app/target -w /usr/src/app -p ${APP_PORT}:${APP_PORT}"
 //        RUN_ARGS = "-v /home/.m2:${WORKSPACE}/?/.m2/repository -v /home/.m2:/root/.m2 -p ${APP_PORT}:${APP_PORT}"
-        RUN_ARGS = "-v /home/.m2:/usr/share/maven/ref:rw,z -p ${APP_PORT}:${APP_PORT}"
+//        RUN_ARGS = "-v /home/.m2:/usr/share/maven/ref:rw,z -p ${APP_PORT}:${APP_PORT}"
+        RUN_ARGS = "-v /home/.m2:${WORKSPACE}/.m2:rw,z -p ${APP_PORT}:${APP_PORT}"
     }
     options {
         timestamps()
@@ -44,16 +45,9 @@ pipeline {
         stage('Build Artifact') {
             steps {
                 script{
-                    docker.image("${IMAGE_NAME}").withRun("${RUN_ARGS}"){ c ->
-                        sh "docker logs ${c.id}"
-                        sh 'cd .. && ls -a && cd .. && ls -a'
-                        sh 'mvn -X -B clean compiler:compile'
-                    }
 //                    ws('/usr/src/app') {
-                        sh 'cd .. && ls -a && cd .. && ls -a'
                         docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
-                            sh "docker logs ${c.id}"
-                            sh 'cd .. && ls -a && cd .. && ls -a'
+                            sh 'cd .. && ls -a && cd .. && cd .m2 && ls -a'
                             sh 'mvn -X -B clean compiler:compile'
                         }
 //                    }
