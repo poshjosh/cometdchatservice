@@ -45,8 +45,8 @@ pipeline {
 //                sh "docker run -d -u 1000:1000 --rm -v ${PWD}:/var/jenkins_home/workspace/cometdchatservice_dev:rw,z -v ${PWD}@tmp:/var/jenkins_home/workspace/cometdchatservice_dev@tmp:rw,z -v /home/.m2:/root/.m2 -v ${PWD}/target:/var/jenkins_home/workspace/cometdchatservice_dev/target -p 8092:8092 -w /var/jenkins_home/workspace/cometdchatservice_dev ${IMAGE_NAME}"
                 echo "HOME = ${HOME}"
                 echo "PWD = ${PWD}"
-                sh "docker run -d -u 1000:1000 --rm -v ${PWD}:/usr/src/app -v /home/.m2:/root/.m2 -v ${PWD}/target:/usr/src/app/target -w /usr/src/app -p 8092:8092 ${IMAGE_NAME}"
-                sh "docker exec -u 1000 -it ${IMAGE_NAME} /bin/bash"
+                sh "docker run -d -u 1000:1000 --rm --name ${ARTIFACTID} -v ${PWD}:/usr/src/${ARTIFACTID} -v /home/.m2:/root/.m2 -v ${PWD}target:/usr/src/${ARTIFACTID}/target -w /usr/src/${ARTIFACTID} -p 8092:8092 ${IMAGE_NAME}"
+                sh "docker exec -u 1000 -it ${ARTIFACTID} /bin/bash"
                 sh "mvn -X -B clean compiler:compile"
 //                script{
 //                    docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
