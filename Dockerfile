@@ -22,12 +22,12 @@ WORKDIR /usr/src/app
 # Anything in /usr/share/maven/ref/ will be copied on container startup to
 # $MAVEN_CONFIG (default = /root/.m2)
 # ---------------
-COPY pom.xml /usr/src/app
-RUN mvn -B -f /usr/src/app/pom.xml -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
+#->COPY pom.xml /usr/src/app
+#->RUN mvn -B -f /usr/src/app/pom.xml -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
 # ---------------
 # Copy other source files (keep in image) - Not applicable to pom projects
 # ---------------
-COPY src /usr/src/app/src
+#->COPY src /usr/src/app/src
 
 
 
