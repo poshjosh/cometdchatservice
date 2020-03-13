@@ -6,7 +6,7 @@
 FROM maven:3-alpine
 # Speed up Maven a bit
 # ---------------
-ENV MAVEN_OPTS="-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+ENV MAVEN_OPTS="-s /usr/share/maven/ref/settings-docker.xml -XX:+TieredCompilation -XX:TieredStopAtLevel=1"
 
 # Install project dependencies and keep sources
 # ---------------
@@ -24,8 +24,6 @@ RUN mkdir -p /usr/src/app
 # ---------------
 #->COPY pom.xml /usr/src/app
 #->RUN mvn -B -f /usr/src/app/pom.xml -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
-COPY pom.xml /usr/src/app/pom.xml
-RUN mvn -B -f /usr/src/app/pom.xml -s /usr/share/maven/ref/settings-docker.xml 
 # ---------------
 # Copy other source files (keep in image) - Not applicable to pom projects
 # ---------------

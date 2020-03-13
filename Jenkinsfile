@@ -48,7 +48,7 @@ pipeline {
                         sh 'ls -a'
                         docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
                             sh 'ls -a'
-                            sh 'mvn -s /usr/share/maven/ref/settings-docker.xml -X -B clean compiler:compile'
+                            sh 'mvn -X -B clean compiler:compile'
                         }
 //                    }
                 }
