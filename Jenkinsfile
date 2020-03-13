@@ -41,7 +41,7 @@ pipeline {
         pollSCM('H H(8-16)/2 * * 1-5')
     }
     stages {
-        stage('Maven') {
+        stage('Mavenize') {
             agent {
                 docker {
                     image 'maven:3-alpine'
@@ -53,18 +53,13 @@ pipeline {
                 ADDITIONAL_MAVEN_ARGS = "${params.DEBUG == 'Y' ? '-X' : ''}"
             }
             stages{
-                stage('Debug') {
-                    when {
-                        expression {
-                            return DEBUG == 'Y'
-                        }
-                    }
-                    steps {
-                        sh 'printenv'
-                    }
-                }
                 stage('Build Artifact') {
                     steps {
+                        script {
+                            if(params.DEBUG == 'Y') {
+                                sh 'printenv'
+                            }
+                        }
                         sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} clean compiler:compile'
                     }
                 }
