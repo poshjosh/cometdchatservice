@@ -47,7 +47,7 @@ pipeline {
                 script{
 //                    ws('/usr/src/app') {
                         docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
-                            sh 'cd .. && ls -a && cd .. && cd .m2 && ls -a'
+//                            sh 'cd .. && ls -a && cd .. && ls -a'
                             sh 'mvn -X -B clean compiler:compile'
                         }
 //                    }
