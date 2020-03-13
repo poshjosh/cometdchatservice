@@ -1,0 +1,10 @@
+FROM openjdk:8-jdk-alpine
+VOLUME /tmp
+ARG SERVER_PORT
+RUN test -z "${SERVER_PORT}" || EXPOSE "${SERVER_PORT}" && :
+ARG JAR_FILE = target/*.jar
+COPY ${JAR_FILE} app.jar
+COPY start.sh .
+ARG JAVA_OPTS
+ENTRYPOINT ["start.sh"]
+
