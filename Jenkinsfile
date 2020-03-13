@@ -5,7 +5,12 @@
  * @see https://github.com/carlossg/docker-maven
  */
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'maven:3-alpine'
+            args "-v ${HOME}/.m2:/root/.m2 -v /home/.m2:${WORKSPACE}/.m2"
+        }
+    }
     environment {
         APP_PORT = '8092'
         ARTIFACTID = readMavenPom().getArtifactId()
@@ -13,10 +18,6 @@ pipeline {
         APP_ID = "${ARTIFACTID}:${VERSION}"
         IMAGE_REF = "poshjosh/${APP_ID}"
         IMAGE_NAME = IMAGE_REF.toLowerCase()
-//        RUN_ARGS = "-v /home/.m2:${HOME}/.m2 -v ${PWD}:/usr/src/app -v /home/.m2:/root/.m2 -v ${PWD}/target:/usr/src/app/target -w /usr/src/app -p ${APP_PORT}:${APP_PORT}"
-//        RUN_ARGS = "-v /home/.m2:${WORKSPACE}/?/.m2/repository -v /home/.m2:/root/.m2 -p ${APP_PORT}:${APP_PORT}"
-//        RUN_ARGS = "-v /home/.m2:/usr/share/maven/ref:rw,z -p ${APP_PORT}:${APP_PORT}"
-        RUN_ARGS = "-v /root/.m2:/root/.m2 -v /home/.m2:${WORKSPACE}/.m2:rw,z -p ${APP_PORT}:${APP_PORT}"
     }
     options {
         timestamps()
@@ -31,105 +32,100 @@ pipeline {
         pollSCM('H H(8-16)/2 * * 1-5')
     }
     stages {
-        stage('Maven') {
-            agent {
-                docker {
-                    image 'maven:3-alpine'
-                    args "-v ${HOME}/.m2:/root/.m2"
+        stage('Build Artifact') {
+            steps {
+//                sh 'mvn -s /usr/share/maven/ref/settings-docker.xml -B -X clean compiler:compile'
+                sh 'ls -a && cd .. && ls -a && cd .. && ls -a'
+                sh 'mvn -B -X clean compiler:compile'
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'target/*.jar', onlyIfSuccessful: true
                 }
             }
-            stages {
-                stage('Build Artifact') {
+        }
+        stage('Unit Tests') {
+            steps {
+                sh 'mvn -B resources:testResources compiler:testCompile surefire:test'
+            }
+            post {
+                always {
+                    junit(
+                        allowEmptyResults: true,
+                        testResults: '**/target/surefire-reports/TEST-*.xml'
+                    )
+                }
+            }
+        }
+        stage('Quality Assurance') {
+            parallel {
+                stage('Integration Tests') {
                     steps {
-//                        sh 'mvn -s /usr/share/maven/ref/settings-docker.xml -B -X clean compiler:compile'
-                        sh 'mvn -B -X clean compiler:compile'
-                    }
-                    post {
-                        always {
-                            archiveArtifacts artifacts: 'target/*.jar', onlyIfSuccessful: true
-                        }
+                        sh 'mvn -B failsafe:integration-test failsafe:verify'
                     }
                 }
-                stage('Unit Tests') {
+                stage('Sanity Check') {
                     steps {
-                        sh 'mvn -B resources:testResources compiler:testCompile surefire:test'
-                    }
-                    post {
-                        always {
-                            junit(
-                                allowEmptyResults: true,
-                                testResults: '**/target/surefire-reports/TEST-*.xml'
-                            )
-                        }
+                        sh 'mvn -B checkstyle:checkstyle pmd:pmd pmd:cpd com.github.spotbugs:spotbugs-maven-plugin:spotbugs'
                     }
                 }
-                stage('Quality Assurance') {
-                    parallel {
-                        stage('Integration Tests') {
-                            steps {
-                                sh 'mvn -B failsafe:integration-test failsafe:verify'
-                            }
-                        }
-                        stage('Sanity Check') {
-                            steps {
-                                sh 'mvn -B checkstyle:checkstyle pmd:pmd pmd:cpd com.github.spotbugs:spotbugs-maven-plugin:spotbugs'
-                            }
-                        }
-                        stage('Sonar Scan') {
-                            environment {
-                                SONAR = credentials('sonar-creds') // Must have been specified in Jenkins
-                            }
-                            steps {
-                                // -Dsonar.host.url=${env.SONARQUBE_HOST}
-                                sh "mvn -B sonar:sonar -Dsonar.login=$SONAR_USR -Dsonar.password=$SONAR_PSW"
-                            }
-                        }
+                stage('Sonar Scan') {
+                    environment {
+                        SONAR = credentials('sonar-creds') // Must have been specified in Jenkins
                     }
+                    steps {
+                        // -Dsonar.host.url=${env.SONARQUBE_HOST}
+                        sh "mvn -B sonar:sonar -Dsonar.login=$SONAR_USR -Dsonar.password=$SONAR_PSW"
+                    }
+                }
+            }
 
+        }
+        stage('Documentation') {
+            steps {
+                sh 'mvn -B site:site'
+            }
+            post {
+                always {
+                    publishHTML(target: [reportName: 'Site', reportDir: 'target/site', reportFiles: 'index.html', keepAll: false])
                 }
-                stage('Documentation') {
+            }
+        }
+        stage('Install Local') {
+            steps {
+                sh 'mvn -B jar:jar source:jar install:install'
+            }
+        }
+        stage('Dockerize') {
+            stages{
+                stage('Build Image') {
                     steps {
-                        sh 'mvn -B site:site'
-                    }
-                    post {
-                        always {
-                            publishHTML(target: [reportName: 'Site', reportDir: 'target/site', reportFiles: 'index.html', keepAll: false])
+                        script {
+                            def additionalBuildArgs = "--pull"
+                            if (env.BRANCH_NAME == "master") {
+                                additionalBuildArgs = "--pull --no-cache"
+                            }
+                            docker.build("${IMAGE_NAME}", "${additionalBuildArgs} .")
                         }
                     }
                 }
-                stage('Install Local') {
+                stage('Run Image') {
                     steps {
-                        sh 'mvn -B jar:jar source:jar install:install'
+                        script{
+                            docker.image("${IMAGE_NAME}").run()
+                        }
                     }
                 }
-            }
-        }
-        stage('Build Image') {
-            steps {
-                script {
-                    def additionalBuildArgs = "--pull"
-                    if (env.BRANCH_NAME == "master") {
-                        additionalBuildArgs = "--pull --no-cache"
+                stage('Deploy Image') {
+                    when {
+                        branch 'master'
                     }
-                    docker.build("${IMAGE_NAME}", "${additionalBuildArgs} .")
-                }
-            }
-        }
-        stage('Run Image') {
-            steps {
-                script{
-                    docker.image("${IMAGE_NAME}").run()
-                }
-            }
-        }
-        stage('Deploy Image') {
-            when {
-                branch 'master'
-            }
-            steps {
-                script {
-                    docker.withRegistry('', 'dockerhub-creds') { // Must have been specified in Jenkins
-                        sh "docker push ${IMAGE_NAME}"
+                    steps {
+                        script {
+                            docker.withRegistry('', 'dockerhub-creds') { // Must have been specified in Jenkins
+                                sh "docker push ${IMAGE_NAME}"
+                            }
+                        }
                     }
                 }
             }
