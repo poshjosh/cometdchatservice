@@ -57,6 +57,7 @@ pipeline {
                         docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
                             echo "HOME = ${HOME}"
                             echo "PWD = ${PWD}"
+                            sh 'printenv'    
                             sh 'mvn -X -B clean compiler:compile'
                         }
 //                    }
