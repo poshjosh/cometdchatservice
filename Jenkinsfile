@@ -30,13 +30,15 @@ pipeline {
     stages {
         stage('Build Image') {
             steps {
-                script {
-                    def additionalBuildArgs = "--pull"
-                    if (env.BRANCH_NAME == "master") {
-                        additionalBuildArgs = "--pull --no-cache"
-                    }
-                    docker.build("${IMAGE_NAME}", "${additionalBuildArgs} .")
-                }
+//                sh "docker run -d -u 1000:1000 --rm -v /:/var/jenkins_home/workspace/cometdchatservice_dev -v /home/.m2:/root/.m2 -v //target:/var/jenkins_home/workspace/cometdchatservice_dev/target -p 8092:8092 -w /var/jenkins_home/workspace/cometdchatservice_dev -v /var/jenkins_home/workspace/cometdchatservice_dev:/var/jenkins_home/workspace/cometdchatservice_dev:rw,z -v /var/jenkins_home/workspace/cometdchatservice_dev@tmp:/var/jenkins_home/workspace/cometdchatservice_dev@tmp:rw,z"
+                sh "docker run -d -u 1000:1000 --rm -v ${PWD}:/var/jenkins_home/workspace/cometdchatservice_dev:rw,z -v ${PWD}@tmp:/var/jenkins_home/workspace/cometdchatservice_dev@tmp:rw,z -v /home/.m2:/root/.m2 -v ${PWD}/target:/var/jenkins_home/workspace/cometdchatservice_dev/target -p 8092:8092 -w /var/jenkins_home/workspace/cometdchatservice_dev"
+//                script {
+//                    def additionalBuildArgs = "--pull"
+//                    if (env.BRANCH_NAME == "master") {
+//                        additionalBuildArgs = "--pull --no-cache"
+//                    }
+//                    docker.build("${IMAGE_NAME}", "${additionalBuildArgs} .")
+//                }
             }
         }
         stage('Build Artifact') {
