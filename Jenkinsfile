@@ -42,7 +42,7 @@ pipeline {
                 stage('Build Artifact') {
                     steps {
                         sh 'ls -a && cd .. && ls -a && cd .. && ls -a'
-                        sh 'mvn -s /usr/share/maven/ref/settings-docker.xml -B clean compiler:compile'
+                        sh 'mvn -s /usr/share/maven/ref/settings-docker.xml -B -X clean compiler:compile'
                     }
                     post {
                         always {
