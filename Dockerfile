@@ -23,7 +23,7 @@ RUN mkdir -p /usr/src/app
 # ---------------
 COPY pom.xml /usr/src/app
 #->RUN mvn -B -f /usr/src/app/pom.xml -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
-RUN mvn -B -f /usr/src/app/pom.xml -s /usr/share/maven/ref/settings-docker.xml dependency:analyze
+RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml -v
 # ---------------
 # Copy other source files (keep in image) - Not applicable to pom projects
 # ---------------
