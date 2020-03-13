@@ -13,7 +13,7 @@ pipeline {
      */
     parameters {
         string(name: 'SERVER_PORT', defaultValue: "8092", description: 'Server port')
-        string(name: 'JAVA_OPTS'
+        string(name: 'JAVA_OPTS',
                 defaultValue: "-XX:+TieredCompilation -noverify -XX:TieredStopAtLevel=1 -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap",
                 description: 'Java environment variables')
         string(name: 'CMD_LINE_ARGS',
