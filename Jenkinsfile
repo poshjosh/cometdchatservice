@@ -4,10 +4,25 @@
  * @see https://hub.docker.com/_/maven
  * @see https://github.com/carlossg/docker-maven
  */
+def ADDITIONAL_MAVEN_ARGS = ''
 pipeline {
     agent any
+    /**
+     * parameters directive provides a list of parameters which a user should provide when triggering the Pipeline
+     * some of the valid parameter types are booleanParam, choice, file, text, password, run, or string
+     */
+    parameters {
+        string(name: 'SERVER_PORT', defaultValue: "8092", description: 'Server port')
+        string(name: 'JAVA_OPTS'
+                defaultValue: "-XX:+TieredCompilation -noverify -XX:TieredStopAtLevel=1 -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap",
+                description: 'Java environment variables')
+        string(name: 'CMD_LINE_ARGS',
+                defaultValue: 'spring.jmx.enabled=false',
+                description: 'Command line arguments')
+        string(name: 'MAIN_CLASS', defaultValue: '', description: 'Java main class')
+        choice(name: 'DEBUG', choices: ['Y', 'N'], description: 'Debug?')
+    }
     environment {
-        APP_PORT = '8092'
         ARTIFACTID = readMavenPom().getArtifactId()
         VERSION = readMavenPom().getVersion()
         APP_ID = "${ARTIFACTID}:${VERSION}"
@@ -35,16 +50,32 @@ pipeline {
                     args "-u root -v /home/.m2:/root/.m2"
                 }
             }
+//            environment{
+//                if(params.DEBUG == 'Y') {
+//                    ADDITIONAL_MAVEN_ARGS = '-X'
+//                }else{
+//                    ADDITIONAL_MAVEN_ARGS = ''
+//                } 
+//            }
             stages{
-                stage('Build Artifact') {
+                stage('Debug') {
+                    when {
+                        expression {
+                            return DEBUG == 'Y'
+                        }
+                    }
                     steps {
                         sh 'printenv'
-                        sh 'mvn -B clean compiler:compile'
+                    }
+                }
+                stage('Build Artifact') {
+                    steps {
+                        sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} clean compiler:compile'
                     }
                 }
                 stage('Unit Tests') {
                     steps {
-                        sh 'mvn -B resources:testResources compiler:testCompile surefire:test'
+                        sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} resources:testResources compiler:testCompile surefire:test'
                     }
                     post {
                         always {
@@ -59,12 +90,12 @@ pipeline {
                     parallel {
                         stage('Integration Tests') {
                             steps {
-                                sh 'mvn -B failsafe:integration-test failsafe:verify'
+                                sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} failsafe:integration-test failsafe:verify'
                             }
                         }
                         stage('Sanity Check') {
                             steps {
-                                sh 'mvn -B checkstyle:checkstyle pmd:pmd pmd:cpd com.github.spotbugs:spotbugs-maven-plugin:spotbugs'
+                                sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} checkstyle:checkstyle pmd:pmd pmd:cpd com.github.spotbugs:spotbugs-maven-plugin:spotbugs'
                             }
                         }
                         stage('Sonar Scan') {
@@ -73,7 +104,7 @@ pipeline {
                             }
                             steps {
                                 // -Dsonar.host.url=${env.SONARQUBE_HOST}
-                                sh "mvn -B sonar:sonar -Dsonar.login=$SONAR_USR -Dsonar.password=$SONAR_PSW"
+                                sh "mvn -B ${ADDITIONAL_MAVEN_ARGS} sonar:sonar -Dsonar.login=$SONAR_USR -Dsonar.password=$SONAR_PSW"
                             }
                         }
                     }
@@ -91,7 +122,7 @@ pipeline {
                 }
                 stage('Install Local') {
                     steps {
-                        sh 'mvn -B jar:jar source:jar install:install'
+                        sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} jar:jar source:jar install:install'
                     }
                     post {
                         always {
@@ -105,6 +136,10 @@ pipeline {
             stages{
                 stage('Build Image') {
                     steps {
+                        sh '''
+                            mkdir target/dependency
+                            (cd target/dependency; jar -xf ../*.jar)
+                        '''
                         script {
                             def additionalBuildArgs = "--pull"
                             if (env.BRANCH_NAME == "master") {
@@ -117,7 +152,14 @@ pipeline {
                 stage('Run Image') {
                     steps {
                         script{
-                            docker.image("${IMAGE_NAME}").run()
+                            if(params.SERVER_PORT == '') {
+                                docker.image("${IMAGE_NAME}")
+                                    .withRun("JAVA_OPTS=${params.JAVA_OPTS} CMD_LINE_ARGS=${params.CMD_LINE_ARGS} MAIN_CLASS=${params.MAIN_CLASS}")
+                            }else{
+                                docker.image("${IMAGE_NAME}")
+                                    .withRun('-p ${params.SERVER_PORT}:${params.SERVER_PORT}', 
+                                    "--server.port=${params.SERVER_PORT} SERVER_PORT=${params.SERVER_PORT} JAVA_OPTS=${params.JAVA_OPTS} CMD_LINE_ARGS=${params.CMD_LINE_ARGS} MAIN_CLASS=${params.MAIN_CLASS}")
+                            }    
                         }
                     }
                 }
@@ -143,8 +185,11 @@ pipeline {
                     try {
                         deleteDir() /* clean up workspace */
                     } catch(error) {
-                        input "Retry deleting workspace?"
-                        false
+                        try{
+                            deleteDir() /* clean up workspace */
+                        }catch(error) {
+                            return false;
+                        }
                     }
                 }
             }
