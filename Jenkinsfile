@@ -38,6 +38,7 @@ pipeline {
             stages{
                 stage('Build Artifact') {
                     steps {
+                        sh 'printenv'
                         sh 'mvn -B clean compiler:compile'
                     }
                 }
@@ -137,7 +138,16 @@ pipeline {
     }
     post {
         always {
-            deleteDir() /* clean up workspace */
+            script{
+                waitUntil {
+                    try {
+                        deleteDir() /* clean up workspace */
+                    } catch(error) {
+                        input "Retry deleting workspace?"
+                        false
+                    }
+                }
+            }
             sh "docker system prune -f --volumes"
         }
         failure {
