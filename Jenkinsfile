@@ -21,7 +21,10 @@ pipeline {
         string(name: 'MAIN_CLASS', 
                 defaultValue: 'com.looseboxes.cometd.chatservice.CometDApplication', 
                 description: 'Java main class')
-        choice(name: 'DEBUG', choices: ['Y', 'N'], description: 'Debug?')
+        string(name: 'SONAR_URL',
+                defaultValue: 'http://localhost:9000',
+                description: 'Value for Sonarqube property sonar.host.url')    
+        choice(name: 'DEBUG', choices: ['N', 'Y'], description: 'Debug - No or Yes?')
     }
     environment {
         ARTIFACTID = readMavenPom().getArtifactId()
@@ -95,8 +98,7 @@ pipeline {
                                 SONAR = credentials('sonar-creds') // Must have been specified in Jenkins
                             }
                             steps {
-                                // -Dsonar.host.url=${env.SONARQUBE_HOST}
-                                sh "mvn -B ${ADDITIONAL_MAVEN_ARGS} sonar:sonar -Dsonar.login=$SONAR_USR -Dsonar.password=$SONAR_PSW"
+                                sh "mvn -B ${ADDITIONAL_MAVEN_ARGS} sonar:sonar -Dsonar.login=$SONAR_USR -Dsonar.password=$SONAR_PSW -Dsonar.host.url=${params.SONAR_URL}"
                             }
                         }
                     }
