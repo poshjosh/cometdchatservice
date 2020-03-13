@@ -46,7 +46,7 @@ pipeline {
                 echo "HOME = ${HOME}"
                 echo "PWD = ${PWD}"
                 sh "docker run -d -u 1000:1000 --rm --name ${ARTIFACTID} -v ${PWD}:/usr/src/${ARTIFACTID} -v /home/.m2:/root/.m2 -v ${PWD}target:/usr/src/${ARTIFACTID}/target -w /usr/src/${ARTIFACTID} -p 8092:8092 ${IMAGE_NAME}"
-                sh "docker exec -u 1000 -it ${ARTIFACTID} /bin/bash"
+                sh "docker exec -d -u 1000 ${ARTIFACTID} /bin/bash"
                 sh "mvn -X -B clean compiler:compile"
 //                script{
 //                    docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
