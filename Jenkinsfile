@@ -152,13 +152,13 @@ pipeline {
                 stage('Run Image') {
                     steps {
                         script{
-                            if(params.SERVER_PORT == '') {
+                            if(params.SERVER_PORT == '' || params.SERVER_PORT == null) {
                                 docker.image("${IMAGE_NAME}")
-                                    .withRun("JAVA_OPTS=${params.JAVA_OPTS} CMD_LINE_ARGS=${params.CMD_LINE_ARGS} MAIN_CLASS=${params.MAIN_CLASS}")
+                                    .withRun("JAVA_OPTS=${params.JAVA_OPTS} MAIN_CLASS=${params.MAIN_CLASS} ${params.CMD_LINE_ARGS}")
                             }else{
                                 docker.image("${IMAGE_NAME}")
                                     .withRun('-p ${params.SERVER_PORT}:${params.SERVER_PORT}', 
-                                    "--server.port=${params.SERVER_PORT} SERVER_PORT=${params.SERVER_PORT} JAVA_OPTS=${params.JAVA_OPTS} CMD_LINE_ARGS=${params.CMD_LINE_ARGS} MAIN_CLASS=${params.MAIN_CLASS}")
+                                    "--server.port=${params.SERVER_PORT} SERVER_PORT=${params.SERVER_PORT} JAVA_OPTS=${params.JAVA_OPTS} MAIN_CLASS=${params.MAIN_CLASS} ${params.CMD_LINE_ARGS}")
                             }    
                         }
                     }
