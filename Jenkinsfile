@@ -4,7 +4,6 @@
  * @see https://hub.docker.com/_/maven
  * @see https://github.com/carlossg/docker-maven
  */
-def ADDITIONAL_MAVEN_ARGS = ''
 pipeline {
     agent any
     /**
@@ -50,13 +49,9 @@ pipeline {
                     args "-u root -v /home/.m2:/root/.m2"
                 }
             }
-//            environment{
-//                if(params.DEBUG == 'Y') {
-//                    ADDITIONAL_MAVEN_ARGS = '-X'
-//                }else{
-//                    ADDITIONAL_MAVEN_ARGS = ''
-//                } 
-//            }
+            environment{
+                ADDITIONAL_MAVEN_ARGS = "${params.DEBUG == 'Y' ? '-X' : ''}"
+            }
             stages{
                 stage('Debug') {
                     when {
@@ -184,10 +179,10 @@ pipeline {
                 waitUntil {
                     try {
                         deleteDir() /* clean up workspace */
-                    } catch(error) {
+                    } catch(error1) {
                         try{
                             deleteDir() /* clean up workspace */
-                        }catch(error) {
+                        }catch(error2) {
                             return false;
                         }
                     }
