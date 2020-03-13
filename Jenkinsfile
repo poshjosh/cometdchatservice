@@ -46,7 +46,8 @@ pipeline {
                 script{
 //                    ws('/usr/src/app') {
                         docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
-                            sh 'cp -f ?/.m2/settings.xml /usr/share/maven/ref/'
+                            sh 'ls -a'
+                            sh 'cp -f /.m2/settings.xml /usr/share/maven/ref/'
                             sh 'mvn -s /usr/share/maven/ref/settings-docker.xml -X -B clean compiler:compile'
                         }
 //                    }
