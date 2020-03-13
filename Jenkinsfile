@@ -38,12 +38,7 @@ pipeline {
             stages{
                 stage('Build Artifact') {
                     steps {
-                        sh 'mvn -B -X clean compiler:compile'
-                    }
-                    post {
-                        always {
-                            archiveArtifacts artifacts: 'target/*.jar', onlyIfSuccessful: true
-                        }
+                        sh 'mvn -B clean compiler:compile'
                     }
                 }
                 stage('Unit Tests') {
@@ -96,6 +91,11 @@ pipeline {
                 stage('Install Local') {
                     steps {
                         sh 'mvn -B jar:jar source:jar install:install'
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'target/*.jar', onlyIfSuccessful: true
+                        }
                     }
                 }
             }
