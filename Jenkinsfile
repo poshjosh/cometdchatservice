@@ -18,7 +18,9 @@ pipeline {
         string(name: 'CMD_LINE_ARGS',
                 defaultValue: 'spring.jmx.enabled=false',
                 description: 'Command line arguments')
-        string(name: 'MAIN_CLASS', defaultValue: '', description: 'Java main class')
+        string(name: 'MAIN_CLASS', 
+                defaultValue: 'com.looseboxes.cometd.chatservice.CometDApplication', 
+                description: 'Java main class')
         choice(name: 'DEBUG', choices: ['Y', 'N'], description: 'Debug?')
     }
     environment {
@@ -171,17 +173,17 @@ pipeline {
     post {
         always {
             script{
-                waitUntil {
+                retry(3) {
                     try {
-                        deleteDir() /* clean up workspace */
-                    } catch(error1) {
-                        try{
-                            deleteDir() /* clean up workspace */
-                        }catch(error2) {
-                            return false;
-                        }
-                    }
-                }
+                        timeout(time: 5, unit: 'SECONDS') {
+                            deleteDir() // Clean up workspace
+                        } 
+                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                        // we re-throw as a different error, that would not 
+                        // cause retry() to fail (workaround for issue JENKINS-51454)
+                        error 'Timeout!'
+                    } 
+                } // retry ends
             }
             sh "docker system prune -f --volumes"
         }
