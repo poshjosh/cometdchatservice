@@ -49,6 +49,9 @@ pipeline {
         stage('Build Artifact') {
             steps {
                 script{
+                    echo "HOME = ${HOME}"
+                    echo "PWD = ${PWD}"
+                    sh "mkdir -p /usr/src/${ARTIFACTID}"
                     ws("/usr/src/${ARTIFACTID}") {
                         docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
                             echo "HOME = ${HOME}"
