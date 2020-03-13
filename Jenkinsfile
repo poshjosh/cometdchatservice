@@ -13,7 +13,9 @@ pipeline {
         APP_ID = "${ARTIFACTID}:${VERSION}"
         IMAGE_REF = "poshjosh/${APP_ID}"
         IMAGE_NAME = IMAGE_REF.toLowerCase()
-        RUN_ARGS = "-v /home/.m2:${HOME}/.m2 -v ${PWD}:/usr/src/app -v /home/.m2:/root/.m2 -v ${PWD}/target:/usr/src/app/target -w /usr/src/app -p ${APP_PORT}:${APP_PORT}"
+//        RUN_ARGS = "-v /home/.m2:${HOME}/.m2 -v ${PWD}:/usr/src/app -v /home/.m2:/root/.m2 -v ${PWD}/target:/usr/src/app/target -w /usr/src/app -p ${APP_PORT}:${APP_PORT}"
+//        RUN_ARGS = "-v /home/.m2:${WORKSPACE}/?/.m2/repository -v /home/.m2:/root/.m2 -p ${APP_PORT}:${APP_PORT}"
+        RUN_ARGS = "-s /usr/share/maven/ref/settings-docker.xml -v /home/.m2:/root/.m2 -p ${APP_PORT}:${APP_PORT}"
     }
     options {
         timestamps()
