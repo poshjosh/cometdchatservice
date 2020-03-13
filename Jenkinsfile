@@ -20,7 +20,7 @@ pipeline {
         IMAGE_NAME = IMAGE_REF.toLowerCase()
 //        RUN_ARGS = "--rm -v /home/.m2:/usr/share/maven/ref/repository /home/.m2:/root/.m2 -p ${APP_PORT}:${APP_PORT}"
 //        RUN_ARGS = "--rm -v ${PWD}:/var/jenkins_home/workspace/cometdchatservice_dev -v /home/.m2:/root/.m2 -v ${PWD}/target:/var/jenkins_home/workspace/cometdchatservice_dev/target -p ${APP_PORT}:${APP_PORT}"
-        RUN_ARGS = "-v ${PWD}:/usr/src/${ARTIFACTID} -v /home/.m2:/root/.m2 -v ${PWD}target:/usr/src/${ARTIFACTID}/target -p ${APP_PORT}:${APP_PORT}"
+        RUN_ARGS = "-v ${PWD}:/usr/src/${ARTIFACTID} -v /home/.m2:${HOME}/workspace/cometdchatservice_dev/?/.m2 -v /home/.m2:/root/.m2 -v ${PWD}target:/usr/src/${ARTIFACTID}/target -w /usr/src/${ARTIFACTID} -p ${APP_PORT}:${APP_PORT}"
     }
     options {
         timestamps()
@@ -51,14 +51,15 @@ pipeline {
                 script{
                     echo "HOME = ${HOME}"
                     echo "PWD = ${PWD}"
-                    sh "mkdir -p /usr/src/${ARTIFACTID}"
-                    ws("/usr/src/${ARTIFACTID}") {
+                    sh 'printenv'
+//                    sh "mkdir -p /usr/src/${ARTIFACTID}"
+//                    ws("/usr/src/${ARTIFACTID}") {
                         docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}"){
                             echo "HOME = ${HOME}"
                             echo "PWD = ${PWD}"
                             sh 'mvn -X -B clean compiler:compile'
                         }
-                    }
+//                    }
                 }
             }
         }
