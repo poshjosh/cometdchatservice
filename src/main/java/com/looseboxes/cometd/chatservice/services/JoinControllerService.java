@@ -41,17 +41,10 @@ public class JoinControllerService implements ControllerService{
             @Autowired Response.Builder responseBuilder,
             @Autowired CometDProperties cometDProperties) {
         
-        this(servletUtil, responseBuilder, 
-                cometDProperties.getHandshakeTimeout(),
-                cometDProperties.getSubscriptionTimeout());
-    }
-    
-    protected JoinControllerService(
-            ServletUtil servletUtil, Response.Builder responseBuilder,
-            long handshakeTimeoutMillis, long subscriptionTimeoutMillis) {
         this.servletUtil = Objects.requireNonNull(servletUtil);
         this.responseBuilder = Objects.requireNonNull(responseBuilder);
-        this.joinTimeout = handshakeTimeoutMillis + subscriptionTimeoutMillis;
+        this.joinTimeout = cometDProperties.getHandshakeTimeout() +
+                cometDProperties.getSubscriptionTimeout();
     }
 
     @Override

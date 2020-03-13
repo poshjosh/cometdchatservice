@@ -15,8 +15,7 @@
  */
 package com.looseboxes.cometd.chatservice.services;
 
-import com.looseboxes.cometd.chatservice.services.JoinControllerService;
-import com.looseboxes.cometd.chatservice.services.ControllerService;
+import com.looseboxes.cometd.chatservice.CometDProperties;
 import com.looseboxes.cometd.chatservice.controllers.Endpoints;
 
 /**
@@ -31,7 +30,12 @@ public class JoinControllerServiceTest extends AbstractControllerServiceTest{
     
     @Override
     public ControllerService getControllerService() {
+
+        final CometDProperties props = new CometDProperties();
+        props.setHandshakeTimeout(3_000);
+        props.setSubscriptionTimeout(7_000);
+
         return new JoinControllerService(
-                getServletUtil(), getResponseBuilder(), 3_000, 7_000);
+                getServletUtil(), getResponseBuilder(), props);
     }
 }
