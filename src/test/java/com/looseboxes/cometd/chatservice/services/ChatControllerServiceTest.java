@@ -15,12 +15,7 @@
  */
 package com.looseboxes.cometd.chatservice.services;
 
-import com.looseboxes.cometd.chatservice.services.JoinControllerService;
-import com.looseboxes.cometd.chatservice.services.ChatControllerService;
-import com.looseboxes.cometd.chatservice.services.ControllerService;
 import com.looseboxes.cometd.chatservice.controllers.Endpoints;
-import com.looseboxes.cometd.chatservice.services.ServletUtil;
-import com.looseboxes.cometd.chatservice.services.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -47,7 +42,7 @@ public class ChatControllerServiceTest extends AbstractControllerServiceTest{
         final ServletUtil servletUtil = this.getServletUtil();
 
         return new ChatControllerService(
-                new JoinControllerService(servletUtil, getResponseBuilder(), 3_000, 7_000), 
+                new JoinControllerService(servletUtil, getResponseBuilder(), 3_000, 7_000){}, 
                 servletUtil,
                 getResponseBuilder()
         );

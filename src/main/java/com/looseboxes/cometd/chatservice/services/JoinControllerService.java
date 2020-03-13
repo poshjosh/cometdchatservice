@@ -36,7 +36,8 @@ public class JoinControllerService implements ControllerService{
     
     private final long joinTimeout;
 
-    public JoinControllerService(@Autowired ServletUtil servletUtil,
+    public JoinControllerService(
+            @Autowired ServletUtil servletUtil,
             @Autowired Response.Builder responseBuilder,
             @Autowired CometDProperties cometDProperties) {
         
@@ -45,7 +46,7 @@ public class JoinControllerService implements ControllerService{
                 cometDProperties.getSubscriptionTimeout());
     }
     
-    public JoinControllerService(
+    protected JoinControllerService(
             ServletUtil servletUtil, Response.Builder responseBuilder,
             long handshakeTimeoutMillis, long subscriptionTimeoutMillis) {
         this.servletUtil = Objects.requireNonNull(servletUtil);
