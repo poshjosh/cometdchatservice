@@ -32,7 +32,7 @@ pipeline {
                 docker {
                     image 'maven:3-alpine'
                     reuseNode 'true'
-                    args "-u root -v ${HOME}/.m2:/root/.m2 -v /home/.m2:${WORKSPACE}/.m2"
+                    args "-u root -v /home/.m2:/root/.m2"
                 }
             }
             steps {
