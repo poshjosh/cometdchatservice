@@ -92,8 +92,10 @@ public class TestChatObjects {
         return new ChatService();
     }
     
-    public ChatSession getChatSession(String user) {
-        return getChatSession(this.getClientSession(), this.getChatConfig().forUser(user));
+    public ChatSession getChatSession(String user, String room) {
+        final ChatConfig chatConfig = testConfig.chatConfig().chatConfigBuilder()
+                .user(user).room(room).build();
+        return getChatSession(this.getClientSession(), chatConfig);
     }
     
     public ChatSession getChatSession(ClientSession client, ChatConfig chatConfig) {
