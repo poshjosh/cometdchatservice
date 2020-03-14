@@ -15,8 +15,6 @@
  */
 package com.looseboxes.cometd.chatservice.services;
 
-import com.looseboxes.cometd.chatservice.services.MembersControllerService;
-import com.looseboxes.cometd.chatservice.services.ControllerService;
 import com.looseboxes.cometd.chatservice.controllers.Endpoints;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import org.junit.jupiter.api.DisplayName;
@@ -41,7 +39,7 @@ public class MembersControllerServiceTest extends AbstractControllerServiceTest{
     
     @Override
     public ControllerService getControllerService() {
-        return new MembersControllerService(this.getResponseBuilder());
+        return this.getTestConfig().membersControllerService();
     }
 }
 

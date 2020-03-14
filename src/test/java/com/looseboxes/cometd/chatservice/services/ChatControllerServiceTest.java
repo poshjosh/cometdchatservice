@@ -15,7 +15,6 @@
  */
 package com.looseboxes.cometd.chatservice.services;
 
-import com.looseboxes.cometd.chatservice.CometDProperties;
 import com.looseboxes.cometd.chatservice.controllers.Endpoints;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,17 +38,6 @@ public class ChatControllerServiceTest extends AbstractControllerServiceTest{
     
     @Override
     public ControllerService getControllerService() {
-
-        final ServletUtil servletUtil = this.getServletUtil();
-        
-        final CometDProperties props = new CometDProperties();
-        props.setHandshakeTimeout(3_000);
-        props.setSubscriptionTimeout(7_000);
-
-        return new ChatControllerService(
-                new JoinControllerService(servletUtil, getResponseBuilder(), props), 
-                servletUtil,
-                getResponseBuilder()
-        );
+        return this.getTestConfig().chatControllerService();
     }
 }
