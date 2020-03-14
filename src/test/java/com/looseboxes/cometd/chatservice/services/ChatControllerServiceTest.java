@@ -16,20 +16,11 @@
 package com.looseboxes.cometd.chatservice.services;
 
 import com.looseboxes.cometd.chatservice.controllers.Endpoints;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 
 /**
  * @author USER
  */
 public class ChatControllerServiceTest extends AbstractControllerServiceTest{
-
-    @Test
-    @DisplayName("When method process is called with invalid argument, throw RuntimeException")
-    public void proces_whenInvalidArg_shouldThrowRuntimeException() {
-        this.process_whenArgumentGiven_shouldThrowRuntimeException(
-                this.getInvalidArgument());
-    }
     
     @Override
     public String getEndpoint() {

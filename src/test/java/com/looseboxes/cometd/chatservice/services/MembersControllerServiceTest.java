@@ -16,21 +16,11 @@
 package com.looseboxes.cometd.chatservice.services;
 
 import com.looseboxes.cometd.chatservice.controllers.Endpoints;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 
 /**
  * @author USER
  */
 public class MembersControllerServiceTest extends AbstractControllerServiceTest{
-    
-    @Test
-    @DisplayName("When method process is called with invalid argument, return error")
-    public void proces_whenInvalidArg_shouldReturnError() {
-        this.process_whenArgumentGiven_shouldReturn(
-                getInvalidArgument(), greaterThanOrEqualTo(300), false);
-    }
     
     @Override
     public String getEndpoint() {
