@@ -20,6 +20,8 @@ import com.looseboxes.cometd.chatservice.controllers.Endpoints;
 import com.looseboxes.cometd.chatservice.services.response.Response;
 import com.looseboxes.cometd.chatservice.test.TestConfig;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 import org.hamcrest.Matcher;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 /**
  * @author USER
@@ -39,11 +42,32 @@ public abstract class AbstractControllerServiceTest {
     private final boolean logStackTrace = TestConfig.LOG_STACKTRACE;
     
     public static class ValidServiceContext extends ControllerServiceContextImpl{
-        public ValidServiceContext(String endpoint) {
-            this(new TestConfig(), endpoint);
+        
+        /**
+         * By default Endpoints.MEMBERS requires no parameters. But it also needs
+         * to call ChatSession.join(), prior to being executed, to be successful,
+         * hence this method adds the parameters required by ChatSession.join, 
+         * i.e required by Endpoints.JOIN.
+         * @param testConfig
+         * @param endpoint
+         * @param params The parameters to update
+         * @return The updated parameters
+         */
+        private static Map updateParams(
+                TestConfig testConfig, String endpoint, Map params) {
+            if(Endpoints.MEMBERS.equals(endpoint)) {
+                final Map update = params == null ? 
+                        new HashMap() : new HashMap(params);
+                final Map joinParams = testConfig
+                        .endpointRequestParams().forEndpoint(Endpoints.JOIN);
+                update.putAll(joinParams);
+                return update;
+            }
+            return params;
         }
-        public ValidServiceContext(TestConfig testConfig, String endpoint) {
-            super(testConfig, endpoint);
+        
+        public ValidServiceContext(TestConfig testConfig, String endpoint, Map params) {
+            super(testConfig, updateParams(testConfig, endpoint, params));
             if(Endpoints.MEMBERS.equals(endpoint)) {
         
                 final Object option = testConfig.initConfig().membersService();
@@ -60,6 +84,7 @@ public abstract class AbstractControllerServiceTest {
         }
         public InvalidServiceContext(TestConfig testConfig) {
             super(testConfig, Collections.EMPTY_MAP);
+            LOG.debug("<TestConfig>{}");
         }
     }
     
@@ -68,8 +93,16 @@ public abstract class AbstractControllerServiceTest {
     public abstract String getEndpoint();
 
     @Test
+    @DisplayName("When method process is called with NULL argument, throw exception")
     public void process_whenNullArgumentGiven_shouldThrowRuntimeException() {
         this.process_whenArgumentGiven_shouldThrowRuntimeException(null);
+    }
+
+    @Test
+    @DisplayName("When method process is called with invalid argument, return error response")
+    public void proces_whenInvalidArg_shouldReturnError() {
+        this.process_whenArgumentGiven_shouldReturn(
+                getInvalidArgument(), greaterThanOrEqualTo(300), false);
     }
 
     @Test
@@ -131,7 +164,10 @@ public abstract class AbstractControllerServiceTest {
     }
 
     public ControllerService.ServiceContext getValidArgument() {
-        return new ValidServiceContext(this.getTestConfig(), this.getEndpoint());
+        return new ValidServiceContext(
+                this.getTestConfig(), this.getEndpoint(),
+                getTestConfig().endpointRequestParams().forEndpoint(getEndpoint())
+        );
     }
 
     public ControllerService.ServiceContext getServiceContext() {
