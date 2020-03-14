@@ -155,19 +155,8 @@ public class TestConfig {
                     }
                 }
             });
-            LOG.info("Request Params: {}", params);
+            LOG.debug("Request Params: {}", params);
             return params;
-        }
-        
-        private String getEnpoint(HttpServletRequest req) {
-            final String uri = req.getRequestURI();
-            final int start = uri.lastIndexOf('/');
-            if(start == -1) {
-                throw new IllegalArgumentException("RequestURI: " + uri);
-            }
-            final int n = uri.lastIndexOf('?');
-            final int end = n == -1 || n < start ? uri.length() : n;
-            return uri.substring(start, end);
         }
     }
 
