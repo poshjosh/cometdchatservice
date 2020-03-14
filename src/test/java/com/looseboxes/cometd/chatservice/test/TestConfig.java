@@ -31,12 +31,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 
 /**
  * @author USER
  */
 public class TestConfig {
+
+    private static final Logger LOG = LoggerFactory.getLogger(TestConfig.class);
     
     public static final boolean DEBUG = false;
     public static final boolean LOG_STACKTRACE = DEBUG;
@@ -151,6 +155,7 @@ public class TestConfig {
                     }
                 }
             });
+            LOG.info("Request Params: {}", params);
             return params;
         }
         
