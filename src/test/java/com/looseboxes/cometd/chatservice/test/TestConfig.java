@@ -55,11 +55,15 @@ public class TestConfig {
         this.contextPath = Objects.requireNonNull(contextPath);
     }
 
-    @Bean public MembersControllerService membersControllerService() {
+    // If you annotate this with @Bean, the test ApplicationContext will fail to
+    // load due to org.springframework.beans.factory.support.BeanDefinitionOverrideException
+    public MembersControllerService membersControllerService() {
         return new MembersControllerService(responseConfig().responseBuilder());
     }
 
-    @Bean public JoinControllerService joinControllerService() {
+    // If you annotate this with @Bean, the test ApplicationContext will fail to
+    // load due to org.springframework.beans.factory.support.BeanDefinitionOverrideException
+    public JoinControllerService joinControllerService() {
         final CometDProperties cometDProps = new CometDProperties();
         cometDProps.setHandshakeTimeout(3_000);
         cometDProps.setSubscriptionTimeout(7_000);
@@ -69,7 +73,9 @@ public class TestConfig {
                 cometDProps);
     }
     
-    @Bean public ChatControllerService chatControllerService() {
+    // If you annotate this with @Bean, the test ApplicationContext will fail to
+    // load due to org.springframework.beans.factory.support.BeanDefinitionOverrideException
+    public ChatControllerService chatControllerService() {
         return new ChatControllerService(
                 joinControllerService(), 
                 requestConfig().servletUtil(),
@@ -185,6 +191,7 @@ public class TestConfig {
     @Deprecated
     public ControllerService.ServiceContext controllerServiceContext(
             String endpoint){
-        return new ControllerServiceContextImpl(this, endpoint);
+        return new ControllerServiceContextImpl(this, 
+                this.endpointRequestParams().forEndpoint(endpoint));
     }
 }
