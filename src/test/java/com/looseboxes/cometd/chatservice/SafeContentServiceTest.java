@@ -19,27 +19,11 @@ import com.looseboxes.cometd.chatservice.test.TestConfig;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
+import org.mockito.ArgumentMatchers;
 
 /**
  * @author USER
@@ -63,8 +47,11 @@ public class SafeContentServiceTest {
         final String text = "A severed human head was on the bloodied operating table";
         final String flagsForText = returnFlagsForText.flag(text);
         
-        verify(whenHttpGetIsCalled).get(isA(String.class), isA(HttpHeaders.class), 
-                isA(Map.class), isA(Class.class));
+        verify(whenHttpGetIsCalled).get(
+                ArgumentMatchers.isA(String.class), 
+                ArgumentMatchers.isA(HttpHeaders.class), 
+                ArgumentMatchers.isA(Map.class), 
+                ArgumentMatchers.isA(Class.class));
         
         assertEquals(expResult, flagsForText);
     }
@@ -89,8 +76,10 @@ public class SafeContentServiceTest {
         final RestTemplateForGet restTemplate = this.getRestTemplateForGet();
         final HttpEntity<Map> response = new HttpEntity<>(responseBody);
         when(restTemplate.get(
-                isA(String.class), isA(HttpHeaders.class), 
-                isA(Map.class), isA(Class.class))).thenReturn(response);
+                ArgumentMatchers.isA(String.class), 
+                ArgumentMatchers.isA(HttpHeaders.class), 
+                ArgumentMatchers.isA(Map.class), 
+                ArgumentMatchers.isA(Class.class))).thenReturn(response);
         
         return restTemplate;
     }
