@@ -94,6 +94,9 @@ public final class ChatSessionImpl implements ChatSession {
     public ChatSessionImpl(ClientSession client, ChatConfig chatConfig) {
     
         this.clientSession = Objects.requireNonNull(client);
+        this.requireNonNullOrEmpty(chatConfig.getChannel());
+        this.requireNonNullOrEmpty(chatConfig.getRoom());
+        this.requireNonNullOrEmpty(chatConfig.getUser());
         this.chatConfig = chatConfig.forUser(chatConfig.getUser());
         this.state = new StateBean();
         
