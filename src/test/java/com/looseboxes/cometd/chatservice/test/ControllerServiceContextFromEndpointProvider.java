@@ -31,6 +31,7 @@ public class ControllerServiceContextFromEndpointProvider {
     }
     
     public ControllerService.ServiceContext from(String endpoint){
-        return new ControllerServiceContextImpl(testConfig, endpoint);
+        return new ControllerServiceContextImpl(testConfig, 
+                testConfig.endpointRequestParams().forEndpoint(endpoint));
     }
 }
