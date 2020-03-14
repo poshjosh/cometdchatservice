@@ -99,6 +99,7 @@ public class TestChatObjects {
                 .websocketEnabled(false)
                 .user(user)
                 .room(room).build();
+        LOG.debug("{}", chatConfig);
         return getChatSession(this.getClientSession(), chatConfig);
     }
     
