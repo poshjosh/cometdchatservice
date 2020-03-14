@@ -20,109 +20,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import static org.assertj.core.api.Assertions.fail;
 import org.cometd.bayeux.Message;
 import org.cometd.bayeux.client.ClientSessionChannel;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.*;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
 
 /**
  * @author USER
@@ -220,9 +127,10 @@ public class ChatSessionTest {
 
     protected Function<ChatSession, Future<Message>> sendAction() {
     
+        final String room = "test_room";
         final String user1 = "test_recipient";
         
-        final ChatSession user1session = this.getChatSession(user1);
+        final ChatSession user1session = this.getChatSession(user1, room);
         
         final Function<ChatSession, Future<Message>> action = (user0session) -> {
             
@@ -400,11 +308,11 @@ public class ChatSessionTest {
     }
 
     protected ChatSession getChatSession() {
-        return this.getChatSession("test_sender");
+        return this.getChatSession("test_sender", "test_room");
     }
 
-    protected ChatSession getChatSession(String user) {
-        return this.getTestConfig().testChatObjects().getChatSession(user);
+    protected ChatSession getChatSession(String user, String room) {
+        return this.getTestConfig().testChatObjects().getChatSession(user, room);
     }
 
     protected String getDescription(String testMethodName) {
