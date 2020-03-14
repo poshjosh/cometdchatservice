@@ -17,33 +17,33 @@ package com.looseboxes.cometd.chatservice.controllers;
 
 import com.looseboxes.cometd.chatservice.services.ChatControllerService;
 import com.looseboxes.cometd.chatservice.services.ControllerService;
-import java.util.Collections;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import com.looseboxes.cometd.chatservice.services.ControllerServiceContextProvider;
+import com.looseboxes.cometd.chatservice.test.MyTestConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 
 /**
  * @author USER
  */
-@WebMvcTest(controllers = ChatController.class)
-public class ChatControllerIT extends AbstractControllerIT{
-    
-    /** Required by the Controller being tested */
-    @MockBean private ChatControllerService controllerService;
-    
-    @Test
-    public void requestToChatEndpoint_whenParamsValid_shouldReturnSuccessfully() {
-        this.requestToEndpoint_whenParamsValid_shouldReturnSuccessfully(Endpoints.CHAT);
-    }
+@Import(MyTestConfiguration.class)
+public class ChatControllerIT extends AbstractChatControllerTest{
 
-    @Test
-    public void requestToChatEndpoint_whenParamsNotValid_shouldReturnErrorResponse() {
-        this.requestToEndpoint_whenParamsGiven_shouldReturnMatchingResult(
-                Endpoints.CHAT, 500, Collections.EMPTY_MAP);
+    @Autowired private ChatControllerService controllerService;
+    
+    @Autowired private ControllerServiceContextProvider serviceContextProvider;
+
+    @Override
+    protected MockContext getMockContext() {
+        return MockContext.NO_OP;
     }
 
     @Override
     public ControllerService getControllerService() {
         return controllerService;
+    }
+
+    @Override
+    public ControllerServiceContextProvider getServiceContextProvider() {
+        return serviceContextProvider;
     }
 }
