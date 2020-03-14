@@ -16,8 +16,7 @@
 package com.looseboxes.cometd.chatservice.controllers;
 
 import com.looseboxes.cometd.chatservice.services.ControllerService;
-import com.looseboxes.cometd.chatservice.services.ControllerServiceContextProvider;
-import com.looseboxes.cometd.chatservice.services.JoinControllerService;
+import com.looseboxes.cometd.chatservice.services.MembersControllerService;
 import com.looseboxes.cometd.chatservice.test.MyTestConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -28,9 +27,7 @@ import org.springframework.context.annotation.Import;
 @Import(MyTestConfiguration.class)
 public class MembersControllerIT extends AbstractMembersControllerTest{
 
-    @Autowired private JoinControllerService controllerService;
-    
-    @Autowired private ControllerServiceContextProvider serviceContextProvider;
+    @Autowired private MembersControllerService controllerService;
 
     @Override
     protected MockContext getMockContext() {
@@ -40,10 +37,5 @@ public class MembersControllerIT extends AbstractMembersControllerTest{
     @Override
     public ControllerService getControllerService() {
         return controllerService;
-    }
-
-    @Override
-    public ControllerServiceContextProvider getServiceContextProvider() {
-        return serviceContextProvider;
     }
 }
