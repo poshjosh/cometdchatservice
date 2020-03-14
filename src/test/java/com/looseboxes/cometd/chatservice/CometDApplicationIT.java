@@ -44,7 +44,7 @@ import static org.mockito.ArgumentMatchers.*;
 /**
  * @author USER
  */
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes=CometDApplication.class)
+@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes=CometDApplication.class)
 @Import(MyTestConfiguration.class)
 public class CometDApplicationIT {
     
