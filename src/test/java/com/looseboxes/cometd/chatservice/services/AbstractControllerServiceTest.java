@@ -15,14 +15,11 @@
  */
 package com.looseboxes.cometd.chatservice.services;
 
-import com.looseboxes.cometd.chatservice.services.ControllerService;
 import com.looseboxes.cometd.chatservice.chat.ChatServerOptionNames;
 import com.looseboxes.cometd.chatservice.controllers.Endpoints;
-import com.looseboxes.cometd.chatservice.services.ServletUtil;
 import com.looseboxes.cometd.chatservice.services.response.Response;
 import com.looseboxes.cometd.chatservice.test.TestConfig;
 import java.util.Collections;
-import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -58,15 +55,11 @@ public abstract class AbstractControllerServiceTest {
     }
     
     public static class InvalidServiceContext extends ControllerServiceContextImpl{
-        public InvalidServiceContext(String endpoint) {
-            super(endpoint);
+        public InvalidServiceContext() {
+            this(new TestConfig());
         }
-        public InvalidServiceContext(TestConfig testConfig, String endpoint) {
-            super(testConfig, endpoint);
-        }
-        @Override
-        public Map<String, Object> getParameters() {
-            return Collections.EMPTY_MAP;
+        public InvalidServiceContext(TestConfig testConfig) {
+            super(testConfig, Collections.EMPTY_MAP);
         }
     }
     
@@ -134,11 +127,11 @@ public abstract class AbstractControllerServiceTest {
     }
     
     public ControllerService.ServiceContext getInvalidArgument() {
-        return new InvalidServiceContext(this.getEndpoint());
+        return new InvalidServiceContext(this.getTestConfig());
     }
 
     public ControllerService.ServiceContext getValidArgument() {
-        return new ValidServiceContext(this.getEndpoint());
+        return new ValidServiceContext(this.getTestConfig(), this.getEndpoint());
     }
 
     public ControllerService.ServiceContext getServiceContext() {
