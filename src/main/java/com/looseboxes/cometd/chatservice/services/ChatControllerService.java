@@ -18,7 +18,6 @@ package com.looseboxes.cometd.chatservice.services;
 import com.looseboxes.cometd.chatservice.ParamNames;
 import com.looseboxes.cometd.chatservice.chat.ChatSession;
 import com.looseboxes.cometd.chatservice.services.response.Response;
-import com.looseboxes.cometd.chatservice.services.ServletUtil;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Future;
@@ -50,6 +49,15 @@ public class ChatControllerService implements ControllerService{
 
     @Override
     public Response process(ControllerService.ServiceContext serviceContext) {
+        try{
+            return this.doProcess(serviceContext);
+        }catch(RuntimeException e) {
+            return this.getUniqueResponseBuilder()
+                    .data(e).error(true).message("Error").build();
+        }
+    }
+
+    protected Response doProcess(ControllerService.ServiceContext serviceContext) {
 
         final Response joinResponse = joinChatIfNotAlready(serviceContext);
         

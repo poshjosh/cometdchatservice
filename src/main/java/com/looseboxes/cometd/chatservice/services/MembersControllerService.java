@@ -41,6 +41,16 @@ public class MembersControllerService implements ControllerService{
     @Override
     public Response process(ControllerService.ServiceContext serviceContext) {
 
+        try{
+            return this.doProcess(serviceContext);
+        }catch(RuntimeException e) {
+            return this.getUniqueResponseBuilder()
+                    .data(e).error(true).message("Error").build();
+        }
+    }
+
+    protected Response doProcess(ControllerService.ServiceContext serviceContext) {
+
         final boolean success;
         final String message;
         final Map outputData;
