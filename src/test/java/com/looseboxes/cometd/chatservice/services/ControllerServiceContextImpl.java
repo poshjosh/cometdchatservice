@@ -22,12 +22,17 @@ import java.util.Map;
 import org.cometd.bayeux.server.BayeuxServer;
 
 /**
+ * To simulate a service context in the event the parameter Map argument to
+ * the constructor is empty (i.e invalid state), we defer the creation of 
+ * the {@link com.looseboxes.cometd.chatservice.chat.ChatSession ChatSession} 
+ * object for this context till the method {@link #getChatSession()} is called.
+ * @see #getChatSession() 
  * @author USER
  */
 public class ControllerServiceContextImpl implements ControllerService.ServiceContext{
         
     private final BayeuxServer bayeuxServer;
-    private final ChatSession chatSession;
+    private final TestConfig testConfig;
     private final Map params;
 
     public ControllerServiceContextImpl(String endpoint) {
@@ -39,11 +44,7 @@ public class ControllerServiceContextImpl implements ControllerService.ServiceCo
     
     public ControllerServiceContextImpl(TestConfig testConfig, Map params) {
         this.bayeuxServer = testConfig.testChatObjects().getBayeuxServer();
-//        String user = (String)params.get(ParamNames.USER);
-//        user = user == null ? "test_user" : user;
-        this.chatSession = testConfig.testChatObjects().getChatSession(
-                (String)params.get(ParamNames.USER),
-                (String)params.get(ParamNames.ROOM));
+        this.testConfig = testConfig;
         this.params = params;
     }
 
@@ -52,9 +53,16 @@ public class ControllerServiceContextImpl implements ControllerService.ServiceCo
         return bayeuxServer;
     }
     
+    
+    private ChatSession _chatSession;
     @Override
     public ChatSession getChatSession() {
-        return chatSession;
+        if(_chatSession == null) {
+            _chatSession = testConfig.testChatObjects().getChatSession(
+                    (String)params.get(ParamNames.USER),
+                    (String)params.get(ParamNames.ROOM));
+        } 
+        return _chatSession;
     }
     
     @Override
