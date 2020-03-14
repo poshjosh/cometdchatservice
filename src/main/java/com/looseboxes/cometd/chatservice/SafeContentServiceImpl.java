@@ -64,7 +64,7 @@ public class SafeContentServiceImpl implements SafeContentService {
      * content is flagged as safe or <code>null</code> if the safety or otherwise
      * of the content could not be ascertained.
      */
-    @Cacheable(value = "cometdchatservice_contentFlagCache", unless="#result == null")
+    @Cacheable(value = CacheNames.CONTENT_FLAG_CACHE, unless="#result == null")
     @Override
     public String flag(String text) {
         
