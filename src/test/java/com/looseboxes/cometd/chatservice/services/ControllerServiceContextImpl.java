@@ -18,8 +18,11 @@ package com.looseboxes.cometd.chatservice.services;
 import com.looseboxes.cometd.chatservice.ParamNames;
 import com.looseboxes.cometd.chatservice.chat.ChatSession;
 import com.looseboxes.cometd.chatservice.test.TestConfig;
+import java.util.Collections;
 import java.util.Map;
 import org.cometd.bayeux.server.BayeuxServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * To simulate a service context in the event the parameter Map argument to
@@ -31,21 +34,17 @@ import org.cometd.bayeux.server.BayeuxServer;
  */
 public class ControllerServiceContextImpl implements ControllerService.ServiceContext{
         
+    private static final Logger LOG = LoggerFactory.getLogger(ControllerServiceContextImpl.class);
+    
     private final BayeuxServer bayeuxServer;
     private final TestConfig testConfig;
-    private final Map params;
+    private final Map parameters;
 
-    public ControllerServiceContextImpl(String endpoint) {
-        this(new TestConfig(), endpoint);
-    }
-    public ControllerServiceContextImpl(TestConfig testConfig, String endpoint) {
-        this(testConfig, testConfig.endpointRequestParams().forEndpoint(endpoint));
-    }
-    
     public ControllerServiceContextImpl(TestConfig testConfig, Map params) {
         this.bayeuxServer = testConfig.testChatObjects().getBayeuxServer();
         this.testConfig = testConfig;
-        this.params = params;
+        this.parameters = params == null ? null : Collections.unmodifiableMap(params);
+        LOG.debug("Parameters: {}", params);
     }
 
     @Override
@@ -58,15 +57,17 @@ public class ControllerServiceContextImpl implements ControllerService.ServiceCo
     @Override
     public ChatSession getChatSession() {
         if(_chatSession == null) {
+            final Map m = getParameters();
+            LOG.debug("Parameters: {}", m);
             _chatSession = testConfig.testChatObjects().getChatSession(
-                    (String)params.get(ParamNames.USER),
-                    (String)params.get(ParamNames.ROOM));
+                    (String)m.get(ParamNames.USER),
+                    (String)m.get(ParamNames.ROOM));
         } 
         return _chatSession;
     }
     
     @Override
     public Map<String, Object> getParameters() {
-        return (Map)params;
+        return (Map)parameters;
     }
 }
