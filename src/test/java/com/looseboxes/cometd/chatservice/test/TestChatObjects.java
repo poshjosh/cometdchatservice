@@ -94,7 +94,11 @@ public class TestChatObjects {
     
     public ChatSession getChatSession(String user, String room) {
         final ChatConfig chatConfig = testConfig.chatConfig().chatConfigBuilder()
-                .user(user).room(room).build();
+                .channel("/service/privatechat")
+                .logLevel("debug")
+                .websocketEnabled(false)
+                .user(user)
+                .room(room).build();
         return getChatSession(this.getClientSession(), chatConfig);
     }
     
