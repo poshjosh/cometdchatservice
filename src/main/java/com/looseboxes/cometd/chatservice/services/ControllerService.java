@@ -75,5 +75,12 @@ public interface ControllerService {
         Map<String, Object> getParameters();
     }
     
+    /**
+     * Best effort should be made to always return a response, regardless of 
+     * what exception is thrown during processing. However if the method argument
+     * is <code>null</code> then the method should throw NullPointerException.
+     * @param serviceContext The context holding objects required for processing
+     * @return A response
+     */
     Response process(ServiceContext serviceContext);
 }
