@@ -18,11 +18,10 @@ package com.looseboxes.cometd.chatservice;
 import com.looseboxes.cometd.chatservice.controllers.ChatController;
 import com.looseboxes.cometd.chatservice.controllers.JoinController;
 import com.looseboxes.cometd.chatservice.controllers.MembersController;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * @author USER
