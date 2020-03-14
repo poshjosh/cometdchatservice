@@ -55,7 +55,7 @@ public class CometDApplicationIT {
     @LocalServerPort private int port;
 
     @Autowired private TestRestTemplate restTemplate;
-
+    
     @Test
     public void membersRequest_AfterJoinRequest_ShouldReturnSuccessfully() throws Exception {
         System.out.println("membersRequest_AfterJoinRequest_ShouldReturnSuccessfully");
