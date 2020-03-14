@@ -33,13 +33,16 @@ public class ControllerServiceContextImpl implements ControllerService.ServiceCo
     public ControllerServiceContextImpl(String endpoint) {
         this(new TestConfig(), endpoint);
     }
-    
     public ControllerServiceContextImpl(TestConfig testConfig, String endpoint) {
-        bayeuxServer = testConfig.testChatObjects().getBayeuxServer();
-        params = testConfig.endpointRequestParams().forEndpoint(endpoint);
+        this(testConfig, testConfig.endpointRequestParams().forEndpoint(endpoint));
+    }
+    
+    public ControllerServiceContextImpl(TestConfig testConfig, Map params) {
+        this.bayeuxServer = testConfig.testChatObjects().getBayeuxServer();
         String user = (String)params.get(ParamNames.USER);
         user = user == null ? "test_user" : user;
-        chatSession = testConfig.testChatObjects().getChatSession(user);
+        this.chatSession = testConfig.testChatObjects().getChatSession(user);
+        this.params = params;
     }
 
     @Override
