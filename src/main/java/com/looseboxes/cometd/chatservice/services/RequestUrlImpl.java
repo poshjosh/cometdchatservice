@@ -54,6 +54,18 @@ public final class RequestUrlImpl implements RequestUrl {
         return result;
     }
 
+    //@TODO -> Standardize, Pull to super interface and make public    
+    private String getEnpoint(HttpServletRequest req) {
+        final String uri = req.getRequestURI();
+        final int start = uri.lastIndexOf('/');
+        if(start == -1) {
+            throw new IllegalArgumentException("RequestURI: " + uri);
+        }
+        final int n = uri.lastIndexOf('?');
+        final int end = n == -1 || n < start ? uri.length() : n;
+        return uri.substring(start, end);
+    }
+    
     @Override
     public String getBaseUrl() {
         return baseUrl;
