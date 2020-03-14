@@ -105,7 +105,9 @@ public class TestChatObjects {
     public ChatSession getChatSession(ClientSession client, ChatConfig chatConfig) {
         Objects.requireNonNull(client);
         Objects.requireNonNull(chatConfig);
-        return new ChatSessionImpl(client, chatConfig);
+        final ChatSession chatSession = new ChatSessionImpl(client, chatConfig);
+        LOG.debug("{}", chatSession);
+        return chatSession;
     }
 
     public ChatSession getChatSession(int port) {
