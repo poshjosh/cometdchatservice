@@ -40,6 +40,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.junit.Assert.fail;
+import org.springframework.http.MediaType;
 
 /**
  * Web MVC test which starts the spring application context without the web
@@ -128,9 +129,11 @@ public abstract class AbstractControllerIT {
                 getControllerService(), code, error, message, data);
         try{
             
-            this.mockMvc.perform(endpointReqBuilders.builder(endpoint, params))
+            this.mockMvc.perform(
+                    endpointReqBuilders.builder(endpoint, params).contentType(MediaType.APPLICATION_JSON))
                     .andDo(debug ? print() : (mvcResult) -> {})
                     .andExpect(status().is(code))
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.code", CoreMatchers.is(code)))
                     .andExpect(jsonPath("$.message", CoreMatchers.is(message)))
                     .andExpect(jsonPath("$.data", CoreMatchers.is(data)))
