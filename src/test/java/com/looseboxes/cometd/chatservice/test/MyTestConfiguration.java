@@ -17,6 +17,9 @@ package com.looseboxes.cometd.chatservice.test;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.support.NoOpCacheManager;
+import org.springframework.context.annotation.Bean;
 
 /**
  * @author USER
@@ -26,6 +29,11 @@ public class MyTestConfiguration extends TestConfig{
     
     public MyTestConfiguration(@Value("${server.servlet.context-path:}") String contextPath) { 
         super(contextPath);
+    }
+    
+    @Bean
+    public CacheManager cacheManager() {
+        return new NoOpCacheManager();
     }
 }
 /**
