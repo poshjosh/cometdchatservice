@@ -57,12 +57,14 @@ public class TestConfig {
 
     // If you annotate this with @Bean, the test ApplicationContext will fail to
     // load due to org.springframework.beans.factory.support.BeanDefinitionOverrideException
+    // because a bean already exists in the non - test application configuration
     public MembersControllerService membersControllerService() {
         return new MembersControllerService(responseConfig().responseBuilder());
     }
 
     // If you annotate this with @Bean, the test ApplicationContext will fail to
     // load due to org.springframework.beans.factory.support.BeanDefinitionOverrideException
+    // because a bean already exists in the non - test application configuration
     public JoinControllerService joinControllerService() {
         final CometDProperties cometDProps = new CometDProperties();
         cometDProps.setHandshakeTimeout(3_000);
@@ -75,6 +77,7 @@ public class TestConfig {
     
     // If you annotate this with @Bean, the test ApplicationContext will fail to
     // load due to org.springframework.beans.factory.support.BeanDefinitionOverrideException
+    // because a bean already exists in the non - test application configuration
     public ChatControllerService chatControllerService() {
         return new ChatControllerService(
                 joinControllerService(), 
@@ -83,7 +86,10 @@ public class TestConfig {
         );
     }
     
-    @Bean public ControllerServiceContextProvider controllerServiceContextProvider() {
+    // If you annotate this with @Bean, the test ApplicationContext will fail to
+    // load due to org.springframework.beans.factory.support.BeanDefinitionOverrideException
+    // because a bean already exists in the non - test application configuration
+    public ControllerServiceContextProvider controllerServiceContextProvider() {
         return new ControllerServiceContextProviderImpl(this);
     }
     
