@@ -16,6 +16,8 @@
 package com.looseboxes.cometd.chatservice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.ehcache.EhCacheCacheManager;
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
@@ -30,13 +32,16 @@ import org.springframework.core.io.ClassPathResource;
 @Configuration
 public class AppConfiguration {
 
-//    private static final Logger LOG = LoggerFactory.getLogger(AppConfiguration.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AppConfiguration.class);
     
     public AppConfiguration(){}
     
     @Bean
     public CacheManager cacheManager() {
-        return new EhCacheCacheManager(ehCacheCacheManager().getObject());
+        final CacheManager cacheManager = 
+                new EhCacheCacheManager(ehCacheCacheManager().getObject());
+        LOG.debug("Created EhCache type: {}", cacheManager);
+        return cacheManager;
     }
  
     @Bean

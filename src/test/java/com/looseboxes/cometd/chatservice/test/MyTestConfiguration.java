@@ -15,6 +15,8 @@
  */
 package com.looseboxes.cometd.chatservice.test;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cache.CacheManager;
@@ -27,13 +29,17 @@ import org.springframework.context.annotation.Bean;
 @TestConfiguration
 public class MyTestConfiguration extends TestConfig{
     
+    private static final Logger LOG = LoggerFactory.getLogger(MyTestConfiguration.class);
+    
     public MyTestConfiguration(@Value("${server.servlet.context-path:}") String contextPath) { 
         super(contextPath);
     }
     
     @Bean
     public CacheManager cacheManager() {
-        return new NoOpCacheManager();
+        final CacheManager cacheManager = new NoOpCacheManager();
+        LOG.debug("Created NoOp type: {}", cacheManager);
+        return cacheManager;
     }
 }
 /**
