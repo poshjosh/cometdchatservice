@@ -40,7 +40,7 @@ public class MembersControllerService implements ControllerService{
 
     @Override
     public Response process(ControllerService.ServiceContext serviceContext) {
-
+        Objects.requireNonNull(serviceContext);
         try{
             return this.doProcess(serviceContext);
         }catch(RuntimeException e) {
