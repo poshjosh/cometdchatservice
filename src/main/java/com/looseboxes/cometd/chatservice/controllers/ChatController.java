@@ -26,11 +26,16 @@ import org.springframework.web.bind.annotation.RestController;
 import com.looseboxes.cometd.chatservice.services.ControllerService;
 import com.looseboxes.cometd.chatservice.services.ControllerServiceContextProvider;
 import java.util.Objects;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * @author USER
  */
 @RestController
+@RequestMapping(path = "/", 
+        produces = MediaType.APPLICATION_JSON_VALUE, 
+        method = {RequestMethod.GET, RequestMethod.POST})
 public class ChatController {
     
     private final ControllerServiceContextProvider serviceContextProvider;
