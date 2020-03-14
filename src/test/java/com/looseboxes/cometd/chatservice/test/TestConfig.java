@@ -16,13 +16,21 @@
 package com.looseboxes.cometd.chatservice.test;
 
 import com.looseboxes.cometd.chatservice.AppConfiguration;
+import com.looseboxes.cometd.chatservice.CometDProperties;
 import com.looseboxes.cometd.chatservice.chat.ChatConfiguration;
 import com.looseboxes.cometd.chatservice.services.RequestConfiguration;
 import com.looseboxes.cometd.chatservice.services.response.ResponseConfiguration;
 import com.looseboxes.cometd.chatservice.initializers.InitConfiguration;
+import com.looseboxes.cometd.chatservice.services.ChatControllerService;
 import com.looseboxes.cometd.chatservice.services.ControllerService;
 import com.looseboxes.cometd.chatservice.services.ControllerServiceContextImpl;
+import com.looseboxes.cometd.chatservice.services.ControllerServiceContextProvider;
+import com.looseboxes.cometd.chatservice.services.JoinControllerService;
+import com.looseboxes.cometd.chatservice.services.MembersControllerService;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 
 /**
@@ -41,6 +49,32 @@ public class TestConfig {
     
     public TestConfig(String contextPath) { 
         this.contextPath = Objects.requireNonNull(contextPath);
+    }
+
+    @Bean public MembersControllerService membersControllerService() {
+        return new MembersControllerService(responseConfig().responseBuilder());
+    }
+
+    @Bean public JoinControllerService joinControllerService() {
+        final CometDProperties cometDProps = new CometDProperties();
+        cometDProps.setHandshakeTimeout(3_000);
+        cometDProps.setSubscriptionTimeout(7_000);
+        return new JoinControllerService(
+                this.requestConfig().servletUtil(), 
+                this.responseConfig().responseBuilder(), 
+                cometDProps);
+    }
+    
+    @Bean public ChatControllerService chatControllerService() {
+        return new ChatControllerService(
+                joinControllerService(), 
+                requestConfig().servletUtil(),
+                responseConfig().responseBuilder()
+        );
+    }
+    
+    @Bean public ControllerServiceContextProvider controllerServiceContextProvider() {
+        return new ControllerServiceContextProviderImpl(this);
     }
     
     @Bean public ControllerServiceContextFromEndpointProvider 
@@ -90,6 +124,46 @@ public class TestConfig {
 
     public InitConfiguration initConfig() {
         return new InitConfiguration();
+    }
+    
+    private static final class ControllerServiceContextProviderImpl 
+            implements ControllerServiceContextProvider{
+        
+        private final TestConfig testConfig;
+
+        private ControllerServiceContextProviderImpl(TestConfig testConfig) {
+            this.testConfig = testConfig;
+        }
+        
+        @Override
+        public ControllerService.ServiceContext from(HttpServletRequest req) {
+            return new ControllerServiceContextImpl(testConfig, getParameters(req));
+        }
+        
+        private Map getParameters(HttpServletRequest req) {
+            final Map<String, Object> params = new HashMap();
+            req.getParameterMap().forEach((k, v) -> {
+                if(v != null) {
+                    if(v.length == 1) {
+                        params.put(k, v[0]);
+                    }else if(v.length > 1){
+                        params.put(k, v);
+                    }
+                }
+            });
+            return params;
+        }
+        
+        private String getEnpoint(HttpServletRequest req) {
+            final String uri = req.getRequestURI();
+            final int start = uri.lastIndexOf('/');
+            if(start == -1) {
+                throw new IllegalArgumentException("RequestURI: " + uri);
+            }
+            final int n = uri.lastIndexOf('?');
+            final int end = n == -1 || n < start ? uri.length() : n;
+            return uri.substring(start, end);
+        }
     }
 
     // When @Bean annotation is added here. Spring complains that
