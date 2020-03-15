@@ -15,7 +15,10 @@
  */
 package com.looseboxes.cometd.chatservice;
 
-import com.looseboxes.cometd.chatservice.test.TestConfig;
+import com.looseboxes.cometd.chatservice.test.CacheEvicter;
+import com.looseboxes.cometd.chatservice.test.TestConfiguratonForInMemoryCache;
+import com.looseboxes.cometd.chatservice.test.MyTestConfiguration;
+import com.looseboxes.cometd.chatservice.test.TestUrls;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -23,15 +26,32 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * @author USER
  */
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {
+    MyTestConfiguration.class, TestConfiguratonForInMemoryCache.class})
 public class SafeContentServiceTest {
     
+    @Autowired private TestUrls testUrls;
+    
+    @Autowired private CacheEvicter cacheEvicter;
+    
     public SafeContentServiceTest() { }
-
+    
+    @BeforeEach
+    public void evictAllCaches() {
+        cacheEvicter.evictAllCaches();
+    }
+    
     @Test
     public void flag_whenValidText_shouldReturnValidOutput() {
         System.out.println("flag_whenValidText_shouldReturnValidOutput");
@@ -99,7 +119,7 @@ public class SafeContentServiceTest {
     }
     
     public SafeContentService returnFlagsForText(RestTemplateForGet restTemplate) {
-        final String url = getTestConfig().testUrl().getContextUrl(getPort());
+        final String url = this.testUrls.getContextUrl(getPort());
         return new SafeContentServiceImpl(restTemplate, url, this.getEnpoint(), 7000);
     }
     
@@ -109,10 +129,6 @@ public class SafeContentServiceTest {
 
     public int getPort() {
         return 8080;
-    }
-    
-    public TestConfig getTestConfig() {
-        return new TestConfig();
     }
     
     public RestTemplateForGet getRestTemplateForGet() {
