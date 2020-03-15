@@ -20,21 +20,18 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.*;
 
 /**
  * @author USER
@@ -46,57 +43,34 @@ public class CacheDestroyerTest {
     private Map<String, Cache> caches;
     
     @BeforeEach
-    public void initCaches() {
-        caches = this.getCaches();
+    public void beforeEach() {
+        caches = this.initCaches();
     }
 
+    @Test
+    public void destroy_whenCallingInstanceInitializedWithNullArg_shouldReturnEmptyResult() {
+        System.out.println("destroy_whenCallingInstanceInitializedWithNullArg_shouldReturnEmptyResult");
+
+        final Collection<String> destroyed = 
+                destroyNoArgs_whenCallingInstanceInitializedWithArg(null);
+        
+        assertThat(destroyed.size(), is(0));
+        
+    }
+    
     @Test
     public void destroy_whenValidArg_shouldReturnNamesOfDestroyedCaches() {
         System.out.println("destroy_whenValidArg_shouldReturnNamesOfDestroyedCaches");
 
-        final Set<String> expCacheNames = caches.keySet();
-        
         final CacheManager cacheManager = whenMethodDestroyIsCalledWithValidArgs();
 
         final Collection<String> destroyed = thenReturnDestroyedCacheNames(cacheManager);
         
-        for(String cacheName : expCacheNames) {
-            verify(caches.get(cacheName), times(1)).clear();
-            verify(caches.get(cacheName), times(1)).invalidate();
-        }
-        
-        verify(cacheManager, times(1)).getCacheNames();
-        verify(cacheManager, times(caches.keySet().size()))
-                .getCache(Mockito.isA(String.class));
+        this.verifyMethodCalls(cacheManager, 1, expectedCacheCount());
      
-        assertThat(destroyed, is(expCacheNames));
+        assertThat(new TreeSet(destroyed), is(new TreeSet(expectedCacheNames())));
     }
     
-    public CacheManager whenMethodDestroyIsCalledWithValidArgs() {
-        
-        final Set<String> expCacheNames = caches.keySet();
-
-        final CacheManager cacheManager = mock(CacheManager.class);
-        when(cacheManager.getCacheNames()).thenReturn(expCacheNames);
-        when(cacheManager.getCache(Mockito.isA(String.class))).thenAnswer(new Answer<Cache>(){
-            @Override
-            public Cache answer(InvocationOnMock iom) throws Throwable {
-                return caches.get(iom.getArgument(0, String.class));
-            }
-        });
-        
-        return cacheManager;
-    }
-    
-    public Collection<String> thenReturnDestroyedCacheNames(CacheManager cacheManager) {
-        
-        final CacheDestroyer cacheDestroyer = getCacheDestroyer();
-        
-        final Collection<String> destroyed = cacheDestroyer.destroy(cacheManager);
-        
-        return destroyed;
-    }
-
     @Test
     public void destroy_whenNullArg_shouldThrowRuntimeException() {
         System.out.println("destroy_whenNullArg_shouldThrowRuntimeException");
@@ -114,7 +88,69 @@ public class CacheDestroyerTest {
         }
     }
     
-    public Map<String, Cache> getCaches() {
+    public void verifyMethodCalls(CacheManager cacheManager, int single, int total) {
+
+        final Set<String> expCacheNames = this.expectedCacheNames();
+        
+        for(String cacheName : expCacheNames) {
+            verify(caches.get(cacheName), times(single)).clear();
+            verify(caches.get(cacheName), times(single)).invalidate();
+        }
+        
+        verify(cacheManager, times(single)).getCacheNames();
+        verify(cacheManager, times(total))
+                .getCache(Mockito.isA(String.class));
+    }
+    
+    public CacheManager whenMethodDestroyIsCalledWithValidArgs() {
+        
+        final Set<String> expCacheNames = this.expectedCacheNames();
+
+        final CacheManager cacheManager = mock(CacheManager.class);
+        when(cacheManager.getCacheNames()).thenReturn(expCacheNames);
+        when(cacheManager.getCache(Mockito.isA(String.class))).thenAnswer(new Answer<Cache>(){
+            @Override
+            public Cache answer(InvocationOnMock iom) throws Throwable {
+                return caches.get(iom.getArgument(0, String.class));
+            }
+        });
+        
+        return cacheManager;
+    }
+    
+    public int expectedCacheCount() {
+        return caches.size();
+    }
+    
+    public Set<String> expectedCacheNames() {
+        return caches.keySet();
+    }
+    
+    public Collection<String> destroyNoArgs_whenCallingInstanceInitializedWithArg(
+            CacheManager cacheManager) {
+        
+        final CacheDestroyer cacheDestroyer = getCacheDestroyer(cacheManager);
+        
+        final Collection<String> destroyed = cacheDestroyer.destroy();
+        
+        return destroyed;
+    }
+   
+    public Collection<String> thenReturnDestroyedCacheNames(CacheManager cacheManager) {
+    
+        return this.thenReturnDestroyedCacheNames(cacheManager, cacheManager);
+    }
+    
+    public Collection<String> thenReturnDestroyedCacheNames(CacheManager init, CacheManager arg) {
+        
+        final CacheDestroyer cacheDestroyer = getCacheDestroyer(init);
+        
+        final Collection<String> destroyed = cacheDestroyer.destroy(arg);
+        
+        return destroyed;
+    }
+
+    public Map<String, Cache> initCaches() {
         final Map<String, Cache> result = new HashMap<>();
         for(String cacheName : CacheNames.all()) {
             final Cache cache = mock(Cache.class);
@@ -126,6 +162,10 @@ public class CacheDestroyerTest {
     }
     
     public CacheDestroyer getCacheDestroyer() {
-        return new CacheDestroyerImpl();
+        return this.getCacheDestroyer(null);
+    }
+    
+    public CacheDestroyer getCacheDestroyer(CacheManager cacheManager) {
+        return new CacheDestroyerImpl(cacheManager);
     }
 }
