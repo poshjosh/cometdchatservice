@@ -15,9 +15,8 @@
  */
 package com.looseboxes.cometd.chatservice.test;
 
-import com.looseboxes.cometd.chatservice.AppConfiguration;
 import com.looseboxes.cometd.chatservice.CometDProperties;
-import com.looseboxes.cometd.chatservice.chat.ChatConfiguration;
+import com.looseboxes.cometd.chatservice.chat.TestChatConfiguration.ChatSessionProvider;
 import com.looseboxes.cometd.chatservice.services.RequestConfiguration;
 import com.looseboxes.cometd.chatservice.services.response.ResponseConfiguration;
 import com.looseboxes.cometd.chatservice.initializers.InitConfiguration;
@@ -30,7 +29,9 @@ import com.looseboxes.cometd.chatservice.services.MembersControllerService;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Supplier;
 import javax.servlet.http.HttpServletRequest;
+import org.cometd.bayeux.server.BayeuxServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -42,30 +43,27 @@ public class TestConfig {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestConfig.class);
     
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
     public static final boolean LOG_STACKTRACE = DEBUG;
     
     private final String contextPath;
-
-    public TestConfig() {
-        this("");
-    } 
     
-    public TestConfig(String contextPath) { 
-        this.contextPath = Objects.requireNonNull(contextPath);
-    }
+    private final Supplier<BayeuxServer> bayeuxServerSupplier;
+    private final ChatSessionProvider chatSessionProvider;
 
-    // If you annotate this with @Bean, the test ApplicationContext will fail to
-    // load due to org.springframework.beans.factory.support.BeanDefinitionOverrideException
-    // because a bean already exists in the non - test application configuration
-    public MembersControllerService membersControllerService() {
+    public TestConfig(String contextPath, 
+            Supplier<BayeuxServer> bayeuxServerSupplier, 
+            ChatSessionProvider chatSessionProvider) {
+        this.contextPath = Objects.requireNonNull(contextPath);
+        this.bayeuxServerSupplier = Objects.requireNonNull(bayeuxServerSupplier);
+        this.chatSessionProvider = Objects.requireNonNull(chatSessionProvider);
+    }
+    
+    @Bean public MembersControllerService membersControllerService() {
         return new MembersControllerService(responseConfig().responseBuilder());
     }
 
-    // If you annotate this with @Bean, the test ApplicationContext will fail to
-    // load due to org.springframework.beans.factory.support.BeanDefinitionOverrideException
-    // because a bean already exists in the non - test application configuration
-    public JoinControllerService joinControllerService() {
+    @Bean public JoinControllerService joinControllerService() {
         final CometDProperties cometDProps = new CometDProperties();
         cometDProps.setHandshakeTimeout(3_000);
         cometDProps.setSubscriptionTimeout(7_000);
@@ -75,35 +73,27 @@ public class TestConfig {
                 cometDProps);
     }
     
-    // If you annotate this with @Bean, the test ApplicationContext will fail to
-    // load due to org.springframework.beans.factory.support.BeanDefinitionOverrideException
-    // because a bean already exists in the non - test application configuration
-    public ChatControllerService chatControllerService() {
+    @Bean public ChatControllerService chatControllerService() {
         return new ChatControllerService(
                 joinControllerService(), 
                 requestConfig().servletUtil(),
-                responseConfig().responseBuilder()
-        );
+                responseConfig().responseBuilder());
     }
     
-    // If you annotate this with @Bean, the test ApplicationContext will fail to
-    // load due to org.springframework.beans.factory.support.BeanDefinitionOverrideException
-    // because a bean already exists in the non - test application configuration
-    public ControllerServiceContextProvider controllerServiceContextProvider() {
+    @Bean public ControllerServiceContextProvider controllerServiceContextProvider() {
         return new ControllerServiceContextProviderImpl(this);
     }
     
     @Bean public ControllerServiceContextFromEndpointProvider 
         controllerServiceContextFromEndpointProvider() {
-        return new ControllerServiceContextFromEndpointProvider(this);
+        return new ControllerServiceContextFromEndpointProvider(
+                bayeuxServerSupplier.get(), 
+                chatSessionProvider, 
+                this.endpointRequestParams());
     }
     
-    @Bean public TestChatObjects testChatObjects() {
-        return new TestChatObjects(this);
-    }
-    
-    @Bean public TestData testData() {
-        return new TestData();
+    @Bean public TestResponse testResponse() {
+        return new TestResponse();
     }
     
     @Bean public TestUtil testUtil() {
@@ -114,20 +104,12 @@ public class TestConfig {
         return new EndpointRequestBuilders(this.endpointRequestParams());
     }
     
-    @Bean public TestUrls testUrl() {
+    @Bean public TestUrls testUrls() {
         return new TestUrls(contextPath, this.endpointRequestParams());
     }
     
     @Bean public EndpointRequestParams endpointRequestParams() {
         return new EndpointRequestParams();
-    }
-    
-    public AppConfiguration appConfig() {
-        return new AppConfiguration();
-    }
-    
-    public ChatConfiguration chatConfig() {
-        return new ChatConfiguration();
     }
 
     public RequestConfiguration requestConfig() {
@@ -153,7 +135,7 @@ public class TestConfig {
         
         @Override
         public ControllerService.ServiceContext from(HttpServletRequest req) {
-            return new ControllerServiceContextImpl(testConfig, getParameters(req));
+            return testConfig.controllerServiceContext(this.getParameters(req));
         }
         
         private Map getParameters(HttpServletRequest req) {
@@ -195,9 +177,18 @@ public class TestConfig {
      * @deprecated
      */
     @Deprecated
-    public ControllerService.ServiceContext controllerServiceContext(
-            String endpoint){
-        return new ControllerServiceContextImpl(this, 
+    public ControllerService.ServiceContext controllerServiceContext(String endpoint){
+        return this.controllerServiceContext(
                 this.endpointRequestParams().forEndpoint(endpoint));
     }
+
+    public ControllerService.ServiceContext controllerServiceContext(Map params){
+        return new ControllerServiceContextImpl(
+                this.bayeuxServerSupplier.get(), 
+                params,
+                this.chatSessionProvider);
+    }
 }
+    // If you annotate this with @Bean, the test ApplicationContext will fail to
+    // load due to org.springframework.beans.factory.support.BeanDefinitionOverrideException
+    // because a bean already exists in the non - test application configuration
