@@ -18,11 +18,10 @@ package com.looseboxes.cometd.chatservice.chat;
 import com.looseboxes.cometd.chatservice.test.TestConfig;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.util.component.LifeCycle;
-import static org.hamcrest.CoreMatchers.is;
 import org.junit.jupiter.api.Test;
 import static org.junit.Assert.*;
 import org.junit.jupiter.api.Assertions;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 
 /**
  * @author USER
