@@ -15,9 +15,15 @@
  */
 package com.looseboxes.cometd.chatservice.test;
 
+import java.util.Optional;
+import org.springframework.cache.CacheManager;
+
 /**
  * @author USER
  */
 public interface CacheEvicter {
-    void evictAllCaches();
+    
+    Optional<CacheManager> evictAllCaches();
+    
+    void evictAllCaches(CacheManager cacheManager);
 }
