@@ -26,6 +26,10 @@ import org.springframework.context.annotation.Scope;
 @Configuration
 public class RequestConfiguration {
     
+    @Bean public ControllerServiceContextBean controllerServiceContextBean() {
+        return new ControllerServiceContextBean();
+    }
+    
     @Bean @Scope("prototype") public RequestUrl requestUrl(HttpServletRequest request){
         return new RequestUrlImpl(request);
     }
