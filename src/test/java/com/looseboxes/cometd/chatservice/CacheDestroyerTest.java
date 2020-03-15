@@ -19,6 +19,7 @@ import com.looseboxes.cometd.chatservice.test.TestConfig;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
@@ -51,10 +52,10 @@ public class CacheDestroyerTest {
     public void destroy_whenCallingInstanceInitializedWithNullArg_shouldReturnEmptyResult() {
         System.out.println("destroy_whenCallingInstanceInitializedWithNullArg_shouldReturnEmptyResult");
 
-        final Collection<String> destroyed = 
+        final Optional<CacheManager> destroyed = 
                 destroyNoArgs_whenCallingInstanceInitializedWithArg(null);
         
-        assertThat(destroyed.size(), is(0));
+        assertThat(destroyed.isPresent(), is(false));
         
     }
     
@@ -126,12 +127,12 @@ public class CacheDestroyerTest {
         return caches.keySet();
     }
     
-    public Collection<String> destroyNoArgs_whenCallingInstanceInitializedWithArg(
+    public Optional<CacheManager> destroyNoArgs_whenCallingInstanceInitializedWithArg(
             CacheManager cacheManager) {
         
         final CacheDestroyer cacheDestroyer = getCacheDestroyer(cacheManager);
         
-        final Collection<String> destroyed = cacheDestroyer.destroyCaches();
+        final Optional<CacheManager> destroyed = cacheDestroyer.destroyCaches();
         
         return destroyed;
     }
