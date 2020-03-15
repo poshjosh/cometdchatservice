@@ -31,10 +31,10 @@ import org.springframework.context.annotation.Primary;
  */
 @TestConfiguration
 @EnableCaching
-public class TestConfiguratonForInMemoryCache implements CacheEvicter{
+public class TestConfigurationForInMemoryCache implements CacheEvicter{
     
     private static final Logger LOG = 
-            LoggerFactory.getLogger(TestConfiguratonForInMemoryCache.class);
+            LoggerFactory.getLogger(TestConfigurationForInMemoryCache.class);
     
     private CacheManager cacheManager; 
 
@@ -54,9 +54,7 @@ public class TestConfiguratonForInMemoryCache implements CacheEvicter{
         if(cacheManager == null) {
             return Optional.empty();
         }else{
-            for(String name : cacheManager.getCacheNames()){
-                cacheManager.getCache(name).clear(); 
-            } 
+            this.evictAllCaches(cacheManager);
             return Optional.of(cacheManager);
         }
     }

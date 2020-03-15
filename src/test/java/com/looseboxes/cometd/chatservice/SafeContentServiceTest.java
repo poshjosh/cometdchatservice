@@ -16,7 +16,7 @@
 package com.looseboxes.cometd.chatservice;
 
 import com.looseboxes.cometd.chatservice.test.CacheEvicter;
-import com.looseboxes.cometd.chatservice.test.TestConfiguratonForInMemoryCache;
+import com.looseboxes.cometd.chatservice.test.TestConfigurationForInMemoryCache;
 import com.looseboxes.cometd.chatservice.test.MyTestConfiguration;
 import com.looseboxes.cometd.chatservice.test.TestUrls;
 import java.util.HashMap;
@@ -38,7 +38,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
-    MyTestConfiguration.class, TestConfiguratonForInMemoryCache.class})
+    MyTestConfiguration.class, TestConfigurationForInMemoryCache.class})
 public class SafeContentServiceTest {
     
     @Autowired private TestUrls testUrls;

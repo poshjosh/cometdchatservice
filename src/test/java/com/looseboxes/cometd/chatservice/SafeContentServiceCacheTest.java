@@ -17,7 +17,7 @@ package com.looseboxes.cometd.chatservice;
 
 import com.looseboxes.cometd.chatservice.test.CacheEvicter;
 import com.looseboxes.cometd.chatservice.test.MyTestConfiguration;
-import com.looseboxes.cometd.chatservice.test.TestConfiguratonForInMemoryCache;
+import com.looseboxes.cometd.chatservice.test.TestConfigurationForInMemoryCache;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,13 +31,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.isNotNull;
 
 /**
  * @author USER
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
-    MyTestConfiguration.class, TestConfiguratonForInMemoryCache.class})
+    MyTestConfiguration.class, TestConfigurationForInMemoryCache.class})
 public class SafeContentServiceCacheTest {
 
     @Mock private SafeContentService safeContentService;

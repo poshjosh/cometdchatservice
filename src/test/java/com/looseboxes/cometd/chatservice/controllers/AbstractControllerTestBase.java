@@ -20,7 +20,7 @@ import com.looseboxes.cometd.chatservice.test.EndpointRequestBuilders;
 import com.looseboxes.cometd.chatservice.test.EndpointRequestParams;
 import com.looseboxes.cometd.chatservice.test.MyTestConfiguration;
 import com.looseboxes.cometd.chatservice.test.TestConfig;
-import com.looseboxes.cometd.chatservice.test.TestConfiguratonForInMemoryCache;
+import com.looseboxes.cometd.chatservice.test.TestConfigurationForInMemoryCache;
 import java.util.Map;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +33,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.Assert.fail;
 import static org.junit.Assert.fail;
 
 /**
@@ -52,7 +53,7 @@ import static org.junit.Assert.fail;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
-    MyTestConfiguration.class, TestConfiguratonForInMemoryCache.class})
+    MyTestConfiguration.class, TestConfigurationForInMemoryCache.class})
 public abstract class AbstractControllerTestBase {
     
     private final boolean debug = TestConfig.DEBUG;
