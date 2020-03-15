@@ -19,11 +19,12 @@ import com.looseboxes.cometd.chatservice.services.response.Response;
 import javax.servlet.http.HttpServletResponse;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * @author USER
  */
-public class TestData {
+public class TestResponse {
     
     private final int successCode = HttpServletResponse.SC_OK;
 
