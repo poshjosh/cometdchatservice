@@ -57,7 +57,7 @@ public class ControllerServiceContextProviderImpl implements ControllerServiceCo
         
         final WebApplicationContext webAppCtx = getWebAppContext(req);
 
-        final ControllerServiceContext bean = webAppCtx.getBean(ControllerServiceContext.class);
+        final ControllerServiceContextBean bean = webAppCtx.getBean(ControllerServiceContextBean.class);
 
         final Map<String, Object> params = new HashMap();
         req.getParameterMap().forEach((k, v) -> {
