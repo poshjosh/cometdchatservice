@@ -11,9 +11,6 @@ pipeline {
             args "-u root -v /home/.m2:/root/.m2 --expose 9092 --expose ${params.SERVER_PORT} --expose ${params.SONAR_PORT}"
         }
     }
-    environment{
-        ADDITIONAL_MAVEN_ARGS = "${params.DEBUG == 'Y' ? '-X' : ''}"
-    }
 
     /**
      * parameters directive provides a list of parameters which a user should provide when triggering the Pipeline
@@ -51,6 +48,7 @@ pipeline {
         IMAGE_REF = "${ORG_NAME}/${APP_ID}"
         IMAGE_NAME = IMAGE_REF.toLowerCase()
         SERVER_URL = "${params.SERVER_BASE_URL}:${params.SERVER_PORT}${params.SERVER_CONTEXT}"
+        ADDITIONAL_MAVEN_ARGS = "${params.DEBUG == 'Y' ? '-X' : ''}"
     }
     options {
         timestamps()
