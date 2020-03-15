@@ -50,11 +50,19 @@ public class AppConfiguration {
  
     @Bean
     public EhCacheManagerFactoryBean ehCacheCacheManager() {
+        
         final EhCacheManagerFactoryBean factory = new EhCacheManagerFactoryBean();
+        
         factory.setConfigLocation(new ClassPathResource("ehcache.xml"));
+        
         // @NOTE Setting shared to false (the default) led to complaint that
-        // the case already exists, in test cases
+        // the CacheManager already exists, in test cases. However setting shared
+        // to true can result to inconsistencies. 
+        //
+        // This is the approache we choose. Each CacheManager is unique this way
+        factory.setCacheManagerName(CacheNames.cacheManagerName(this));
 //        factory.setShared(true);
+        
         return factory;
     }
 
