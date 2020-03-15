@@ -15,13 +15,12 @@
  */
 package com.looseboxes.cometd.chatservice.test;
 
+import com.looseboxes.cometd.chatservice.chat.TestChatConfiguration;
+import java.util.function.Supplier;
+import org.cometd.bayeux.server.BayeuxServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.support.NoOpCacheManager;
-import org.springframework.context.annotation.Bean;
 
 /**
  * @author USER
@@ -31,49 +30,19 @@ public class MyTestConfiguration extends TestConfig{
     
     private static final Logger LOG = LoggerFactory.getLogger(MyTestConfiguration.class);
     
-    public MyTestConfiguration(@Value("${server.servlet.context-path:}") String contextPath) { 
-        super(contextPath);
+    public MyTestConfiguration() { 
+        this("", new TestChatConfiguration());
     }
     
-    @Bean
-    public CacheManager cacheManager() {
-        final CacheManager cacheManager = new NoOpCacheManager();
-        LOG.debug("Created NoOp type: {}", cacheManager);
-        return cacheManager;
+    public MyTestConfiguration(String contextPath, TestChatConfiguration testChatConfiguration) {
+        this(contextPath, 
+                () -> testChatConfiguration.getBayeuxServer(), 
+                testChatConfiguration.chatSessionProvider());
+    }
+    
+    public MyTestConfiguration(String contextPath, 
+            Supplier<BayeuxServer> bayeuxServerSupplier, 
+            TestChatConfiguration.ChatSessionProvider chatSessionProvider) {
+        super(contextPath, bayeuxServerSupplier, chatSessionProvider);
     }
 }
-/**
- * 
-
-    @Autowired private AppConfiguration appConfig;
-    @Autowired private InitConfiguration initConfig;
-    @Autowired private RequestConfiguration requestConfig;
-    @Autowired private ResponseConfiguration responseConfig;
-    @Autowired private ChatConfiguration chatConfig;
-    
-    @Override
-    public AppConfiguration appConfig() {
-        return appConfig;
-    }
-
-    @Override
-    public InitConfiguration initConfig() {
-        return initConfig;
-    }
-
-    @Override
-    public RequestConfiguration requestConfig() {
-        return requestConfig;
-    }
-
-    @Override
-    public ResponseConfiguration responseConfig() {
-        return responseConfig;
-    }
-
-    @Override
-    public ChatConfiguration chatConfig() {
-        return chatConfig;
-    }
- * 
- */
