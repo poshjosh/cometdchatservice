@@ -15,7 +15,10 @@
  */
 package com.looseboxes.cometd.chatservice.chat;
 
+import com.looseboxes.cometd.chatservice.chat.TestChatConfiguration.ChatSessionProvider;
+import com.looseboxes.cometd.chatservice.test.MyTestConfiguration;
 import com.looseboxes.cometd.chatservice.test.TestConfig;
+import com.looseboxes.cometd.chatservice.test.TestUtil;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -25,20 +28,26 @@ import org.cometd.bayeux.client.ClientSessionChannel;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * @author USER
  */
 // @RunWith(MockitoJUnitRunner.class)   JUnit4 construct
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {MyTestConfiguration.class, TestChatConfiguration.class})
 public class ChatSessionTest {
     
     private final boolean logStackTrace = TestConfig.LOG_STACKTRACE;
+    
+    @Autowired private TestUtil testUtil;
+    @Autowired private ChatSessionProvider chatSessionProvider;
     
     public ChatSessionTest() { }
     
@@ -312,15 +321,19 @@ public class ChatSessionTest {
     }
 
     protected ChatSession getChatSession(String user, String room) {
-        return this.getTestConfig().testChatObjects().getChatSession(user, room);
+        return this.getChatSessionProvider().getChatSession(user, room);
     }
 
     protected String getDescription(String testMethodName) {
-        return getTestConfig().testUtil().getDescription(this.getClass(), testMethodName);
+        return getTestUtil().getDescription(this.getClass(), testMethodName);
     }
 
-    protected TestConfig getTestConfig() {
-        return new TestConfig();
+    public TestUtil getTestUtil() {
+        return testUtil;
+    }
+
+    public ChatSessionProvider getChatSessionProvider() {
+        return chatSessionProvider;
     }
 }
 /**
