@@ -16,6 +16,7 @@
 package com.looseboxes.cometd.chatservice.test;
 
 import com.looseboxes.cometd.chatservice.CacheNames;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -23,6 +24,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 
 /**
  * @author USER
@@ -36,7 +38,7 @@ public class TestConfiguratonForInMemoryCache implements CacheEvicter{
     
     private CacheManager cacheManager; 
 
-    @Bean public CacheManager cacheManager() {
+    @Bean @Primary public CacheManager cacheManager() {
         cacheManager = new ConcurrentMapCacheManager(
                 CacheNames.all().toArray(new String[0]));
         LOG.debug("Created ConcurrentMap type: {}", cacheManager);
@@ -48,7 +50,19 @@ public class TestConfiguratonForInMemoryCache implements CacheEvicter{
     }
 
     @Override
-    public void evictAllCaches(){ 
+    public Optional<CacheManager> evictAllCaches(){ 
+        if(cacheManager == null) {
+            return Optional.empty();
+        }else{
+            for(String name : cacheManager.getCacheNames()){
+                cacheManager.getCache(name).clear(); 
+            } 
+            return Optional.of(cacheManager);
+        }
+    }
+
+    @Override
+    public void evictAllCaches(CacheManager cacheManager) {
         for(String name : cacheManager.getCacheNames()){
             cacheManager.getCache(name).clear(); 
         } 
