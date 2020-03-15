@@ -15,22 +15,30 @@
  */
 package com.looseboxes.cometd.chatservice.chat;
 
-import com.looseboxes.cometd.chatservice.test.TestChatObjects;
 import com.looseboxes.cometd.chatservice.test.TestConfig;
 import org.cometd.bayeux.server.ConfigurableServerChannel;
 import org.cometd.bayeux.server.ServerMessage;
 import org.cometd.bayeux.server.ServerSession;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * @author USER
  */
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = TestChatConfiguration.class)
 public class ChatServiceTest {
     
     private final boolean logStackTrace = TestConfig.LOG_STACKTRACE;
+    
+    @Autowired private ChatService chatService;
+    @Autowired private ServerSession serverSession;
+    @Autowired private ServerMessage serverMessage;
     
     public ChatServiceTest() { }
     
@@ -71,7 +79,6 @@ public class ChatServiceTest {
     }
 
     @Test
-    @Disabled("@TODO CometdD must be intercepting ChatService methods behind the scenes")
     public void handleMembership_whenNullServerMessage_shouldThrowRuntimeException() {
         System.out.println(
                 "handleMembership_whenNullServerMessage_shouldThrowRuntimeException");
@@ -84,7 +91,6 @@ public class ChatServiceTest {
     }
     
     @Test
-    @Disabled("@TODO CometdD must be intercepting ChatService methods behind the scenes")
     public void handleMembership_whenNullServerSession_shouldThrowRuntimeException() {
         System.out.println(
                 "handleMembership_whenNullServerSession_shouldThrowRuntimeException");
@@ -125,7 +131,6 @@ public class ChatServiceTest {
     }
     
     @Test
-    @Disabled("@TODO CometdD must be intercepting ChatService methods behind the scenes")
     public void privateChat_whenNullServerMessage_shouldThrowRuntimeException() {
         System.out.println(
                 "privateChat_whenNullServerMessage_shouldThrowRuntimeException");
@@ -138,7 +143,6 @@ public class ChatServiceTest {
     }
     
     @Test
-    @Disabled("@TODO CometdD must be intercepting ChatService methods behind the scenes")
     public void privateChat_whenNullServerSession_shouldThrowRuntimeException() {
         System.out.println(
                 "privateChat_whenNullServerSession_shouldThrowRuntimeException");
@@ -175,25 +179,17 @@ public class ChatServiceTest {
 
         return chatService;
     }
-    
-    protected ChatService getChatService() {
-        return this.getTestChatObjects().getChatService();
-    }
-    
-    protected ServerSession getServerSession() {
-        return this.getTestChatObjects().getServerSession();
+
+    public ChatService getChatService() {
+        return chatService;
     }
 
-    protected ServerMessage getServerMessage() {
-        return this.getTestChatObjects().getServerMessage();
-    }
-    
-    protected TestChatObjects getTestChatObjects() {
-        return this.getTestConfig().testChatObjects();
+    public ServerSession getServerSession() {
+        return serverSession;
     }
 
-    protected TestConfig getTestConfig() {
-        return new TestConfig();
+    public ServerMessage getServerMessage() {
+        return serverMessage;
     }
 }
 /**
