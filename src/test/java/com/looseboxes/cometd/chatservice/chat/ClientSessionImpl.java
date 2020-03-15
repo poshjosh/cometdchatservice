@@ -15,7 +15,7 @@
  */
 package com.looseboxes.cometd.chatservice.chat;
 
-import com.looseboxes.cometd.chatservice.test.TestChatObjects;
+import com.looseboxes.cometd.chatservice.test.ChatUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +35,7 @@ public class ClientSessionImpl extends AttributeStore implements ClientSession{
     
     private final String id;
 
-    private final TestChatObjects chatUtil;
+    private final ChatUtil chatUtil;
     
     private final List<Extension> extensions;
     
@@ -45,11 +45,11 @@ public class ClientSessionImpl extends AttributeStore implements ClientSession{
     
     private boolean connected;
 
-    public ClientSessionImpl(TestChatObjects chatUtil) {
+    public ClientSessionImpl(ChatUtil chatUtil) {
         this(Long.toHexString(System.currentTimeMillis()), chatUtil);
     }
     
-    public ClientSessionImpl(String id, TestChatObjects chatUtil) {
+    public ClientSessionImpl(String id, ChatUtil chatUtil) {
         this.id = Objects.requireNonNull(id);
         this.chatUtil = Objects.requireNonNull(chatUtil);
         this.extensions = Collections.synchronizedList(new ArrayList<>());

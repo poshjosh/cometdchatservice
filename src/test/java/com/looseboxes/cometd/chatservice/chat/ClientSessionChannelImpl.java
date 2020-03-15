@@ -15,7 +15,7 @@
  */
 package com.looseboxes.cometd.chatservice.chat;
 
-import com.looseboxes.cometd.chatservice.test.TestChatObjects;
+import com.looseboxes.cometd.chatservice.test.ChatUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +36,7 @@ public class ClientSessionChannelImpl extends AttributeStore implements ClientSe
     
     private final ClientSession clientSession;
 
-    private final TestChatObjects chatUtil;
+    private final ChatUtil chatUtil;
     
     private final List<MessageListener> subscribers;
     
@@ -45,7 +45,7 @@ public class ClientSessionChannelImpl extends AttributeStore implements ClientSe
     private boolean released;
 
     public ClientSessionChannelImpl(String id, 
-            ClientSession clientSession, TestChatObjects chatUtil) {
+            ClientSession clientSession, ChatUtil chatUtil) {
         this.id = Objects.requireNonNull(id);
         this.channelId = new ChannelId(id);
         this.clientSession = Objects.requireNonNull(clientSession);
