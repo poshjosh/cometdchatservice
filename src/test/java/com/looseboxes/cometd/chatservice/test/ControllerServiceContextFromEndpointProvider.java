@@ -15,23 +15,33 @@
  */
 package com.looseboxes.cometd.chatservice.test;
 
+import com.looseboxes.cometd.chatservice.chat.TestChatConfiguration;
 import com.looseboxes.cometd.chatservice.services.ControllerService;
 import com.looseboxes.cometd.chatservice.services.ControllerServiceContextImpl;
 import java.util.Objects;
+import org.cometd.bayeux.server.BayeuxServer;
 
 /**
  * @author USER
  */
 public class ControllerServiceContextFromEndpointProvider {
     
-    private final TestConfig testConfig;
+    private final BayeuxServer bayeuxServer;
+    private final TestChatConfiguration.ChatSessionProvider chatSessionProvider;
+    private final EndpointRequestParams endpointRequestParams;
 
-    public ControllerServiceContextFromEndpointProvider(TestConfig testConfig) {
-        this.testConfig = Objects.requireNonNull(testConfig);
+    public ControllerServiceContextFromEndpointProvider(
+            BayeuxServer bayeuxServer, 
+            TestChatConfiguration.ChatSessionProvider chatSessionProvider,
+            EndpointRequestParams endpointRequestParams) {
+        this.bayeuxServer = Objects.requireNonNull(bayeuxServer);
+        this.chatSessionProvider = Objects.requireNonNull(chatSessionProvider);
+        this.endpointRequestParams = Objects.requireNonNull(endpointRequestParams);
     }
     
     public ControllerService.ServiceContext from(String endpoint){
-        return new ControllerServiceContextImpl(testConfig, 
-                testConfig.endpointRequestParams().forEndpoint(endpoint));
+        return new ControllerServiceContextImpl(bayeuxServer, 
+                this.endpointRequestParams.forEndpoint(endpoint),
+                chatSessionProvider);
     }
 }
