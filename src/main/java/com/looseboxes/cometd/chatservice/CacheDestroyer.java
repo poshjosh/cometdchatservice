@@ -24,9 +24,19 @@ import org.springframework.cache.CacheManager;
 public interface CacheDestroyer {
     
     /**
+     * Destroy caches of the {@link org.springframework.cache.CacheManager CacheManager} 
+     * bean contained in the application context.
+     * @return The names of the destroyed caches
+     * @see #destroy(org.springframework.cache.CacheManager) 
+     */
+    Collection<String> destroy();
+    
+    /**
+     * Destroy caches of the specified {@link org.springframework.cache.CacheManager CacheManager}.
      * @param cacheManager The {@link org.springframework.cache.CacheManager CacheManager}
      * whose {@link org.springframework.cache.Cache Caches} will be destroyed.
      * @return The names of the destroyed caches
+     * @see #destroy() 
      */
     Collection<String> destroy(CacheManager cacheManager);
 }
