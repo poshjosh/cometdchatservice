@@ -24,7 +24,6 @@ import static org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.test.annotation.DirtiesContext;
 
 /**
  * @author USER
@@ -32,8 +31,6 @@ import org.springframework.test.annotation.DirtiesContext;
 @SpringBootTest(
         webEnvironment = WebEnvironment.RANDOM_PORT, 
         classes = CometDApplication.class)
-@DirtiesContext
-//@Disabled("@TODO")
 public class SmokeIT {
 
     @Autowired private JoinController joinController;
