@@ -18,16 +18,12 @@ package com.looseboxes.cometd.chatservice;
 import com.looseboxes.cometd.chatservice.controllers.ChatController;
 import com.looseboxes.cometd.chatservice.controllers.JoinController;
 import com.looseboxes.cometd.chatservice.controllers.MembersController;
-import com.looseboxes.cometd.chatservice.test.CacheEvicter;
-import com.looseboxes.cometd.chatservice.test.TestConfigurationForInMemoryCache;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import static org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.cache.CacheManager;
 import org.springframework.test.annotation.DirtiesContext;
 
 /**
@@ -37,19 +33,18 @@ import org.springframework.test.annotation.DirtiesContext;
         webEnvironment = WebEnvironment.RANDOM_PORT, 
         classes = CometDApplication.class)
 @DirtiesContext
-@Disabled("@TODO")
+//@Disabled("@TODO")
 public class SmokeIT {
 
     @Autowired private JoinController joinController;
     @Autowired private ChatController chatController;
     @Autowired private MembersController membersController;
     
-    @Autowired private CacheManager cacheManager;
-    private final CacheEvicter cacheEvicter = new TestConfigurationForInMemoryCache();
+    @Autowired private CacheDestroyer cacheDestroyer;
     
     @BeforeEach
     public void cleanUpCacheManager() {
-        cacheEvicter.evictAllCaches(cacheManager);
+        cacheDestroyer.destroyCaches();
     }
 
     @Test

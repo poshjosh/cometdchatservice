@@ -15,16 +15,12 @@
  */
 package com.looseboxes.cometd.chatservice;
 
-import com.looseboxes.cometd.chatservice.test.CacheEvicter;
 import com.looseboxes.cometd.chatservice.test.MyTestConfiguration;
 import com.looseboxes.cometd.chatservice.test.TestConfigurationForInMemoryCache;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.ArgumentMatchers.isNotNull;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +41,7 @@ public class SafeContentServiceCacheTest {
 
     @Mock private SafeContentService safeContentService;
 
-    @Autowired private CacheEvicter cacheEvicter;
+    @Autowired private CacheDestroyer cacheDestroyer;
     
     @Autowired private CacheManager cacheManager;
     
@@ -53,7 +49,7 @@ public class SafeContentServiceCacheTest {
     
     @BeforeEach
     public void evictAllCaches() {
-        cacheEvicter.evictAllCaches();
+        cacheDestroyer.destroyCaches();
     }
     
     @Test

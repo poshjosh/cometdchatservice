@@ -15,7 +15,6 @@
  */
 package com.looseboxes.cometd.chatservice;
 
-import com.looseboxes.cometd.chatservice.test.CacheEvicter;
 import com.looseboxes.cometd.chatservice.test.TestConfigurationForInMemoryCache;
 import com.looseboxes.cometd.chatservice.test.MyTestConfiguration;
 import com.looseboxes.cometd.chatservice.test.TestUrls;
@@ -43,13 +42,13 @@ public class SafeContentServiceTest {
     
     @Autowired private TestUrls testUrls;
     
-    @Autowired private CacheEvicter cacheEvicter;
+    @Autowired private CacheDestroyer cacheDestroyer;
     
     public SafeContentServiceTest() { }
     
     @BeforeEach
     public void evictAllCaches() {
-        cacheEvicter.evictAllCaches();
+        cacheDestroyer.destroyCaches();
     }
     
     @Test

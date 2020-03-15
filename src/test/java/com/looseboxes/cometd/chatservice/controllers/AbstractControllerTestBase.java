@@ -15,7 +15,7 @@
  */
 package com.looseboxes.cometd.chatservice.controllers;
 
-import com.looseboxes.cometd.chatservice.test.CacheEvicter;
+import com.looseboxes.cometd.chatservice.CacheDestroyer;
 import com.looseboxes.cometd.chatservice.test.EndpointRequestBuilders;
 import com.looseboxes.cometd.chatservice.test.EndpointRequestParams;
 import com.looseboxes.cometd.chatservice.test.MyTestConfiguration;
@@ -33,7 +33,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.junit.Assert.fail;
 import static org.junit.Assert.fail;
 
 /**
@@ -63,11 +62,11 @@ public abstract class AbstractControllerTestBase {
 
     @Autowired private MockMvc mockMvc;
     
-    @Autowired private CacheEvicter cacheEvicter;
+    @Autowired private CacheDestroyer cacheDestroyer;
     
     @BeforeEach
     public void evictAllCaches() {
-        cacheEvicter.evictAllCaches();
+        cacheDestroyer.destroyCaches();
     }
     
     public void requestToEndpoint_whenParamsValid_shouldReturnSuccessfully(

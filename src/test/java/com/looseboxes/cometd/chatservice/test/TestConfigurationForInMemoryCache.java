@@ -15,6 +15,8 @@
  */
 package com.looseboxes.cometd.chatservice.test;
 
+import com.looseboxes.cometd.chatservice.CacheDestroyer;
+import com.looseboxes.cometd.chatservice.CacheDestroyerImpl;
 import com.looseboxes.cometd.chatservice.CacheNames;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -46,8 +48,8 @@ public class TestConfigurationForInMemoryCache implements CacheEvicter{
         return cacheManager;
     }
     
-    @Bean public CacheEvicter cacheEvicter(){
-        return this;
+    @Bean public CacheDestroyer cacheDestroyer(){
+        return new CacheDestroyerImpl(cacheManager());
     }
 
     @Override
