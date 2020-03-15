@@ -73,12 +73,12 @@ public final class ChatService {
 
     @Listener(Chat.MEMBERS_SERVICE_CHANNEL)
     public void handleMembership(ServerSession session, ServerMessage message) {
+        Objects.requireNonNull(session);
+        Objects.requireNonNull(message);
         try{
             if(LOG.isDebugEnabled()) {
                 LOG.debug("handleMembership(ServerSession, ServerMessage={})", message);
             }
-            Objects.requireNonNull(session);
-            Objects.requireNonNull(message);
 
             final Map<String, Object> data = getData(message);
 
@@ -128,12 +128,12 @@ public final class ChatService {
 
     @Listener(ClientSessionChannel.SERVICE+"/privatechat")
     public void privateChat(ServerSession session, ServerMessage message) {
+        Objects.requireNonNull(session);
+        Objects.requireNonNull(message);
         try{
             if(LOG.isTraceEnabled()) {
                 LOG.trace("privateChat(ServerSession, ServerMessage={})", message);
             }
-            Objects.requireNonNull(session);
-            Objects.requireNonNull(message);
             final Map<String, Object> data = getData(message);
 
             final String room = data == null ? null : getRoom(data, null);
