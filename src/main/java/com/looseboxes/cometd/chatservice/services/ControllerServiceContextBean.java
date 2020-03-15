@@ -21,11 +21,9 @@ import java.util.Objects;
 import org.cometd.bayeux.server.BayeuxServer;
 
 /**
- * package access java bean type used by 
- * {@link com.looseboxes.cometd.chatservice.services.ControllerServiceContextProviderImpl ControllerServiceContextProviderImpl}
  * @author USER
  */
-final class ControllerServiceContext implements ControllerService.ServiceContext{
+public class ControllerServiceContextBean implements ControllerService.ServiceContext{
     
     private BayeuxServer bayeuxServer; 
     
@@ -33,7 +31,7 @@ final class ControllerServiceContext implements ControllerService.ServiceContext
     
     private Map<String, Object> parameters;
 
-    public ControllerServiceContext() { }
+    public ControllerServiceContextBean() { }
 
     @Override
     public BayeuxServer getBayeuxServer() {
@@ -88,7 +86,7 @@ final class ControllerServiceContext implements ControllerService.ServiceContext
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final ControllerServiceContext other = (ControllerServiceContext) obj;
+        final ControllerServiceContextBean other = (ControllerServiceContextBean) obj;
         if (!Objects.equals(this.bayeuxServer, other.bayeuxServer)) {
             return false;
         }
