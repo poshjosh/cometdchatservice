@@ -18,6 +18,7 @@ package com.looseboxes.cometd.chatservice;
 import javax.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author USER
@@ -26,9 +27,13 @@ public class TerminateBean {
  
     private static final Logger LOG = LoggerFactory.getLogger(TerminateBean.class);
     
+    @Autowired private CacheDestroyer cacheDestroyer;
+    
     @PreDestroy
     public void onDestroy() throws Exception {
-        
+
+        cacheDestroyer.destroy();
+
         LOG.info("Spring Container is destroyed!");
     }
 }
