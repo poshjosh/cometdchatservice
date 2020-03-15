@@ -31,27 +31,25 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import static org.mockito.ArgumentMatchers.*;
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
-import static org.mockito.ArgumentMatchers.*;
 
 /**
  * @author USER
  */
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes=CometDApplication.class)
-@Import(MyTestConfiguration.class)
+@SpringBootTest(
+        webEnvironment = WebEnvironment.DEFINED_PORT, 
+        classes=CometDApplication.class)
 public class CometDApplicationIT {
     
     private final boolean debug = TestConfig.DEBUG;
     
-    @Autowired private TestUrls testUrls;
-
     @LocalServerPort private int port;
 
     @Autowired private TestRestTemplate restTemplate;
@@ -60,21 +58,15 @@ public class CometDApplicationIT {
     public void membersRequest_AfterJoinRequest_ShouldReturnSuccessfully() throws Exception {
         System.out.println("membersRequest_AfterJoinRequest_ShouldReturnSuccessfully");
         
-        final ResponseEntity<Map> result = 
+        final ResponseEntity<Map> joinResponse = 
                 this.givenUrl_ShouldReturnSuccess(Endpoints.JOIN);
         
-        final List<String> cookies = result.getHeaders().get("Set-Cookie");
+        final List<String> cookies = this.getCookies(joinResponse);
         
-        final ResponseEntity<Map> members = this.givenUrl_ShouldReturnSuccess(
+        final ResponseEntity<Map> membersResponse = givenUrl_ShouldReturnSuccess(
                 Endpoints.MEMBERS, cookies);
         
-        final Map body = members.getBody();
-        final Object data = body == null ? null : body.get("data");
-        
-        if(debug) {
-            System.out.println(data);
-            System.out.println("----------------------------------");
-        }
+        final Object data = this.getBodyValue(membersResponse, "data");
         
         assertThat("{members={}}", not(data));
     }
@@ -135,7 +127,7 @@ public class CometDApplicationIT {
             int code, Class<T> responseType) throws Exception {
         
         if( ! url.startsWith("http")) {
-            url = testUrls.getEndpointUrlWithParams(port, url);
+            url = this.getTestUrls().getEndpointUrlWithParams(port, url);
         }
         
         if(debug) {
@@ -152,15 +144,34 @@ public class CometDApplicationIT {
         final ResponseEntity<T> result = restTemplate.exchange(
                 url, HttpMethod.GET, entity, responseType);
         
-        final List<String> cookiesReceived = result.getHeaders().get("Set-Cookie");
-        
-        if(debug){
-            System.out.println("Cookies received: " + cookiesReceived);
-            System.out.println("----------------------------------");
-        }
+        this.getCookies(result);
         
         assertThat(result.getStatusCodeValue(), is(code));
 
         return result;
+    }
+    
+    public List<String> getCookies(ResponseEntity responseEntity) {
+        final List<String> cookiesReceived = responseEntity.getHeaders().get("Set-Cookie");
+        if(debug){
+            System.out.println("Cookies received: " + cookiesReceived);
+            System.out.println("----------------------------------");
+        }
+        return cookiesReceived;
+    }
+    
+    public Object getBodyValue(ResponseEntity<Map> responseEntity, String key) {
+        final Map body = responseEntity.getBody();
+        final Object value = body == null ? null : body.get(key);
+        if(debug) {
+            System.out.println(value);
+            System.out.println("----------------------------------");
+        }
+        return value;
+    }
+    
+    private final MyTestConfiguration testConfig = new MyTestConfiguration();
+    public TestUrls getTestUrls() {
+        return testConfig.testUrls();
     }
 }
