@@ -20,6 +20,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
@@ -62,7 +63,9 @@ public class TestConfigurationForInMemoryCache implements CacheEvicter{
     @Override
     public void evictAllCaches(CacheManager cacheManager) {
         for(String name : cacheManager.getCacheNames()){
-            cacheManager.getCache(name).clear(); 
+            final Cache cache = cacheManager.getCache(name);
+            cache.clear(); 
+            cache.invalidate();
         } 
     }
 }
