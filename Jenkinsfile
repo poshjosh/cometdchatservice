@@ -5,7 +5,16 @@
  * @see https://github.com/carlossg/docker-maven
  */
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'maven:3-alpine'
+            args "-u root -v /home/.m2:/root/.m2 --expose 9092 --expose ${params.SERVER_PORT} --expose ${params.SONAR_PORT}"
+        }
+    }
+    environment{
+        ADDITIONAL_MAVEN_ARGS = "${params.DEBUG == 'Y' ? '-X' : ''}"
+    }
+
     /**
      * parameters directive provides a list of parameters which a user should provide when triggering the Pipeline
      * some of the valid parameter types are booleanParam, choice, file, text, password, run, or string
@@ -56,17 +65,6 @@ pipeline {
         pollSCM('H H(8-16)/2 * * 1-5')
     }
     stages {
-        stage('Mavenize') {
-            agent {
-                docker {
-                    image 'maven:3-alpine'
-                    args "-u root -v /home/.m2:/root/.m2 --expose 9092 --expose ${params.SERVER_PORT} --expose ${params.SONAR_PORT}"
-                }
-            }
-            environment{
-                ADDITIONAL_MAVEN_ARGS = "${params.DEBUG == 'Y' ? '-X' : ''}"
-            }
-            stages{
 //                stage('Build Artifact') {
 //                    steps {
 //                        script {
@@ -91,66 +89,18 @@ pipeline {
 //                        }
 //                    }
 //                }
-                stage('Quality Assurance') {
-                    parallel {
-                        stage('Integration Tests') {
-                            steps {
-// Step to ensure that the application under test is completely up and running.
-// Simply waiting for the Docker container to be up is not enough as apps
-// require a few seconds to initialize after the container is up.
-                                sh "curl --retry 5 --retry-connrefused --connect-timeout 5 --max-time 5 ${SERVER_URL}"
-                                sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} failsafe:integration-test failsafe:verify'
-                                jacoco execPattern: 'target/jacoco-it.exec'    
-                            }
-                            post {
-                                always {
-                                    junit(
-                                        allowEmptyResults: true,
-                                        testResults: '**/target/failsafe-reports/TEST-*.xml'
-                                    )
-                                }
-                            }
-                        }
-//                        stage('Sanity Check') {
-//                            steps {
-//                                sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} checkstyle:checkstyle pmd:pmd pmd:cpd com.github.spotbugs:spotbugs-maven-plugin:spotbugs'
-//                            }
-//                        }
-                        stage('Sonar Scan') {
-                            environment {
-                                SONAR = credentials('sonar-creds') // Must have been specified in Jenkins
-                                SONAR_URL = "${params.SONAR_BASE_URL}:${params.SONAR_PORT}"
-                            }
-                            steps {
-                                sh "mvn -B ${ADDITIONAL_MAVEN_ARGS} sonar:sonar -Dsonar.login=$SONAR_USR -Dsonar.password=$SONAR_PSW -Dsonar.host.url=${SONAR_URL}"
-                            }
-                        }
-                    }
-
-                }
-                stage('Documentation') {
-                    steps {
-                        sh 'mvn -B site:site'
-                    }
-                    post {
-                        always {
-                            publishHTML(target: [reportName: 'Site', reportDir: 'target/site', reportFiles: 'index.html', keepAll: false])
-                        }
-                    }
-                }
-                stage('Install Local') {
-                    steps {
-                        sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} jar:jar source:jar install:install'
-                    }
-                    post {
-                        always {
-                            archiveArtifacts artifacts: 'target/*.jar', onlyIfSuccessful: true
-                        }
-                    }
+        stage('Package') {
+            steps {
+                sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} jar:jar'
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'target/*.jar', onlyIfSuccessful: true
                 }
             }
         }
         stage('Dockerize') {
+            agent any
             stages{
                 stage('Build Image') {
                     steps {
@@ -181,16 +131,69 @@ pipeline {
                         }
                     }
                 }
-                stage('Deploy Image') {
-                    when {
-                        branch 'master'
+            }
+        }
+        stage('Quality Assurance') {
+            parallel {
+                stage('Integration Tests') {
+                    steps {
+// Step to ensure that the application under test is completely up and running.
+// Simply waiting for the Docker container to be up is not enough as apps
+// require a few seconds to initialize after the container is up.
+                        sh "curl --retry 5 --retry-connrefused --connect-timeout 5 --max-time 5 ${SERVER_URL}"
+                        sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} failsafe:integration-test failsafe:verify'
+                        jacoco execPattern: 'target/jacoco-it.exec'    
+                    }
+                    post {
+                        always {
+                            junit(
+                                allowEmptyResults: true,
+                                testResults: '**/target/failsafe-reports/TEST-*.xml'
+                            )
+                        }
+                    }
+                }
+//                        stage('Sanity Check') {
+//                            steps {
+//                                sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} checkstyle:checkstyle pmd:pmd pmd:cpd com.github.spotbugs:spotbugs-maven-plugin:spotbugs'
+//                            }
+//                        }
+                stage('Sonar Scan') {
+                    environment {
+                        SONAR = credentials('sonar-creds') // Must have been specified in Jenkins
+                        SONAR_URL = "${params.SONAR_BASE_URL}:${params.SONAR_PORT}"
                     }
                     steps {
-                        script {
-                            docker.withRegistry('', 'dockerhub-creds') { // Must have been specified in Jenkins
-                                sh "docker push ${IMAGE_NAME}"
-                            }
-                        }
+                        sh "mvn -B ${ADDITIONAL_MAVEN_ARGS} sonar:sonar -Dsonar.login=$SONAR_USR -Dsonar.password=$SONAR_PSW -Dsonar.host.url=${SONAR_URL}"
+                    }
+                }
+            }
+
+        }
+        stage('Documentation') {
+            steps {
+                sh 'mvn -B site:site'
+            }
+            post {
+                always {
+                    publishHTML(target: [reportName: 'Site', reportDir: 'target/site', reportFiles: 'index.html', keepAll: false])
+                }
+            }
+        }
+        stage('Install Local') {
+            steps {
+                sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} source:jar install:install'
+            }
+        }
+        stage('Deploy Image') {
+            agent any
+            when {
+                branch 'master'
+            }
+            steps {
+                script {
+                    docker.withRegistry('', 'dockerhub-creds') { // Must have been specified in Jenkins
+                        sh "docker push ${IMAGE_NAME}"
                     }
                 }
             }
