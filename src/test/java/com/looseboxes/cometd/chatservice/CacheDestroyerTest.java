@@ -81,7 +81,7 @@ public class CacheDestroyerTest {
         
         final RuntimeException thrown = Assertions.assertThrows(
                 RuntimeException.class, 
-                () -> cacheDestroyer.destroy(cacheManager));
+                () -> cacheDestroyer.destroyCaches(cacheManager));
         
         if(logStackTrace) {
             thrown.printStackTrace();
@@ -131,7 +131,7 @@ public class CacheDestroyerTest {
         
         final CacheDestroyer cacheDestroyer = getCacheDestroyer(cacheManager);
         
-        final Collection<String> destroyed = cacheDestroyer.destroy();
+        final Collection<String> destroyed = cacheDestroyer.destroyCaches();
         
         return destroyed;
     }
@@ -145,7 +145,7 @@ public class CacheDestroyerTest {
         
         final CacheDestroyer cacheDestroyer = getCacheDestroyer(init);
         
-        final Collection<String> destroyed = cacheDestroyer.destroy(arg);
+        final Collection<String> destroyed = cacheDestroyer.destroyCaches(arg);
         
         return destroyed;
     }
