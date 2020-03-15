@@ -60,7 +60,7 @@ pipeline {
             agent {
                 docker {
                     image 'maven:3-alpine'
-                    args "-u root -v /home/.m2:/root/.m2 --expose 9090 --expose 9092 --expose ${params.SERVER_PORT} --expose ${params.SONAR_PORT}"
+                    args "-u root -v /home/.m2:/root/.m2 --expose 9092 --expose ${params.SERVER_PORT} --expose ${params.SONAR_PORT}"
                 }
             }
             environment{
