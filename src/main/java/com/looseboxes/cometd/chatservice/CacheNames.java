@@ -29,4 +29,11 @@ public interface CacheNames {
     static List<String> all(){
         return Collections.singletonList(CONTENT_FLAG_CACHE);
     }
+    
+    static String buildUniqueName(Object ref) {
+        if(ref instanceof Class) {
+            throw new IllegalArgumentException("Not an instance: " + ref);
+        }
+        return ref.getClass().getSimpleName() + "Cache" + Integer.toHexString(ref.hashCode());
+    }
 }

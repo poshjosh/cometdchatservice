@@ -60,7 +60,7 @@ public class AppConfiguration {
         // to true can result to inconsistencies. 
         //
         // This is the approache we choose. Each CacheManager is unique this way
-        factory.setCacheManagerName(CacheNames.cacheManagerName(this));
+        factory.setCacheManagerName(CacheNames.buildUniqueName(this));
 //        factory.setShared(true);
         
         return factory;
