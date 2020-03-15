@@ -18,11 +18,9 @@ package com.looseboxes.cometd.chatservice.test;
 import com.looseboxes.cometd.chatservice.CacheDestroyer;
 import com.looseboxes.cometd.chatservice.CacheDestroyerImpl;
 import com.looseboxes.cometd.chatservice.CacheNames;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
@@ -34,7 +32,7 @@ import org.springframework.context.annotation.Primary;
  */
 @TestConfiguration
 @EnableCaching
-public class TestConfigurationForInMemoryCache implements CacheEvicter{
+public class TestConfigurationForInMemoryCache {
     
     private static final Logger LOG = 
             LoggerFactory.getLogger(TestConfigurationForInMemoryCache.class);
@@ -50,24 +48,5 @@ public class TestConfigurationForInMemoryCache implements CacheEvicter{
     
     @Bean public CacheDestroyer cacheDestroyer(){
         return new CacheDestroyerImpl(cacheManager());
-    }
-
-    @Override
-    public Optional<CacheManager> evictAllCaches(){ 
-        if(cacheManager == null) {
-            return Optional.empty();
-        }else{
-            this.evictAllCaches(cacheManager);
-            return Optional.of(cacheManager);
-        }
-    }
-
-    @Override
-    public void evictAllCaches(CacheManager cacheManager) {
-        for(String name : cacheManager.getCacheNames()){
-            final Cache cache = cacheManager.getCache(name);
-            cache.clear(); 
-            cache.invalidate();
-        } 
     }
 }
