@@ -36,6 +36,10 @@ public class AppConfiguration {
     
     public AppConfiguration(){}
     
+    @Bean CacheDestroyer cacheDestroyer() {
+        return new CacheDestroyerImpl(this.cacheManager());
+    }
+    
     @Bean
     public CacheManager cacheManager() {
         final CacheManager cacheManager = 
@@ -48,6 +52,8 @@ public class AppConfiguration {
     public EhCacheManagerFactoryBean ehCacheCacheManager() {
         final EhCacheManagerFactoryBean factory = new EhCacheManagerFactoryBean();
         factory.setConfigLocation(new ClassPathResource("ehcache.xml"));
+        // @NOTE Setting shared to false (the default) led to complaint that
+        // the case already exists, in test cases
 //        factory.setShared(true);
         return factory;
     }
