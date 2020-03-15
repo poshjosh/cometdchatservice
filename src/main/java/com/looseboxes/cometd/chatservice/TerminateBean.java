@@ -32,7 +32,7 @@ public class TerminateBean {
     @PreDestroy
     public void onDestroy() throws Exception {
 
-        cacheDestroyer.destroy();
+        cacheDestroyer.destroyCaches();
 
         LOG.info("Spring Container is destroyed!");
     }

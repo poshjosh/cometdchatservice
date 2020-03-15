@@ -37,13 +37,13 @@ public class CacheDestroyerImpl implements CacheDestroyer{
     }
 
     @Override
-    public Collection<String> destroy() {
+    public Collection<String> destroyCaches() {
         return cacheManager == null ? 
-                Collections.EMPTY_LIST : this.destroy(cacheManager);
+                Collections.EMPTY_LIST : this.destroyCaches(cacheManager);
     }
 
     @Override
-    public Collection<String> destroy(CacheManager cacheManager) {
+    public Collection<String> destroyCaches(CacheManager cacheManager) {
         final Collection<String> cacheNames = cacheManager.getCacheNames();
         final Collection<String> done = new TreeSet<>();
         try{
