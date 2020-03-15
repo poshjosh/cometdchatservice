@@ -15,8 +15,8 @@ pipeline {
                 description: 'Name of the organization. (Docker Hub/GitHub)')
         string(name: 'SERVER_PROTOCOL', defaultValue: "http", 
                 description: 'Server protocol, e.g http, https etc')
-        string(name: 'SERVER_HOST', defaultValue: "localhost", 
-                description: 'Server host, e.g ip address without the port')
+        string(name: 'SERVER_BASE_URL', defaultValue: "http://localhost", 
+                description: 'Server protocol://host, without the port')
         string(name: 'SERVER_PORT', defaultValue: "8092", description: 'Server port')
         string(name: 'SERVER_CONTEXT', defaultValue: "/", 
                 description: 'Server context path. Must begin with a forward slash / ')
@@ -29,8 +29,10 @@ pipeline {
         string(name: 'MAIN_CLASS', 
                 defaultValue: 'com.looseboxes.cometd.chatservice.CometDApplication', 
                 description: 'Java main class')
-        string(name: 'SONAR_URL', defaultValue: 'http://localhost:9000',
-                description: 'Value for Sonarqube property sonar.host.url')    
+        string(name: 'SONAR_BASE_URL', defaultValue: 'http://localhost',
+                description: 'Sonarqube base URL. Will be combined with port to build Sonarqube property sonar.host.url')    
+        string(name: 'SONAR_PORT', defaultValue: '9000',
+                description: 'Port for Sonarqube server')    
         choice(name: 'DEBUG', choices: ['N', 'Y'], description: 'Debug - No or Yes?')
     }
     environment {
@@ -39,7 +41,7 @@ pipeline {
         APP_ID = "${ARTIFACTID}:${VERSION}"
         IMAGE_REF = "${ORG_NAME}/${APP_ID}"
         IMAGE_NAME = IMAGE_REF.toLowerCase()
-        SERVER_URL = "${params.SERVER_PROTOCOL}://${params.SERVER_HOST}:${params.SERVER_PORT}${params.SERVER_CONTEXT}"
+        SERVER_URL = "${params.SERVER_BASE_URL}:${params.SERVER_PORT}${params.SERVER_CONTEXT}"
     }
     options {
         timestamps()
@@ -58,7 +60,7 @@ pipeline {
             agent {
                 docker {
                     image 'maven:3-alpine'
-                    args "-u root -v /home/.m2:/root/.m2 --expose 9090 --expose 9092"
+                    args "-u root -v /home/.m2:/root/.m2 --expose 9090 --expose 9092 --expose ${params.SERVER_PORT} -- ${params.SONAR_PORTS}"
                 }
             }
             environment{
@@ -117,9 +119,10 @@ pipeline {
                         stage('Sonar Scan') {
                             environment {
                                 SONAR = credentials('sonar-creds') // Must have been specified in Jenkins
+                                SONAR_URL = "${params.SONAR_BASE_URL}:${params.SONAR_PORT}"
                             }
                             steps {
-                                sh "mvn -B ${ADDITIONAL_MAVEN_ARGS} sonar:sonar -Dsonar.login=$SONAR_USR -Dsonar.password=$SONAR_PSW -Dsonar.host.url=${params.SONAR_URL}"
+                                sh "mvn -B ${ADDITIONAL_MAVEN_ARGS} sonar:sonar -Dsonar.login=$SONAR_USR -Dsonar.password=$SONAR_PSW -Dsonar.host.url=${SONAR_URL}"
                             }
                         }
                     }
