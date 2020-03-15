@@ -16,6 +16,7 @@
 package com.looseboxes.cometd.chatservice;
 
 import java.util.Collection;
+import java.util.Optional;
 import org.springframework.cache.CacheManager;
 
 /**
@@ -26,10 +27,10 @@ public interface CacheDestroyer {
     /**
      * Destroy caches of the {@link org.springframework.cache.CacheManager CacheManager} 
      * bean contained in the application context.
-     * @return The names of the destroyed caches
+     * @return The CacheManager whose caches were destroyed
      * @see #destroyCaches(org.springframework.cache.CacheManager) 
      */
-    Collection<String> destroyCaches();
+    Optional<CacheManager> destroyCaches();
     
     /**
      * Destroy caches of the specified {@link org.springframework.cache.CacheManager CacheManager}.

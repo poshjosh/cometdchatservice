@@ -16,7 +16,7 @@
 package com.looseboxes.cometd.chatservice;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Optional;
 import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,9 +37,13 @@ public class CacheDestroyerImpl implements CacheDestroyer{
     }
 
     @Override
-    public Collection<String> destroyCaches() {
-        return cacheManager == null ? 
-                Collections.EMPTY_LIST : this.destroyCaches(cacheManager);
+    public Optional<CacheManager> destroyCaches() {
+        if(cacheManager == null || cacheManager.getCacheNames().isEmpty()) {
+            return Optional.empty();
+        }else{
+            this.destroyCaches(cacheManager);
+            return Optional.of(cacheManager);
+        }
     }
 
     @Override
