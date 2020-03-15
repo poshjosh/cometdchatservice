@@ -58,7 +58,7 @@ pipeline {
             agent {
                 docker {
                     image 'maven:3-alpine'
-                    args "--network jenkins -u root -v /home/.m2:/root/.m2 --expose 9090 --expose 9092"
+                    args "-u root -v /home/.m2:/root/.m2 --expose 9090 --expose 9092"
                 }
             }
             environment{
