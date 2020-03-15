@@ -16,32 +16,33 @@
 package com.looseboxes.cometd.chatservice.controllers;
 
 import com.looseboxes.cometd.chatservice.services.ControllerService;
-import com.looseboxes.cometd.chatservice.services.ControllerServiceContextProvider;
 import com.looseboxes.cometd.chatservice.services.JoinControllerService;
+import java.util.Collections;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 /**
  * @author USER
  */
-public class JoinControllerTest extends AbstractJoinControllerTest{
+@WebMvcTest(controllers = JoinController.class)
+public class JoinControllerTest extends AbstractControllerTest{
     
     @MockBean private JoinControllerService controllerService;
 
-    @MockBean private ControllerServiceContextProvider serviceContextProvider;
-            
-    @Override
-    protected MockContext getMockContext() {
-        return new MockContextImpl(this);
+    @Test
+    public void requestToJoinEndpoint_whenParamsValid_shouldReturnSuccessfully() {
+        this.requestToEndpoint_whenParamsValid_shouldReturnSuccessfully(Endpoints.JOIN);
+    }
+
+    @Test
+    public void requestToJoinEndpoint_whenParamsNotValid_shouldReturnErrorResponse() {
+        this.requestToEndpoint_whenParamsGiven_shouldReturnMatchingResult(
+                Endpoints.JOIN, 400, Collections.EMPTY_MAP);
     }
 
     @Override
     protected ControllerService getControllerService() {
         return controllerService;
     }
-
-    @Override
-    protected ControllerServiceContextProvider getServiceContextProvider() {
-        return serviceContextProvider;
-    }
 }
-

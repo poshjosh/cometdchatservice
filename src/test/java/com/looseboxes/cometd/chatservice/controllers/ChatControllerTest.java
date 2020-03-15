@@ -17,30 +17,32 @@ package com.looseboxes.cometd.chatservice.controllers;
 
 import com.looseboxes.cometd.chatservice.services.ChatControllerService;
 import com.looseboxes.cometd.chatservice.services.ControllerService;
-import com.looseboxes.cometd.chatservice.services.ControllerServiceContextProvider;
+import java.util.Collections;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 /**
  * @author USER
  */
-public class ChatControllerTest extends AbstractChatControllerTest{
-    
-    @MockBean private ChatControllerService controllerService;
+@WebMvcTest(controllers = ChatController.class)
+public class ChatControllerTest extends AbstractControllerTest{
 
-    @MockBean private ControllerServiceContextProvider serviceContextProvider;
+    @MockBean private ChatControllerService controllerService;
             
-    @Override
-    protected MockContext getMockContext() {
-        return new MockContextImpl(this);
+    @Test
+    public void requestToChatEndpoint_whenParamsValid_shouldReturnSuccessfully() {
+        this.requestToEndpoint_whenParamsValid_shouldReturnSuccessfully(Endpoints.CHAT);
+    }
+
+    @Test
+    public void requestToChatEndpoint_whenParamsNotValid_shouldReturnErrorResponse() {
+        this.requestToEndpoint_whenParamsGiven_shouldReturnMatchingResult(
+                Endpoints.CHAT, 400, Collections.EMPTY_MAP);
     }
 
     @Override
     protected ControllerService getControllerService() {
         return controllerService;
-    }
-
-    @Override
-    protected ControllerServiceContextProvider getServiceContextProvider() {
-        return serviceContextProvider;
     }
 }

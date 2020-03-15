@@ -16,32 +16,36 @@
 package com.looseboxes.cometd.chatservice.controllers;
 
 import com.looseboxes.cometd.chatservice.services.ControllerService;
-import com.looseboxes.cometd.chatservice.services.ControllerServiceContextProvider;
 import com.looseboxes.cometd.chatservice.services.MembersControllerService;
+import java.util.Collections;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 /**
  * @author USER
  */
-public class MembersControllerTest extends AbstractMembersControllerTest{
-    
+@WebMvcTest(controllers = MembersController.class)
+public class MembersControllerTest extends AbstractControllerTest{
+
     @MockBean private MembersControllerService controllerService;
 
-    @MockBean private ControllerServiceContextProvider serviceContextProvider;
-            
-    @Override
-    protected MockContext getMockContext() {
-        return new MockContextImpl(this);
+    @Test
+    @Disabled("@TODO Call Join, maintain session state before calling this")
+    public void requestToMembersEndpoint_whenParamsValid_shouldReturnSuccessfully() {
+        this.requestToEndpoint_whenParamsValid_shouldReturnSuccessfully(Endpoints.MEMBERS);
+    }
+
+    @Test
+    @Disabled("@TODO Call Join, maintain session state before calling this")
+    public void requestToMembersEndpoint_whenParamsNotValid_shouldReturnErrorResponse() {
+        this.requestToEndpoint_whenParamsGiven_shouldReturnMatchingResult(
+                Endpoints.MEMBERS, 400, Collections.EMPTY_MAP);
     }
 
     @Override
     protected ControllerService getControllerService() {
         return controllerService;
     }
-
-    @Override
-    protected ControllerServiceContextProvider getServiceContextProvider() {
-        return serviceContextProvider;
-    }
 }
-

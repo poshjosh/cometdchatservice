@@ -16,12 +16,15 @@
 package com.looseboxes.cometd.chatservice.services;
 
 import com.looseboxes.cometd.chatservice.controllers.Endpoints;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author USER
  */
 public class JoinControllerServiceTest extends AbstractControllerServiceTest{
 
+    @Autowired private JoinControllerService controllerService;
+    
     @Override
     public String getEndpoint() {
         return Endpoints.JOIN;
@@ -29,6 +32,6 @@ public class JoinControllerServiceTest extends AbstractControllerServiceTest{
     
     @Override
     public ControllerService getControllerService() {
-        return this.getTestConfig().joinControllerService();
+        return this.controllerService;
     }
 }

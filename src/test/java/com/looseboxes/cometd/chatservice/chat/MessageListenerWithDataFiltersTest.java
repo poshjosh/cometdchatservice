@@ -16,34 +16,43 @@
 package com.looseboxes.cometd.chatservice.chat;
 
 import com.looseboxes.cometd.chatservice.test.TestConfig;
-import java.util.Objects;
 import java.util.stream.Stream;
 import org.cometd.bayeux.server.ServerChannel;
 import org.cometd.bayeux.server.ServerMessage;
 import org.cometd.bayeux.server.ServerSession;
-import org.cometd.server.filter.DataFilter;
-import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.ContextConfiguration;
+import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * As of the time of writing, this class used experimental types from 
  * the org.junit.jupiter.params package.
  * @author USER
  */
+// @RunWith(MockitoJUnitRunner.class)   JUnit4 construct
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {TestChatConfiguration.class})
 public class MessageListenerWithDataFiltersTest {
+    
+    @Autowired private ServerChannel.MessageListener serverChannelMessageListener;
     
     static class ValidArgumentProvider implements ArgumentsProvider {
         @Override
         public Stream<? extends Arguments> provideArguments(
                 ExtensionContext context) throws Exception {
-            final TestObjects testObjs = new TestObjects();
+            final TestArguments testObjs = new TestArguments();
             return Stream.of(
                     Arguments.of(testObjs.getServerSession(), 
                             testObjs.getServerChannel(),
@@ -56,7 +65,7 @@ public class MessageListenerWithDataFiltersTest {
         @Override
         public Stream<? extends Arguments> provideArguments(
                 ExtensionContext context) throws Exception {
-            final TestObjects testObjs = new TestObjects();
+            final TestArguments testObjs = new TestArguments();
             return Stream.of(
                     Arguments.of(null, 
                             testObjs.getServerChannel(),
@@ -78,7 +87,7 @@ public class MessageListenerWithDataFiltersTest {
     @ArgumentsSource(ValidArgumentProvider.class)
     public void onMessage_whenValidArgs_shouldReturnSuccessfully(
             ServerSession session, ServerChannel channel, ServerMessage.Mutable message) {
-        final boolean result = getMessageListener()
+        final boolean result = getServerChannelMessageListener()
                 .onMessage(session, channel, message);
         assertThat(result, is(true));
     }
@@ -91,28 +100,26 @@ public class MessageListenerWithDataFiltersTest {
         
         final RuntimeException thrown = Assertions.assertThrows(
                 RuntimeException.class, 
-                () -> getMessageListener().onMessage(session, channel, message));
+                () -> getServerChannelMessageListener().onMessage(session, channel, message));
         
         if(logStackTrace) {
             thrown.printStackTrace();
         }
     }
-    
-    public ServerChannel.MessageListener getMessageListener() {
-        return new TestObjects().getServerChannelMessageListener();
+
+    public ServerChannel.MessageListener getServerChannelMessageListener() {
+        return serverChannelMessageListener;
     }
 
-    static class TestObjects extends TestConfig{
-        public ServerSession getServerSession() {
-            return testChatObjects().getServerSession();
+    private static class TestArguments extends TestChatConfiguration{
+        
+        @Bean @Scope("prototype") public ServerChannel getServerChannel(){
+            return getServerChannel(getChannelId());
         }
 
-        public ServerChannel getServerChannel(){
-            return testChatObjects().getServerChannel(getChannelId());
-        }
-
-        public ServerMessage.Mutable getServerMessage(){
-            return testChatObjects().createSuccessMessage(
+        @Override
+        @Bean @Scope("prototype") public ServerMessage.Mutable getServerMessage(){
+            return this.chatUtil().createSuccessMessage(
                     getClientId(), Chat.CHAT, getChatText());
         }
         
@@ -126,39 +133,6 @@ public class MessageListenerWithDataFiltersTest {
 
         public String getChatText() {
             return "Hi love";
-        }
-
-        public ServerChannel.MessageListener getServerChannelMessageListener(){
-            return new MessageListenerWithDataFilters(getDataFilterDummy());
-        }
-
-        public ServerChannel.MessageListener getServerChannelMessageListenerDummy(){
-            return new ServerChannelMessageListenerDummy();
-        }
-
-        public DataFilter getDataFilterDummy() {
-            return new DataFilterDummy();
-        }
-
-        private static final class ServerChannelMessageListenerDummy 
-                implements ServerChannel.MessageListener{
-            @Override
-            public boolean onMessage(ServerSession sender, 
-                    ServerChannel channel, 
-                    ServerMessage.Mutable message) {
-                Objects.requireNonNull(sender);
-                Objects.requireNonNull(channel);
-                return true;
-            }
-        }
-
-        private static final class DataFilterDummy implements DataFilter{
-            @Override
-            public Object filter(ServerSession ss, ServerChannel sc, Object o) throws DataFilter.AbortException {
-                Objects.requireNonNull(ss);
-                Objects.requireNonNull(sc);
-                return o;
-            }
         }
     }
 }

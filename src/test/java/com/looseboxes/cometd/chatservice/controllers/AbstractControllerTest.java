@@ -15,25 +15,18 @@
  */
 package com.looseboxes.cometd.chatservice.controllers;
 
-import com.looseboxes.cometd.chatservice.controllers.MockContext.MethodCallVerifier;
 import com.looseboxes.cometd.chatservice.services.ControllerService;
 import com.looseboxes.cometd.chatservice.services.ControllerServiceContextProvider;
-import com.looseboxes.cometd.chatservice.test.EndpointRequestBuilders;
-import com.looseboxes.cometd.chatservice.test.EndpointRequestParams;
-import com.looseboxes.cometd.chatservice.test.MyTestConfiguration;
-import com.looseboxes.cometd.chatservice.test.TestConfig;
+import com.looseboxes.cometd.chatservice.services.response.Response;
+import com.looseboxes.cometd.chatservice.test.ControllerServiceContextFromEndpointProvider;
+import com.looseboxes.cometd.chatservice.test.TestResponse;
+import java.util.Collections;
 import java.util.Map;
-import org.hamcrest.CoreMatchers;
-import org.junit.jupiter.api.extension.ExtendWith;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.junit.Assert.fail;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Web MVC test which starts the spring application context without the web
@@ -50,88 +43,93 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
  * </p>
  * @author USER
  */
-@ExtendWith(SpringExtension.class)
-@Import(MyTestConfiguration.class)
-public abstract class AbstractControllerTest {
+public abstract class AbstractControllerTest extends AbstractControllerTestBase{
     
-    private final boolean debug = TestConfig.DEBUG;
+    /**
+     * Used to verify a method was called properly
+     */
+    @FunctionalInterface
+    public static interface MethodCallVerifier{ 
+        MethodCallVerifier NO_OP = () -> {};
+        void verify();
+    }
     
-    @Autowired private EndpointRequestParams endpointReqParams;
+    @Autowired private TestResponse testResponse;
+    @Autowired private ControllerServiceContextFromEndpointProvider 
+            controllerServiceContextFromEndpointProvider;
 
-    @Autowired private EndpointRequestBuilders endpointReqBuilders;
-
-    @Autowired private MockMvc mockMvc;
+    @MockBean private ControllerServiceContextProvider serviceContextProvider;
     
-    protected abstract MockContext getMockContext();
-
+    /**
+     * Should return a MockBean
+     * @return A @MockBean 
+     */
     protected abstract ControllerService getControllerService();
-
-    protected abstract ControllerServiceContextProvider getServiceContextProvider();
     
-    public void requestToEndpoint_whenParamsValid_shouldReturnSuccessfully(
-            String endpoint) {
-        
-        this.requestToEndpoint_whenParamsValid_shouldReturnMatchingResult(endpoint, 200);
-    }
-    
-    public void requestToEndpoint_whenParamsValid_shouldReturnMatchingResult(
-            String endpoint, int code) {
-        
-        this.requestToEndpoint_whenParamsGiven_shouldReturnMatchingResult(
-                endpoint, code, this.endpointReqParams.forEndpoint(endpoint));
-    }
-    
-    public void requestToEndpoint_whenParamsGiven_shouldReturnMatchingResult(
-            String endpoint, int code, Map<String, String> params) {
-        
-        final boolean error = code >= 300;
-        
-        requestToEndpoint_whenParamsGiven_shouldReturnMatchingResult(
-                endpoint, code, error, params);
-    }
-    
-    public void requestToEndpoint_whenParamsValid_shouldReturnMatchingResult(
-            String endpoint, int code, boolean error) {
-    
-        requestToEndpoint_whenParamsGiven_shouldReturnMatchingResult(
-                endpoint, code, error, this.endpointReqParams.forEndpoint(endpoint));
-    }
-    
+    @Override
     public void requestToEndpoint_whenParamsGiven_shouldReturnMatchingResult(
             String endpoint, int code, boolean error, 
             Map<String, String> params) {
 
-        try{
         final MethodCallVerifier svcCtxProviderVerifier = 
-                getMockContext().whenMethodFromIsCalled(endpoint);
+                whenMethodFromIsCalled(endpoint);
 
         final MethodCallVerifier controllerSvcVerifier =
-                getMockContext().whenMethodProcessIsCalled(endpoint, code, error);
-        try{
+                whenMethodProcessIsCalled(endpoint, code, error);
 
-            final ResultActions actions = this.mockMvc.perform(
-                    endpointReqBuilders.builder(endpoint, params))
-                    .andDo(debug ? print() : (mvcResult) -> {})
-                    .andExpect(status().is(code));
-            
-            if(!error) {
-                actions.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                        .andExpect(jsonPath("$.code", CoreMatchers.is(code)))
-                        .andExpect(jsonPath("$.success", CoreMatchers.not(error)));
-            }
-        }catch(Exception e) {
-            if(debug) {
-                e.printStackTrace();
-            }
-            fail(e.toString());
-        }
+        super.requestToEndpoint_whenParamsGiven_shouldReturnMatchingResult(
+                endpoint, code, error, params);
         
         svcCtxProviderVerifier.verify();
         
         controllerSvcVerifier.verify();
-        }catch(RuntimeException e) {
-            e.printStackTrace();
-            throw e;
-        }
+    }
+
+    public MethodCallVerifier whenMethodFromIsCalled(String endpoint) {
+        
+        final ControllerService.ServiceContext serviceCtx = 
+                this.getControllerServiceContextFromEndpointProvider().from(endpoint);
+        
+        final ControllerServiceContextProvider svcContextProvider = 
+                getServiceContextProvider();
+        
+        when(svcContextProvider.from(isA(HttpServletRequest.class)))
+                .thenReturn(serviceCtx);
+        
+        final MethodCallVerifier verifier = () -> verify(svcContextProvider)
+                .from(isA(HttpServletRequest.class));
+        
+        return verifier;
+    }
+
+    public MethodCallVerifier whenMethodProcessIsCalled(
+            String endpoint, int code, boolean error) {
+        
+        final String message = error ? "error" : "successful";
+        final Object data = Collections.singletonMap(endpoint, message);
+        final Response response = getTestResponse()
+                .createResponse(code, error, message, data);
+        
+        final ControllerService controllerSvc = getControllerService();
+        
+        when(controllerSvc.process(isA(ControllerService.ServiceContext.class))).thenReturn(response);
+        
+        final MethodCallVerifier verifier = () -> verify(controllerSvc)
+                .process(isA(ControllerService.ServiceContext.class));
+        
+        return verifier;
+    }
+
+    public ControllerServiceContextProvider getServiceContextProvider() {
+        return serviceContextProvider;
+    }
+    
+    public TestResponse getTestResponse() {
+        return testResponse;
+    }
+
+    public ControllerServiceContextFromEndpointProvider 
+        getControllerServiceContextFromEndpointProvider() {
+        return controllerServiceContextFromEndpointProvider;
     }
 }

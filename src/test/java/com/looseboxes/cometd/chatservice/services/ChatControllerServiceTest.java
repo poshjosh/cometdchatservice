@@ -16,11 +16,14 @@
 package com.looseboxes.cometd.chatservice.services;
 
 import com.looseboxes.cometd.chatservice.controllers.Endpoints;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author USER
  */
 public class ChatControllerServiceTest extends AbstractControllerServiceTest{
+    
+    @Autowired private ChatControllerService controllerService;
     
     @Override
     public String getEndpoint() {
@@ -29,6 +32,6 @@ public class ChatControllerServiceTest extends AbstractControllerServiceTest{
     
     @Override
     public ControllerService getControllerService() {
-        return this.getTestConfig().chatControllerService();
+        return this.controllerService;
     }
 }

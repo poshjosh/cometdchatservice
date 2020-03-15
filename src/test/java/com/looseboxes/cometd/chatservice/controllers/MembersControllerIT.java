@@ -15,27 +15,27 @@
  */
 package com.looseboxes.cometd.chatservice.controllers;
 
-import com.looseboxes.cometd.chatservice.services.ControllerService;
-import com.looseboxes.cometd.chatservice.services.MembersControllerService;
-import com.looseboxes.cometd.chatservice.test.MyTestConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
+import java.util.Collections;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 
 /**
  * @author USER
  */
-@Import(MyTestConfiguration.class)
-public class MembersControllerIT extends AbstractMembersControllerTest{
+@WebMvcTest(controllers = MembersController.class)
+public class MembersControllerIT extends AbstractControllerTestBase{
 
-    @Autowired private MembersControllerService controllerService;
-
-    @Override
-    protected MockContext getMockContext() {
-        return MockContext.NO_OP;
+    @Test
+    @Disabled("@TODO Call Join, maintain session state before calling this")
+    public void requestToMembersEndpoint_whenParamsValid_shouldReturnSuccessfully() {
+        this.requestToEndpoint_whenParamsValid_shouldReturnSuccessfully(Endpoints.MEMBERS);
     }
 
-    @Override
-    public ControllerService getControllerService() {
-        return controllerService;
+    @Test
+    @Disabled("@TODO Call Join, maintain session state before calling this")
+    public void requestToMembersEndpoint_whenParamsNotValid_shouldReturnErrorResponse() {
+        this.requestToEndpoint_whenParamsGiven_shouldReturnMatchingResult(
+                Endpoints.MEMBERS, 400, Collections.EMPTY_MAP);
     }
 }

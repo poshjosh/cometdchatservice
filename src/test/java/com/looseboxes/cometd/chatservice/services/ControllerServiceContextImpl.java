@@ -17,9 +17,10 @@ package com.looseboxes.cometd.chatservice.services;
 
 import com.looseboxes.cometd.chatservice.ParamNames;
 import com.looseboxes.cometd.chatservice.chat.ChatSession;
-import com.looseboxes.cometd.chatservice.test.TestConfig;
+import com.looseboxes.cometd.chatservice.chat.TestChatConfiguration.ChatSessionProvider;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,16 +35,19 @@ import org.slf4j.LoggerFactory;
  */
 public class ControllerServiceContextImpl implements ControllerService.ServiceContext{
         
-    private static final Logger LOG = LoggerFactory.getLogger(ControllerServiceContextImpl.class);
+    private static final Logger LOG = 
+            LoggerFactory.getLogger(ControllerServiceContextImpl.class);
     
     private final BayeuxServer bayeuxServer;
-    private final TestConfig testConfig;
     private final Map parameters;
+    private final ChatSessionProvider chatSessionProvider;
 
-    public ControllerServiceContextImpl(TestConfig testConfig, Map params) {
-        this.bayeuxServer = testConfig.testChatObjects().getBayeuxServer();
-        this.testConfig = testConfig;
+    public ControllerServiceContextImpl(
+            BayeuxServer bayeuxServer, Map params,
+            ChatSessionProvider chatSessionProvider) {
+        this.bayeuxServer = Objects.requireNonNull(bayeuxServer);
         this.parameters = params == null ? null : Collections.unmodifiableMap(params);
+        this.chatSessionProvider = Objects.requireNonNull(chatSessionProvider);
         LOG.debug("Parameters: {}", params);
     }
 
@@ -57,9 +61,9 @@ public class ControllerServiceContextImpl implements ControllerService.ServiceCo
     @Override
     public ChatSession getChatSession() {
         if(_chatSession == null) {
-            final Map m = getParameters();
+            final Map m = this.getParameters();
             LOG.debug("Parameters: {}", m);
-            _chatSession = testConfig.testChatObjects().getChatSession(
+            _chatSession = this.chatSessionProvider.getChatSession(
                     (String)m.get(ParamNames.USER),
                     (String)m.get(ParamNames.ROOM));
         } 
