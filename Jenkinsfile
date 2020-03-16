@@ -33,7 +33,7 @@ pipeline {
                 description: 'Sonarqube base URL. Will be combined with port to build Sonarqube property sonar.host.url')    
         string(name: 'SONAR_PORT', defaultValue: '9000',
                 description: 'Port for Sonarqube server')    
-        string(timeout: 'TIMEOUT', defaultValue: "45", 
+        string(name: 'TIMEOUT', defaultValue: '45', 
                 description: 'Max time that could be spent in MINUTES')
         choice(name: 'DEBUG', choices: ['N', 'Y'], description: 'Debug - No or Yes?')
     }
@@ -175,14 +175,14 @@ pipeline {
                         sh "mvn -B ${ADDITIONAL_MAVEN_ARGS} sonar:sonar -Dsonar.login=$SONAR_USR -Dsonar.password=$SONAR_PSW -Dsonar.host.url=${SONAR_URL}"
                     }
                 }
-            }
-            stage('Documentation') {
-                steps {
-                    sh 'mvn -B site:site'
-                }
-                post {
-                    always {
-                        publishHTML(target: [reportName: 'Site', reportDir: 'target/site', reportFiles: 'index.html', keepAll: false])
+                stage('Documentation') {
+                    steps {
+                        sh 'mvn -B site:site'
+                    }
+                    post {
+                        always {
+                            publishHTML(target: [reportName: 'Site', reportDir: 'target/site', reportFiles: 'index.html', keepAll: false])
+                        }
                     }
                 }
             }
