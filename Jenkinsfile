@@ -39,6 +39,8 @@ pipeline {
                 description: 'Sonarqube base URL. Will be combined with port to build Sonarqube property sonar.host.url')    
         string(name: 'SONAR_PORT', defaultValue: '9000',
                 description: 'Port for Sonarqube server')    
+        string(timeout: 'TIMEOUT', defaultValue: "45", 
+                description: 'Max time that could be spent in MINUTES')
         choice(name: 'DEBUG', choices: ['N', 'Y'], description: 'Debug - No or Yes?')
     }
     environment {
@@ -52,7 +54,7 @@ pipeline {
     }
     options {
         timestamps()
-        timeout(time: 30, unit: 'MINUTES')
+        timeout(time: "${params.TIMEOUT}", unit: 'MINUTES')
         buildDiscarder(logRotator(numToKeepStr: '4'))
 //        skipStagesAfterUnstable()
         disableConcurrentBuilds()
@@ -202,7 +204,7 @@ pipeline {
             script{
                 retry(3) {
                     try {
-                        timeout(time: 5, unit: 'SECONDS') {
+                        timeout(time: 60, unit: 'SECONDS') {
                             deleteDir() // Clean up workspace
                         } 
                     } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
