@@ -45,7 +45,6 @@ pipeline {
         IMAGE_NAME = IMAGE_REF.toLowerCase()
         SERVER_URL = "${params.SERVER_BASE_URL}:${params.SERVER_PORT}${params.SERVER_CONTEXT}"
         ADDITIONAL_MAVEN_ARGS = "${params.DEBUG == 'Y' ? '-X' : ''}"
-        RUN_ARGS = "-u root -v /home/.m2:/root/.m2 --expose 9092 --expose ${params.SERVER_PORT} --expose ${params.SONAR_PORT}"
     }
     options {
         timestamps()
@@ -96,12 +95,12 @@ pipeline {
         }
         stage('Build Image') {
             steps {
-                echo '- - - - - - - BUILD IMAGE - - - - - - -'
-                sh '''
-                    mkdir target/dependency
-                    (cd target/dependency; jar -xf ../*.jar)
-                '''
                 script {
+                    echo '- - - - - - - BUILD IMAGE - - - - - - -'
+                    sh '''
+                        mkdir target/dependency
+                        (cd target/dependency; jar -xf ../*.jar)
+                    '''
                     def additionalBuildArgs = "--pull"
                     if (env.BRANCH_NAME == "master") {
                         additionalBuildArgs = "--pull --no-cache"
@@ -113,6 +112,7 @@ pipeline {
         stage('Run Image') {
             steps {
                 script{
+                    echo '- - - - - - - RUN IMAGE - - - - - - -'
                     def ARGS_MNT = "-v /home/.m2:/root/.m2"
                     def ARGS_EXP = "--expose 9092 --expose ${params.SONAR_PORT}"
                     def NO_PORT = (params.SERVER_PORT == '' || params.SERVER_PORT == null)
