@@ -5,7 +5,9 @@
  * @see https://github.com/carlossg/docker-maven
  */
 pipeline {
-    agent any
+    agent {
+        dockerfile true
+    }
     /**
      * parameters directive provides a list of parameters which a user should provide when triggering the Pipeline
      * some of the valid parameter types are booleanParam, choice, file, text, password, run, or string
