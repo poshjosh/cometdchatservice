@@ -97,10 +97,9 @@ pipeline {
             steps {
                 script {
                     echo '- - - - - - - BUILD IMAGE - - - - - - -'
-                    sh '''
-                        mkdir target/dependency
-                        (cd target/dependency; jar -xf ../*.jar)
-                    '''
+                    sh 'mkdir target/dependency'
+                    sh 'cd target/dependency'
+                    sh 'jar -xf ../*.jar'
                     def additionalBuildArgs = "--pull"
                     if (env.BRANCH_NAME == "master") {
                         additionalBuildArgs = "--pull --no-cache"
@@ -113,31 +112,32 @@ pipeline {
             steps {
                 script{
                     echo '- - - - - - - RUN IMAGE - - - - - - -'
-                    def ARGS_MNT = "-v /home/.m2:/root/.m2"
-                    def ARGS_EXP = "--expose 9092 --expose ${params.SONAR_PORT}"
-                    def NO_PORT = (params.SERVER_PORT == '' || params.SERVER_PORT == null)
-                    def ARGS_OPTS
-                    if(NO_PORT) {
-                        ARGS_OPTS = "JAVA_OPTS=${params.JAVA_OPTS} MAIN_CLASS=${params.MAIN_CLASS} ${params.CMD_LINE_ARGS}"
-                    }else{
-                        ARGS_OPTS = "--server.port=${params.SERVER_PORT} SERVER_PORT=${params.SERVER_PORT} JAVA_OPTS=${params.JAVA_OPTS} MAIN_CLASS=${params.MAIN_CLASS} ${params.CMD_LINE_ARGS}"
-                    }    
-                    def RUN_ARGS = "-u root ${ARGS_MNT} ${ARGS_EXP} ${ARGS_OPTS}"
+//                    def ARGS_MNT = "-v /home/.m2:/root/.m2"
+//                    def ARGS_EXP = "--expose 9092 --expose ${params.SONAR_PORT}"
+//                    def NO_PORT = (params.SERVER_PORT == '' || params.SERVER_PORT == null)
+//                    def ARGS_OPTS
+//                    if(NO_PORT) {
+//                        ARGS_OPTS = "JAVA_OPTS=${params.JAVA_OPTS} MAIN_CLASS=${params.MAIN_CLASS} ${params.CMD_LINE_ARGS}"
+//                    }else{
+//                        ARGS_OPTS = "--server.port=${params.SERVER_PORT} SERVER_PORT=${params.SERVER_PORT} JAVA_OPTS=${params.JAVA_OPTS} MAIN_CLASS=${params.MAIN_CLASS} ${params.CMD_LINE_ARGS}"
+//                    }    
+//                    def RUN_ARGS = "-u root ${ARGS_MNT} ${ARGS_EXP} ${ARGS_OPTS}"
 
-                    if(NO_PORT) {
-                        docker.image("${IMAGE_NAME}").inside("${ARGS_RUN}") {
-                            sh 'java -version'
-                        }
-                    }else{
+//                    if(NO_PORT) {
+//                        docker.image("${IMAGE_NAME}").inside("${ARGS_RUN}") {
+//                            sh 'java -version'
+//                        }
+//                    }else{
+//                        docker.image("${IMAGE_NAME}")
+//                            .inside("-p ${params.SERVER_PORT}:${params.SERVER_PORT}", "${ARGS_RUN}") {
                         docker.image("${IMAGE_NAME}")
-                            .inside("-p ${params.SERVER_PORT}:${params.SERVER_PORT}", "${ARGS_RUN}") {
+                            .inside("-p 8092:8092", "--server.port=8092 -v /home/.m2:/root/.m2 --expose 9092 --expose 9090 MAIN_CLASS=com.looseboxes.cometd.chatservice.CometDApplication") {
                                 echo '- - - - - - - INSIDE IMAGE - - - - - - -'
-                                sh '''
-                                    mkdir target/dependency
-                                    (cd target/dependency; jar -xf ../*.jar)
-                                '''
+                                sh 'mkdir target/dependency'
+                                sh 'cd target/dependency'
+                                sh 'jar -xf ../*.jar'
                         }
-                    }    
+//                    }    
                 }
             }
         }
