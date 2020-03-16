@@ -5,13 +5,7 @@
  * @see https://github.com/carlossg/docker-maven
  */
 pipeline {
-    agent {
-        docker {
-            image 'maven:3-alpine'
-            args "-u root -v /home/.m2:/root/.m2 --expose 9092 --expose ${params.SERVER_PORT} --expose ${params.SONAR_PORT}"
-        }
-    }
-
+    agent any
     /**
      * parameters directive provides a list of parameters which a user should provide when triggering the Pipeline
      * some of the valid parameter types are booleanParam, choice, file, text, password, run, or string
@@ -51,6 +45,7 @@ pipeline {
         IMAGE_NAME = IMAGE_REF.toLowerCase()
         SERVER_URL = "${params.SERVER_BASE_URL}:${params.SERVER_PORT}${params.SERVER_CONTEXT}"
         ADDITIONAL_MAVEN_ARGS = "${params.DEBUG == 'Y' ? '-X' : ''}"
+        RUN_ARGS = "-u root -v /home/.m2:/root/.m2 --expose 9092 --expose ${params.SERVER_PORT} --expose ${params.SONAR_PORT}"
     }
     options {
         timestamps()
@@ -99,37 +94,50 @@ pipeline {
                 }
             }
         }
-        stage('Dockerize') {
-            agent any
-            stages{
-                stage('Build Image') {
-                    steps {
-                        sh '''
-                            mkdir target/dependency
-                            (cd target/dependency; jar -xf ../*.jar)
-                        '''
-                        script {
-                            def additionalBuildArgs = "--pull"
-                            if (env.BRANCH_NAME == "master") {
-                                additionalBuildArgs = "--pull --no-cache"
-                            }
-                            docker.build("${IMAGE_NAME}", "${additionalBuildArgs} .")
-                        }
+        stage('Build Image') {
+            steps {
+                echo '- - - - - - - BUILD IMAGE - - - - - - -'
+                sh '''
+                    mkdir target/dependency
+                    (cd target/dependency; jar -xf ../*.jar)
+                '''
+                script {
+                    def additionalBuildArgs = "--pull"
+                    if (env.BRANCH_NAME == "master") {
+                        additionalBuildArgs = "--pull --no-cache"
                     }
+                    docker.build("${IMAGE_NAME}", "${additionalBuildArgs} .")
                 }
-                stage('Run Image') {
-                    steps {
-                        script{
-                            if(params.SERVER_PORT == '' || params.SERVER_PORT == null) {
-                                docker.image("${IMAGE_NAME}")
-                                    .withRun("JAVA_OPTS=${params.JAVA_OPTS} MAIN_CLASS=${params.MAIN_CLASS} ${params.CMD_LINE_ARGS}")
-                            }else{
-                                docker.image("${IMAGE_NAME}")
-                                    .withRun('-p ${params.SERVER_PORT}:${params.SERVER_PORT}', 
-                                    "--server.port=${params.SERVER_PORT} SERVER_PORT=${params.SERVER_PORT} JAVA_OPTS=${params.JAVA_OPTS} MAIN_CLASS=${params.MAIN_CLASS} ${params.CMD_LINE_ARGS}")
-                            }    
+            }
+        }
+        stage('Run Image') {
+            steps {
+                script{
+                    def ARGS_MNT = "-v /home/.m2:/root/.m2"
+                    def ARGS_EXP = "--expose 9092 --expose ${params.SONAR_PORT}"
+                    def NO_PORT = (params.SERVER_PORT == '' || params.SERVER_PORT == null)
+                    def ARGS_OPTS
+                    if(NO_PORT) {
+                        ARGS_OPTS = "JAVA_OPTS=${params.JAVA_OPTS} MAIN_CLASS=${params.MAIN_CLASS} ${params.CMD_LINE_ARGS}"
+                    }else{
+                        ARGS_OPTS = "--server.port=${params.SERVER_PORT} SERVER_PORT=${params.SERVER_PORT} JAVA_OPTS=${params.JAVA_OPTS} MAIN_CLASS=${params.MAIN_CLASS} ${params.CMD_LINE_ARGS}"
+                    }    
+                    def RUN_ARGS = "-u root ${ARGS_MNT} ${ARGS_EXP} ${ARGS_OPTS}"
+
+                    if(NO_PORT) {
+                        docker.image("${IMAGE_NAME}").inside("${ARGS_RUN}") {
+                            sh 'java -version'
                         }
-                    }
+                    }else{
+                        docker.image("${IMAGE_NAME}")
+                            .inside("-p ${params.SERVER_PORT}:${params.SERVER_PORT}", "${ARGS_RUN}") {
+                                echo '- - - - - - - INSIDE IMAGE - - - - - - -'
+                                sh '''
+                                    mkdir target/dependency
+                                    (cd target/dependency; jar -xf ../*.jar)
+                                '''
+                        }
+                    }    
                 }
             }
         }
@@ -168,15 +176,14 @@ pipeline {
                     }
                 }
             }
-
-        }
-        stage('Documentation') {
-            steps {
-                sh 'mvn -B site:site'
-            }
-            post {
-                always {
-                    publishHTML(target: [reportName: 'Site', reportDir: 'target/site', reportFiles: 'index.html', keepAll: false])
+            stage('Documentation') {
+                steps {
+                    sh 'mvn -B site:site'
+                }
+                post {
+                    always {
+                        publishHTML(target: [reportName: 'Site', reportDir: 'target/site', reportFiles: 'index.html', keepAll: false])
+                    }
                 }
             }
         }
@@ -186,7 +193,6 @@ pipeline {
             }
         }
         stage('Deploy Image') {
-            agent any
             when {
                 branch 'master'
             }
