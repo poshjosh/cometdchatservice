@@ -45,6 +45,7 @@ pipeline {
         IMAGE_NAME = IMAGE_REF.toLowerCase()
         SERVER_URL = "${params.SERVER_BASE_URL}:${params.SERVER_PORT}${params.SERVER_CONTEXT}"
         ADDITIONAL_MAVEN_ARGS = "${params.DEBUG == 'Y' ? '-X' : ''}"
+        MAVEN_CONTAINER_NAME = "${ARTIFACTID}container"
     }
     options {
 //        skipDefaultCheckout true // We are thus able to call checkout scm at our convenience
@@ -60,181 +61,156 @@ pipeline {
         pollSCM('H H(8-16)/2 * * 1-5')
     }
     stages {
-//                stage('Build Artifact') {
-//                    steps {
-//                        script {
-//                            if(params.DEBUG == 'Y') {
-//                                sh 'printenv'
-//                            }
-//                        }
-//                        sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} clean compiler:compile'
-//                    }
-//                }
-//                stage('Unit Tests') {
-//                    steps {
-//                        sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} resources:testResources compiler:testCompile surefire:test'
-//                        jacoco execPattern: 'target/jacoco.exec'    
-//                    }
-//                    post {
-//                        always {
-//                            junit(
-//                                allowEmptyResults: true,
-//                                testResults: '**/target/surefire-reports/TEST-*.xml'
-//                            )
-//                        }
-//                    }
-//                }
-        stage('Package') {
+        stage('Maven Artifact') {
             agent {
                 docker {
                     image 'maven:3-alpine'
-                    args '-u root -v /home/.m2:/root/.m2'
+                    args "--name ${MAVEN_CONTAINER_NAME} -u root -v /home/.m2:/root/.m2"
                 }
             }
-            steps {
-                echo '- - - - - - - PACKAGE - - - - - - -'
-                sh 'ls -a && cd .. && ls -a && cd .. && ls -a'
-                sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} jar:jar'
-                sh "mkdir ${env.WORKSPACE}/mytarget && cp -r /target ${env.WORKSPACE}/mytarget"
-            }
-            post {
-                always {
-                    archiveArtifacts artifacts: 'target/*.jar', onlyIfSuccessful: true
-                }
-            }
-        }
-        stage('Build Image') {
-            steps {
-//                checkout scm
-                script {
-                    echo '- - - - - - - BUILD IMAGE - - - - - - -'
-                    sh 'ls -a && cd .. && ls -a && cd .. && ls -a'
-                    sh "cp -r ${env.WORKSPACE}/mytarget /target"
-                    sh 'mkdir target/dependency'
-                    sh 'cd target/dependency'
-                    sh 'jar -xf ../*.jar'
-                    def additionalBuildArgs = "--pull"
-                    if (env.BRANCH_NAME == "master") {
-                        additionalBuildArgs = "--pull --no-cache"
-                    }
-                    docker.build("${IMAGE_NAME}", "${additionalBuildArgs} .")
-                }
-            }
-        }
-        stage('Run Image') {
-            steps {
-                script{
-                    echo '- - - - - - - RUN IMAGE - - - - - - -'
-                    sh 'ls -a && cd .. && ls -a && cd .. && ls -a'
-//                    def ARGS_MNT = "-v /home/.m2:/root/.m2"
-//                    def ARGS_EXP = "--expose 9092 --expose ${params.SONAR_PORT}"
-//                    def NO_PORT = (params.SERVER_PORT == '' || params.SERVER_PORT == null)
-//                    def ARGS_OPTS
-//                    if(NO_PORT) {
-//                        ARGS_OPTS = "JAVA_OPTS=${params.JAVA_OPTS} MAIN_CLASS=${params.MAIN_CLASS} ${params.CMD_LINE_ARGS}"
-//                    }else{
-//                        ARGS_OPTS = "--server.port=${params.SERVER_PORT} SERVER_PORT=${params.SERVER_PORT} JAVA_OPTS=${params.JAVA_OPTS} MAIN_CLASS=${params.MAIN_CLASS} ${params.CMD_LINE_ARGS}"
-//                    }    
-//                    def RUN_ARGS = "-u root ${ARGS_MNT} ${ARGS_EXP} ${ARGS_OPTS}"
-
-//                    if(NO_PORT) {
-//                        docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}") {
-//                            sh 'java -version'
-//                        }
-//                    }else{
-//                        docker.image("${IMAGE_NAME}")
-//                            .inside("-p ${params.SERVER_PORT}:${params.SERVER_PORT}", "${RUN_ARGS}") {
-                        docker.image("${IMAGE_NAME}")
-                            .inside("-p 8092:8092", "--server.port=8092 -v /home/.m2:/root/.m2 --expose 9092 --expose 9090 MAIN_CLASS=com.looseboxes.cometd.chatservice.CometDApplication") {
-                                echo '- - - - - - - INSIDE IMAGE - - - - - - -'
-                        }
-//                    }    
-                }
-            }
-        }
-        stage('Quality Assurance') {
-            parallel {
-                stage('Integration Tests') {
-                    agent {
-                        docker {
-                            image 'maven:3-alpine'
-                            args '-u root -v /home/.m2:/root/.m2'
-                        }
-                    }
+            stages {
+                stage('Package') {
                     steps {
-// Step to ensure that the application under test is completely up and running.
-// Simply waiting for the Docker container to be up is not enough as apps
-// require a few seconds to initialize after the container is up.
-//                        sh "curl --retry 5 --retry-connrefused --connect-timeout 5 --max-time 5 ${SERVER_URL}"
-                        sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} failsafe:integration-test failsafe:verify'
-                        jacoco execPattern: 'target/jacoco-it.exec'    
+                        echo '- - - - - - - PACKAGE - - - - - - -'
+                        sh 'ls -a && cd .. && ls -a && cd .. && ls -a && cd .. && ls -a'
+                        sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} -DskipTests clean package'
+                        sh "mkdir ${env.WORKSPACE}/${MAVEN_CONTAINER_NAME} && docker cp -r ${MAVEN_CONTAINER_NAME}:/target ${env.WORKSPACE}/${MAVEN_CONTAINER_NAME}"
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'target/*.jar', onlyIfSuccessful: true
+                        }
+                    }
+                }
+                stage('Unit Tests') {
+                    steps {
+                        echo '- - - - - - - UNIT TESTS - - - - - - -'
+                        sh 'ls -a && cd .. && ls -a && cd .. && ls -a && cd .. && ls -a'
+//                        sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} surefire:test'
+                        sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} resources:testResources compiler:testCompile surefire:test'
+                        jacoco execPattern: 'target/jacoco.exec'    
                     }
                     post {
                         always {
                             junit(
                                 allowEmptyResults: true,
-                                testResults: '**/target/failsafe-reports/TEST-*.xml'
+                                testResults: 'target/surefire-reports/*.xml'
                             )
                         }
                     }
                 }
+                stage('Quality Assurance') {
+                    parallel {
+                        stage('Integration Tests') {
+                            steps {
+                                sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} failsafe:integration-test failsafe:verify'
+                                jacoco execPattern: 'target/jacoco-it.exec'    
+                            }
+                            post {
+                                always {
+                                    junit(
+                                        allowEmptyResults: true,
+                                        testResults: 'target/failsafe-reports/*.xml'
+                                    )
+                                }
+                            }
+                        }
 //                        stage('Sanity Check') {
 //                            steps {
 //                                sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} checkstyle:checkstyle pmd:pmd pmd:cpd com.github.spotbugs:spotbugs-maven-plugin:spotbugs'
 //                            }
 //                        }
-                stage('Sonar Scan') {
-                    agent {
-                        docker {
-                            image 'maven:3-alpine'
-                            args '-u root -v /home/.m2:/root/.m2'
+                        stage('Sonar Scan') {
+                            environment {
+                                SONAR = credentials('sonar-creds') // Must have been specified in Jenkins
+                                SONAR_URL = "${params.SONAR_BASE_URL}:${params.SONAR_PORT}"
+                            }
+                            steps {
+                                sh "mvn -B ${ADDITIONAL_MAVEN_ARGS} sonar:sonar -Dsonar.login=$SONAR_USR -Dsonar.password=$SONAR_PSW -Dsonar.host.url=${SONAR_URL}"
+                            }
                         }
-                    }
-                    environment {
-                        SONAR = credentials('sonar-creds') // Must have been specified in Jenkins
-                        SONAR_URL = "${params.SONAR_BASE_URL}:${params.SONAR_PORT}"
-                    }
-                    steps {
-                        sh "mvn -B ${ADDITIONAL_MAVEN_ARGS} sonar:sonar -Dsonar.login=$SONAR_USR -Dsonar.password=$SONAR_PSW -Dsonar.host.url=${SONAR_URL}"
+                        stage('Documentation') {
+                            steps {
+                                sh 'mvn -B site:site'
+                            }
+                            post {
+                                always {
+                                    publishHTML(target: [reportName: 'Site', reportDir: 'target/site', reportFiles: 'index.html', keepAll: false])
+                                }
+                            }
+                        }
                     }
                 }
-                stage('Documentation') {
-                    agent {
-                        docker {
-                            image 'maven:3-alpine'
-                            args '-u root -v /home/.m2:/root/.m2'
-                        }
-                    }
+                stage('Install Local') {
                     steps {
-                        sh 'mvn -B site:site'
-                    }
-                    post {
-                        always {
-                            publishHTML(target: [reportName: 'Site', reportDir: 'target/site', reportFiles: 'index.html', keepAll: false])
-                        }
+                        sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} source:jar install:install'
                     }
                 }
             }
         }
-        stage('Install Local') {
-            agent {
-                docker {
-                    image 'maven:3-alpine'
-                    args '-u root -v /home/.m2:/root/.m2'
+        stage('Docker Image') {
+            stages{
+                stage('Build Image') {
+                    steps {
+//                        checkout scm
+                        script {
+                            echo '- - - - - - - BUILD IMAGE - - - - - - -'
+                            sh 'ls -a && cd .. && ls -a && cd .. && ls -a && cd .. && ls -a'
+                            sh 'mkdir target'
+                            sh "cp -r ${env.WORKSPACE}/${MAVEN_CONTAINER_NAME} /target"
+                            sh 'cd target'
+                            sh 'mkdir dependency'
+                            sh 'cd dependency'
+                            sh 'jar -xf ../*.jar'
+                            def additionalBuildArgs = "--pull"
+                            if (env.BRANCH_NAME == "master") {
+                                additionalBuildArgs = "--pull --no-cache"
+                            }
+                            docker.build("${IMAGE_NAME}", "${additionalBuildArgs} .")
+                        }
+                    }
                 }
-            }
-            steps {
-                sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} source:jar install:install'
-            }
-        }
-        stage('Deploy Image') {
-            when {
-                branch 'master'
-            }
-            steps {
-                script {
-                    docker.withRegistry('', 'dockerhub-creds') { // Must have been specified in Jenkins
-                        sh "docker push ${IMAGE_NAME}"
+                stage('Run Image') {
+                    steps {
+                        script{
+                            echo '- - - - - - - RUN IMAGE - - - - - - -'
+                            sh 'ls -a && cd .. && ls -a && cd .. && ls -a'
+        //                    def ARGS_MNT = "-v /home/.m2:/root/.m2"
+        //                    def ARGS_EXP = "--expose 9092 --expose ${params.SONAR_PORT}"
+        //                    def NO_PORT = (params.SERVER_PORT == '' || params.SERVER_PORT == null)
+        //                    def ARGS_OPTS
+        //                    if(NO_PORT) {
+        //                        ARGS_OPTS = "JAVA_OPTS=${params.JAVA_OPTS} MAIN_CLASS=${params.MAIN_CLASS} ${params.CMD_LINE_ARGS}"
+        //                    }else{
+        //                        ARGS_OPTS = "--server.port=${params.SERVER_PORT} SERVER_PORT=${params.SERVER_PORT} JAVA_OPTS=${params.JAVA_OPTS} MAIN_CLASS=${params.MAIN_CLASS} ${params.CMD_LINE_ARGS}"
+        //                    }    
+        //                    def RUN_ARGS = "-u root ${ARGS_MNT} ${ARGS_EXP} ${ARGS_OPTS}"
+
+        //                    if(NO_PORT) {
+        //                        docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}") {
+        //                            sh 'java -version'
+        //                        }
+        //                    }else{
+        //                        docker.image("${IMAGE_NAME}")
+        //                            .inside("-p ${params.SERVER_PORT}:${params.SERVER_PORT}", "${RUN_ARGS}") {
+                                docker.image("${IMAGE_NAME}")
+                                    .inside("-p 8092:8092", "--server.port=8092 -v /home/.m2:/root/.m2 --expose 9092 --expose 9090 MAIN_CLASS=com.looseboxes.cometd.chatservice.CometDApplication") {
+                                        echo '- - - - - - - INSIDE IMAGE - - - - - - -'
+                                }
+        //                    }    
+                        }
+                    }
+                }
+                stage('Deploy Image') {
+                    when {
+                        branch 'master'
+                    }
+                    steps {
+                        script {
+                            docker.withRegistry('', 'dockerhub-creds') { // Must have been specified in Jenkins
+                                sh "docker push ${IMAGE_NAME}"
+                            }
+                        }
                     }
                 }
             }
