@@ -144,13 +144,13 @@ pipeline {
             }
         }
         stage('Quality Assurance') {
-            agent {
-                docker {
-                    image 'maven:3-alpine'
-                }
-            }
             parallel {
                 stage('Integration Tests') {
+                    agent {
+                        docker {
+                            image 'maven:3-alpine'
+                        }
+                    }
                     steps {
 // Step to ensure that the application under test is completely up and running.
 // Simply waiting for the Docker container to be up is not enough as apps
@@ -174,6 +174,11 @@ pipeline {
 //                            }
 //                        }
                 stage('Sonar Scan') {
+                    agent {
+                        docker {
+                            image 'maven:3-alpine'
+                        }
+                    }
                     environment {
                         SONAR = credentials('sonar-creds') // Must have been specified in Jenkins
                         SONAR_URL = "${params.SONAR_BASE_URL}:${params.SONAR_PORT}"
@@ -183,6 +188,11 @@ pipeline {
                     }
                 }
                 stage('Documentation') {
+                    agent {
+                        docker {
+                            image 'maven:3-alpine'
+                        }
+                    }
                     steps {
                         sh 'mvn -B site:site'
                     }
