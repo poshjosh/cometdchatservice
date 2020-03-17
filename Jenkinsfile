@@ -89,7 +89,6 @@ pipeline {
                 docker {
                     image 'maven:3-alpine'
                     args '-u root -v /home/.m2:/root/.m2'
-                    additionalBuildArgs '-t mavenimage'
                 }
             }
             steps {
