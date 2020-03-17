@@ -47,7 +47,7 @@ pipeline {
         ADDITIONAL_MAVEN_ARGS = "${params.DEBUG == 'Y' ? '-X' : ''}"
     }
     options {
-        skipDefaultCheckout true // We are thus able to call checkout scm at our convenience
+//        skipDefaultCheckout true // We are thus able to call checkout scm at our convenience
         timestamps()
         timeout(time: "${params.TIMEOUT}", unit: 'MINUTES')
         buildDiscarder(logRotator(numToKeepStr: '4'))
@@ -105,7 +105,7 @@ pipeline {
         }
         stage('Build Image') {
             steps {
-                checkout scm
+//                checkout scm
                 script {
                     echo '- - - - - - - BUILD IMAGE - - - - - - -'
                     sh 'ls -a && cd .. && ls -a && cd .. && ls -a'
