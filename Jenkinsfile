@@ -87,6 +87,7 @@ pipeline {
             agent {
                 docker {
                     image 'maven:3-alpine'
+                    args '-u root /home/.m2:/root/.m2'
                 }
             }
             steps {
@@ -149,6 +150,7 @@ pipeline {
                     agent {
                         docker {
                             image 'maven:3-alpine'
+                            args '-u root /home/.m2:/root/.m2'
                         }
                     }
                     steps {
@@ -177,6 +179,7 @@ pipeline {
                     agent {
                         docker {
                             image 'maven:3-alpine'
+                            args '-u root /home/.m2:/root/.m2'
                         }
                     }
                     environment {
@@ -191,6 +194,7 @@ pipeline {
                     agent {
                         docker {
                             image 'maven:3-alpine'
+                            args '-u root /home/.m2:/root/.m2'
                         }
                     }
                     steps {
@@ -208,6 +212,7 @@ pipeline {
             agent {
                 docker {
                     image 'maven:3-alpine'
+                    args '-u root /home/.m2:/root/.m2'
                 }
             }
             steps {
