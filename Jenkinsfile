@@ -5,9 +5,7 @@
  * @see https://github.com/carlossg/docker-maven
  */
 pipeline {
-    agent {
-        dockerfile true
-    }
+    agent any
     /**
      * parameters directive provides a list of parameters which a user should provide when triggering the Pipeline
      * some of the valid parameter types are booleanParam, choice, file, text, password, run, or string
@@ -86,6 +84,11 @@ pipeline {
 //                    }
 //                }
         stage('Package') {
+            agent {
+                docker {
+                    image 'maven:3-alpine'
+                }
+            }
             steps {
                 sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} jar:jar'
             }
@@ -126,31 +129,33 @@ pipeline {
 //                    def RUN_ARGS = "-u root ${ARGS_MNT} ${ARGS_EXP} ${ARGS_OPTS}"
 
 //                    if(NO_PORT) {
-//                        docker.image("${IMAGE_NAME}").inside("${ARGS_RUN}") {
+//                        docker.image("${IMAGE_NAME}").inside("${RUN_ARGS}") {
 //                            sh 'java -version'
 //                        }
 //                    }else{
 //                        docker.image("${IMAGE_NAME}")
-//                            .inside("-p ${params.SERVER_PORT}:${params.SERVER_PORT}", "${ARGS_RUN}") {
+//                            .inside("-p ${params.SERVER_PORT}:${params.SERVER_PORT}", "${RUN_ARGS}") {
                         docker.image("${IMAGE_NAME}")
                             .inside("-p 8092:8092", "--server.port=8092 -v /home/.m2:/root/.m2 --expose 9092 --expose 9090 MAIN_CLASS=com.looseboxes.cometd.chatservice.CometDApplication") {
                                 echo '- - - - - - - INSIDE IMAGE - - - - - - -'
-                                sh 'mkdir target/dependency'
-                                sh 'cd target/dependency'
-                                sh 'jar -xf ../*.jar'
                         }
 //                    }    
                 }
             }
         }
         stage('Quality Assurance') {
+            agent {
+                docker {
+                    image 'maven:3-alpine'
+                }
+            }
             parallel {
                 stage('Integration Tests') {
                     steps {
 // Step to ensure that the application under test is completely up and running.
 // Simply waiting for the Docker container to be up is not enough as apps
 // require a few seconds to initialize after the container is up.
-                        sh "curl --retry 5 --retry-connrefused --connect-timeout 5 --max-time 5 ${SERVER_URL}"
+//                        sh "curl --retry 5 --retry-connrefused --connect-timeout 5 --max-time 5 ${SERVER_URL}"
                         sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} failsafe:integration-test failsafe:verify'
                         jacoco execPattern: 'target/jacoco-it.exec'    
                     }
@@ -190,6 +195,11 @@ pipeline {
             }
         }
         stage('Install Local') {
+            agent {
+                docker {
+                    image 'maven:3-alpine'
+                }
+            }
             steps {
                 sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} source:jar install:install'
             }
