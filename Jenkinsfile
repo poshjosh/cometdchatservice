@@ -47,10 +47,11 @@ pipeline {
         ADDITIONAL_MAVEN_ARGS = "${params.DEBUG == 'Y' ? '-X' : ''}"
     }
     options {
+        skipDefaultCheckout true // We are thus able to call checkout scm at our convenience
         timestamps()
         timeout(time: "${params.TIMEOUT}", unit: 'MINUTES')
         buildDiscarder(logRotator(numToKeepStr: '4'))
-//        skipStagesAfterUnstable()
+        skipStagesAfterUnstable()
         disableConcurrentBuilds()
     }
     triggers {
@@ -88,10 +89,14 @@ pipeline {
                 docker {
                     image 'maven:3-alpine'
                     args '-u root -v /home/.m2:/root/.m2'
+                    additionalBuildArgs '-t mavenimage'
                 }
             }
             steps {
+                echo '- - - - - - - PACKAGE - - - - - - -'
+                sh 'ls -a && cd .. && ls -a && cd .. && ls -a'
                 sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} jar:jar'
+                sh "mkdir ${env.WORKSPACE}/mytarget && cp -r /target ${env.WORKSPACE}/mytarget"
             }
             post {
                 always {
@@ -101,8 +106,11 @@ pipeline {
         }
         stage('Build Image') {
             steps {
+                checkout scm
                 script {
                     echo '- - - - - - - BUILD IMAGE - - - - - - -'
+                    sh 'ls -a && cd .. && ls -a && cd .. && ls -a'
+                    sh "cp -r ${env.WORKSPACE}/mytarget /target"
                     sh 'mkdir target/dependency'
                     sh 'cd target/dependency'
                     sh 'jar -xf ../*.jar'
@@ -118,6 +126,7 @@ pipeline {
             steps {
                 script{
                     echo '- - - - - - - RUN IMAGE - - - - - - -'
+                    sh 'ls -a && cd .. && ls -a && cd .. && ls -a'
 //                    def ARGS_MNT = "-v /home/.m2:/root/.m2"
 //                    def ARGS_EXP = "--expose 9092 --expose ${params.SONAR_PORT}"
 //                    def NO_PORT = (params.SERVER_PORT == '' || params.SERVER_PORT == null)
