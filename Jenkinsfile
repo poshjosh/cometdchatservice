@@ -35,7 +35,7 @@ pipeline {
                 description: 'Port for Sonarqube server')    
         string(name: 'TIMEOUT', defaultValue: '45', 
                 description: 'Max time that could be spent in MINUTES')
-        choice(name: 'DEBUG', choices: ['N', 'Y'], description: 'Debug - No or Yes?')
+        choice(name: 'DEBUG', choices: ['Y', 'N'], description: 'Debug - Yes or No?')
     }
     environment {
         ARTIFACTID = readMavenPom().getArtifactId()
