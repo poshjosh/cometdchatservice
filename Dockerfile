@@ -1,3 +1,5 @@
+# Repo: https://github.com/poshjosh/cometdchatservice
+# ---------------------------------------------------
 FROM openjdk:8-jdk-alpine
 #FROM maven:3-alpine
 VOLUME /tmp

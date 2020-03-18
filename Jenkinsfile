@@ -86,7 +86,6 @@ pipeline {
                     steps {
                         echo '- - - - - - - UNIT TESTS - - - - - - -'
                         sh 'ls -a && cd .. && ls -a && cd .. && ls -a && cd .. && ls -a'
-//                        sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} surefire:test'
                         sh 'mvn -B ${ADDITIONAL_MAVEN_ARGS} resources:testResources compiler:testCompile surefire:test'
                         jacoco execPattern: 'target/jacoco.exec'    
                     }
