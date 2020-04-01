@@ -47,8 +47,11 @@ final BayeuxClient johnClient = new BayeuxClient(url, tpt);
 
 Use john's client to create johns chat session
 ```java
-final ChatConfig johnConfig = new ChatConfig("/service/privatechat", "/chat/demo", JOHN);
-johnConfig.setLogLevel(Chat.LOG_LEVEL_VALUES.DEBUG);
+final ChatConfig johnConfig = ChatConfig.builder()
+        .logLevel(Chat.LOG_LEVEL_VALUES.DEBUG)
+        .channel("/service/privatechat")
+        .room("/chat/demo")
+        .user(JOHN).build();
 
 final ChatSession johnSession = new ChatSessionImpl(johnClient, johnConfig);
 
@@ -96,7 +99,7 @@ maryLeave.get(timeout, TimeUnit.MILLISECONDS);
 
 // Add listeners to a chat session
 ```java
-johnSession.addListener(new ChatListener(){
+johnSession.listeners().addListener(new ChatListener(){
     @Override
     public void onUnsubscribe(ChatListener.Event event) { }
     @Override

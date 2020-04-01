@@ -1,7 +1,17 @@
+# Repo: https://github.com/poshjosh/cometdchatservice
+# ---------------------------------------------------
 FROM openjdk:8-jdk-alpine
-EXPOSE 8092
-RUN addgroup -S spring && adduser -S spring -G spring
-USER spring:spring
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+VOLUME /tmp
+ARG APP_PORT
+RUN test -z "${APP_PORT}" || EXPOSE "${APP_PORT}" && :
+ARG DEPENDENCY_DIR=target/dependency
+# for Spring Boot
+COPY ${DEPENDENCY_DIR}/BOOT-INF/lib /app/lib
+COPY ${DEPENDENCY_DIR}/META-INF /app/META-INF
+# for Spring Boot
+COPY ${DEPENDENCY_DIR}/BOOT-INF/classes /app
+COPY start.sh .
+RUN chmod +x /start.sh
+ARG JAVA_OPTS
+ARG MAIN_CLASS
+ENTRYPOINT ["/start.sh"]

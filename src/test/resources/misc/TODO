@@ -1,3 +1,22 @@
+MyTestConfiguration should provide not extend TestConfig hence obtain an
+instance of TestConfig via auto wire
+
+JMeter testing
+
+Change to Random Port
+---------------------
+In application.properties set server.port to 0
+In tests use change WebEnvironment.DEFINED_PORT to WebEnvironment.RANDOM_PORT
+
+Security e.g settings.xml jenkins pipeline credentials etc, findSecBugs (i.e SpotBugs for security)
+
+Mutation tests
+
+
+Cache tests
+https://dzone.com/articles/spring-cache-and-integration-testing
+
+
 WRITE TESTS TO ENSURE THIS DOESN'T REPEAT
 Wrong value for room. ce/privatechat instead of service/privatechat
 -------------------------------------------------------
@@ -15,3 +34,16 @@ However, instead of sending the message, it is sending the sender
 Logs from cometdchatservice
 09:13:07 DEBUG ChatSessionImpl: send("Hi love", "Nel") sender: Non
 09:13:08 DEBUG SafeContentServiceImpl: URL: http://safecontentservice/flag?text=Non&timeout=5000
+
+Look for all 
+        final Map<String, Object> params = new HashMap();
+        req.getParameterMap().forEach((k, v) -> {
+            if(v != null) {
+                if(v.length == 1) {
+                    params.put(k, v[0]);
+                }else if(v.length > 1){
+                    params.put(k, v);
+                }
+            }
+        });
+Use Map<String, String[]> or MultiValueMap
