@@ -14,7 +14,7 @@ library(
 )
 
 completePipeline(
+        appPort : '8092',
         appEndpoint : '/actuator/health',
-        mainClass : 'com.looseboxes.cometd.chatservice.CometDApplication',
-        appPort : '8092'
+        mainClass : 'com.looseboxes.cometd.chatservice.CometDApplication'
 )
