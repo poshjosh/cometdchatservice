@@ -13,4 +13,8 @@ library(
     )
 )
 
-completePipeline(gitUrl : 'https://github.com/poshjosh/cometdchatservice.git')
+completePipeline(
+        gitUrl : 'https://github.com/poshjosh/cometdchatservice.git',
+        mainClass : 'com.looseboxes.cometd.chatservice.CometDApplication',
+        appPort : '8092'
+)
