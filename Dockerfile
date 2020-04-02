@@ -1,6 +1,8 @@
 # Repo: https://github.com/poshjosh/cometdchatservice
+# @see: https://spring.io/guides/topicals/spring-boot-docker/
 # ---------------------------------------------------
 FROM openjdk:8-jdk-alpine
+LABEL maintainer="posh.bc@gmail.com"
 VOLUME /tmp
 ARG DEPENDENCY_DIR=target/dependency
 # for Spring Boot
