@@ -4,6 +4,10 @@
 FROM openjdk:8-jdk-alpine
 LABEL maintainer="posh.bc@gmail.com"
 VOLUME /tmp
+# Create and use non-root user
+# ---------------------------
+RUN addgroup -S poshjosh && adduser -S poshjosh -G poshjosh
+USER poshjosh
 ARG DEPENDENCY_DIR=target/dependency
 # for Spring Boot
 COPY ${DEPENDENCY_DIR}/BOOT-INF/lib /app/lib
@@ -16,6 +20,4 @@ ARG DEBUG
 ENV DEBUG=$DEBUG
 ARG JAVA_OPTS
 ENV JAVA_OPTS=$JAVA_OPTS
-ARG MAIN_CLASS
-ENV MAIN_CLASS=$MAIN_CLASS
 ENTRYPOINT ["/start.sh"]
