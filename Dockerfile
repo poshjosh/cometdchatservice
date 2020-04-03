@@ -10,8 +10,8 @@ COPY start.sh .
 RUN chmod +x /start.sh
 # Create and use non-root user
 # ---------------------------
-RUN addgroup -S poshjosh && adduser -S poshjosh -G poshjosh
-USER poshjosh
+#RUN addgroup -S poshjosh && adduser -S poshjosh -G poshjosh
+#USER poshjosh
 ARG DEPENDENCY_DIR=target/dependency
 # for Spring Boot
 COPY ${DEPENDENCY_DIR}/BOOT-INF/lib /app/lib
