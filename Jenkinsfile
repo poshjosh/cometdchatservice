@@ -12,11 +12,8 @@ library(
         ]
     )
 )
-//        javaOpts : '-Dserver.port=8092 -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -noverify',
 
 completePipeline(
         appPort : '8092',
         appEndpoint : '/actuator/health',
-        javaOpts : '-XX:TieredStopAtLevel=1',
-        mainClass : 'com.looseboxes.cometd.chatservice.CometDApplication'
 )
