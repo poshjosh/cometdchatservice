@@ -8,5 +8,11 @@ if [ "$DEBUG" = true ] ; then
     echo 'cd .. && cd ..'
     cd .. && cd ..
 fi
-echo java ${JAVA_OPTS} -cp app:app/lib/* ${MAIN_CLASS} ${@}
-exec java ${JAVA_OPTS} -cp app:app/lib/* ${MAIN_CLASS} ${@}
+echo "Additional java options = ${JAVA_OPTS} ${@}"
+echo "Command line arguments = ${@}"
+exec java -Djava.security.egd=file:/dev/./urandom \
+        -XX:TieredStopAtLevel=1 \
+        -XX:+UnlockExperimentalVMOptions \
+        -XX:+UseCGroupMemoryLimitForHeap \
+        -noverify \
+        ${JAVA_OPTS} -cp app:app/lib/* com.looseboxes.cometd.chatservice.CometDApplication ${@}
