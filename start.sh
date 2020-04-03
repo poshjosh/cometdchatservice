@@ -15,4 +15,4 @@ exec java -Djava.security.egd=file:/dev/./urandom \
         -XX:+UnlockExperimentalVMOptions \
         -XX:+UseCGroupMemoryLimitForHeap \
         -noverify \
-        ${JAVA_OPTS} -cp app:app/lib/* com.looseboxes.cometd.chatservice.CometDApplication ${@}
+        ${JAVA_OPTS} -cp app:app/lib/* ${MAIN_CLASS} ${@}

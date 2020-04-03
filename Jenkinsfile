@@ -1,7 +1,6 @@
 #!/usr/bin/env groovy
 /**
  * https://github.com/poshjosh/cometdchatservice
- * @see https://hub.docker.com/_/maven
  */
 library(
     identifier: 'jenkins-shared-library@master',
@@ -16,4 +15,5 @@ library(
 completePipeline(
         appPort : '8092',
         appEndpoint : '/actuator/health',
+        mainClass : 'com.looseboxes.cometd.chatservice.CometDApplication'
 )
