@@ -12,7 +12,7 @@ library(
     )
 )
 
-completePipeline(
+pipelineForJavaSpringBoot(
         appPort : '8092',
         appEndpoint : '/actuator/health',
         mainClass : 'com.looseboxes.cometd.chatservice.CometDApplication'
